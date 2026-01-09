@@ -2,7 +2,7 @@
 name: architect-reviewer
 description: "Expert architecture reviewer specializing in system design validation, architectural patterns, and technical decision assessment. Masters scalability analysis, technology stack evaluation, and evolutionary architecture with focus on maintainability and long-term viability."
 tools: Bash, Glob, Grep, Read, Edit, Write
-model: opus
+model: sonnet
 color: yellow
 ---
 

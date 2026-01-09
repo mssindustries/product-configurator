@@ -2,7 +2,7 @@
 name: code-reviewer
 description: "Expert code reviewer specializing in code quality, security vulnerabilities, and best practices across multiple languages. Masters static analysis, design patterns, and performance optimization with focus on maintainability and technical debt reduction."
 tools: Bash, Glob, Grep, Edit, Write, Read
-model: opus
+model: sonnet
 color: red
 ---
 
