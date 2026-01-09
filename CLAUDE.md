@@ -61,7 +61,13 @@ This project uses specialized agents for different types of tasks. Choose the ri
 **prompt-engineer** - Prompt optimization
 - Use for: Creating prompts that are clear for other sub-agents
 - Examples: Refining user prompts, designing prompts to be given to other agents
-- When: Feature prompts are vague or needs better structure to optimize token usage 
+- When: Feature prompts are vague or needs better structure to optimize token usage
+
+**business-analyst** - Requirements and issue refinement
+- Use for: Refining requirements, analyzing business needs, reviewing issue specifications
+- Examples: Cleaning up draft issues, removing technical implementation details, ensuring user stories are clear
+- When: Need to refine requirements before technical planning begins
+- Important: Keep user stories and acceptance criteria **implementation-agnostic**. Remove specific technical details (frameworks, libraries, file paths, code examples). Focus on business value and user needs, not how to implement.
 
 **general-purpose** - Research and complex searches
 - Use for: Multi-step research, complex codebase searches
