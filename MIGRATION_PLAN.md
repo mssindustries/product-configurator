@@ -24,13 +24,13 @@ These tasks set up the new project structure and local development environment.
 **Labels:** `infrastructure`, `migration`
 
 **Context:**
-The current codebase has a Next.js app in `src/webapp/`. We need to restructure to have separate `frontend/` and `backend/` directories.
+The current codebase has a Next.js app in `src/webapp/`. We need to restructure to have separate `src/frontend/` and `src/backend/` directories.
 
 **Requirements:**
 1. Create new top-level directories:
    ```
-   /frontend/    # Will contain Vite React app
-   /backend/     # Will contain FastAPI app
+   /src/frontend/    # Vite React app
+   /src/backend/     # FastAPI app
    /docker/      # Docker-related files
    ```
 2. Move existing Next.js code to a temporary location or archive it (we'll extract reusable components later)
@@ -41,7 +41,7 @@ The current codebase has a Next.js app in `src/webapp/`. We need to restructure 
 - [ ] New directory structure exists
 - [ ] Old Next.js code is preserved (archived or in separate branch)
 - [ ] `.gitignore` updated for Python, Vite, and Docker artifacts
-- [ ] Root `package.json` removed (will be in frontend/)
+- [ ] Root `package.json` removed (will be in src/frontend/)
 
 ---
 
@@ -53,7 +53,7 @@ The current codebase has a Next.js app in `src/webapp/`. We need to restructure 
 We're replacing Next.js with a Vite-powered React SPA. The frontend will be deployed to Azure Static Web Apps.
 
 **Requirements:**
-1. Initialize Vite project in `frontend/` with React and TypeScript template:
+1. Initialize Vite project in `src/frontend/` with React and TypeScript template:
    ```bash
    npm create vite@latest frontend -- --template react-ts
    ```
@@ -85,9 +85,9 @@ We're replacing Next.js with a Vite-powered React SPA. The frontend will be depl
 We need a Python FastAPI backend that will handle API requests and run Blender for GLB generation.
 
 **Requirements:**
-1. Create `backend/` directory structure per ARCHITECTURE.md:
+1. Create `src/backend/` directory structure per ARCHITECTURE.md:
    ```
-   backend/
+   src/backend/
    ├── app/
    │   ├── api/
    │   │   ├── v1/
@@ -145,7 +145,7 @@ Local development uses Docker Compose to run PostgreSQL, Azurite (Azure Storage 
    - `db`: PostgreSQL 15+
    - `api`: FastAPI + Blender (build from Dockerfile)
    - `azurite`: Azure Storage emulator
-2. Create `backend/Dockerfile`:
+2. Create `src/backend/Dockerfile`:
    - Base image with Python 3.11+
    - Install Blender (headless)
    - Install Python dependencies
@@ -175,7 +175,7 @@ Local development uses Docker Compose to run PostgreSQL, Azurite (Azure Storage 
 The backend container needs both Python/FastAPI and Blender installed for GLB generation.
 
 **Requirements:**
-1. Create `backend/Dockerfile` that:
+1. Create `src/backend/Dockerfile` that:
    - Uses Python 3.11 slim base image
    - Installs Blender via apt or downloads official release
    - Installs Python dependencies from `pyproject.toml`
@@ -241,7 +241,7 @@ We need SQLAlchemy 2.0+ async models for all entities defined in ARCHITECTURE.md
 We need Alembic configured for database migrations with async support.
 
 **Requirements:**
-1. Initialize Alembic in `backend/`:
+1. Initialize Alembic in `src/backend/`:
    ```bash
    alembic init migrations
    ```
