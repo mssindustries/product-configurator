@@ -28,14 +28,12 @@ RUN useradd -m -u 1000 appuser && \
 # Set working directory
 WORKDIR /app
 
-# Copy dependency files
+# Copy dependency files and source code
 COPY --chown=appuser:appuser pyproject.toml ./
+COPY --chown=appuser:appuser . .
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -e ".[dev]"
-
-# Copy application code
-COPY --chown=appuser:appuser . .
 
 # Switch to non-root user
 USER appuser
