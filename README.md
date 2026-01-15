@@ -1,1 +1,1 @@
-# makerrx-product-configurator
+# MSS Industries Product Configurator
