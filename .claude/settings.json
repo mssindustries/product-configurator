@@ -1,13 +1,4 @@
 {
-  "enabledPlugins": {
-    "frontend-design@claude-plugins-official": true,
-    "github@claude-plugins-official": true,
-    "python-development@claude-code-workflows": true,
-    "backend-development@claude-code-workflows": true,
-    "code-review@claude-plugins-official": true,
-    "feature-dev@claude-plugins-official": true,
-    "javascript-typescript@claude-code-workflows": true
-  },
   "permissions": {
     "allow": [
       "Bash(ls:*)",
@@ -28,5 +19,15 @@
       "Bash(./scripts/start-development.sh:*)",
       "Bash(./scripts/abandon-feature.sh:*)"
     ]
+  },
+  "enabledPlugins": {
+    "frontend-design@claude-plugins-official": true,
+    "github@claude-plugins-official": true,
+    "python-development@claude-code-workflows": true,
+    "backend-development@claude-code-workflows": true,
+    "code-review@claude-plugins-official": true,
+    "feature-dev@claude-plugins-official": true,
+    "javascript-typescript@claude-code-workflows": true,
+    "commit-commands@claude-plugins-official": true
   }
 }
