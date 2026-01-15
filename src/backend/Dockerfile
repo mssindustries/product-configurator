@@ -1,19 +1,16 @@
 # MSS Industries Product Configurator - Backend Dockerfile
 # Python 3.11+ with Blender headless
 
-FROM python:3.11-slim
+FROM python:3.11-slim AS base
 
 # Install system dependencies and Blender
-RUN apt-get update && apt-get install -y \
-    # Blender dependencies
+# Note: libgl1-mesa-glx replaced by libgl1 in newer Debian
+RUN apt-get update && apt-get install -y --no-install-recommends \
     blender \
     libxrender1 \
     libxi6 \
-    libgl1-mesa-glx \
+    libgl1 \
     libglib2.0-0 \
-    # Build tools for Python packages
-    build-essential \
-    # Cleanup
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -25,15 +22,25 @@ RUN useradd -m -u 1000 appuser && \
     mkdir -p /app /app/uploads /app/temp && \
     chown -R appuser:appuser /app
 
-# Set working directory
 WORKDIR /app
 
-# Copy dependency files and source code
-COPY --chown=appuser:appuser pyproject.toml ./
-COPY --chown=appuser:appuser . .
+# Copy dependency file first for better layer caching
+COPY pyproject.toml ./
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -e ".[dev]"
+# Install Python dependencies from pyproject.toml (production only)
+RUN pip install --no-cache-dir \
+    "fastapi>=0.109.0" \
+    "uvicorn[standard]>=0.27.0" \
+    "sqlalchemy[asyncio]>=2.0.25" \
+    "asyncpg>=0.29.0" \
+    "aiosqlite>=0.19.0" \
+    "pydantic>=2.5.0" \
+    "pydantic-settings>=2.1.0" \
+    "alembic>=1.13.0" \
+    "python-multipart>=0.0.6"
+
+# Copy application code (changes more frequently)
+COPY --chown=appuser:appuser . .
 
 # Switch to non-root user
 USER appuser
@@ -51,5 +58,5 @@ ENV PYTHONUNBUFFERED=1 \
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"
 
-# Run the application
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+# Run the application (no --reload for production)
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
