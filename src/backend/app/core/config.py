@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     # Database Settings
     database_url: str = Field(
         default="sqlite+aiosqlite:///./configurator.db",
-        description="Database connection URL (SQLite with aiosqlite driver)",
+        description="Database connection URL. Use PostgreSQL for Docker/production, SQLite for standalone local dev.",
     )
 
     # Azure Storage Settings
@@ -50,7 +50,7 @@ class Settings(BaseSettings):
 
     # CORS Settings
     cors_origins: list[str] = Field(
-        default=["http://localhost:5173", "http://localhost:3000"],
+        default=["http://localhost:5173"],
         description="Allowed CORS origins",
     )
 
