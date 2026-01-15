@@ -3,7 +3,7 @@ Application configuration using Pydantic Settings.
 Loads configuration from environment variables.
 """
 
-from pydantic import Field, PostgresDsn
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -23,9 +23,9 @@ class Settings(BaseSettings):
     api_description: str = "B2B 3D product configurator platform API"
 
     # Database Settings
-    database_url: PostgresDsn = Field(
-        default="postgresql+asyncpg://user:pass@localhost:5432/configurator",
-        description="PostgreSQL database connection URL",
+    database_url: str = Field(
+        default="sqlite+aiosqlite:///./configurator.db",
+        description="Database connection URL (SQLite with aiosqlite driver)",
     )
 
     # Azure Storage Settings
@@ -46,6 +46,12 @@ class Settings(BaseSettings):
     blender_timeout_seconds: int = Field(
         default=300,
         description="Blender process timeout in seconds",
+    )
+
+    # CORS Settings
+    cors_origins: list[str] = Field(
+        default=["http://localhost:5173", "http://localhost:3000"],
+        description="Allowed CORS origins",
     )
 
     # Server Settings
