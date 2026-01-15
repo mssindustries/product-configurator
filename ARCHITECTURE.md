@@ -69,7 +69,7 @@ The platform is a B2B 3D product configurator that allows manufacturers to offer
 
 ### Directory Structure
 ```
-frontend/
+src/frontend/
 ├── public/
 │   └── assets/              # Static assets
 ├── src/
@@ -107,7 +107,7 @@ frontend/
 
 ### Directory Structure
 ```
-backend/
+src/backend/
 ├── app/
 │   ├── api/
 │   │   ├── v1/                    # Versioned API routes
@@ -401,7 +401,7 @@ The frontend runs on the host machine (`npm run dev`) for optimal hot reload per
 docker compose up -d
 
 # Install frontend dependencies
-cd frontend && npm install
+cd src/frontend && npm install
 
 # Start frontend dev server
 npm run dev

@@ -7,5 +7,26 @@
     "code-review@claude-plugins-official": true,
     "feature-dev@claude-plugins-official": true,
     "javascript-typescript@claude-code-workflows": true
+  },
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(tree:*)",
+      "Bash(cat:*)",
+      "Bash(git add:*)",
+      "Bash(git branch:*)",
+      "Bash(git checkout:*)",
+      "Bash(git commit:*)",
+      "Bash(git mv:*)",
+      "Bash(git pull:*)",
+      "Bash(git push:*)",
+      "Bash(git stash:*)",
+      "Bash(gh:*)",
+      "Bash(./scripts/complete-feature.sh:*)",
+      "Bash(./scripts/new-feature.sh:*)",
+      "Bash(./scripts/move-to-analysis.sh:*)",
+      "Bash(./scripts/start-development.sh:*)",
+      "Bash(./scripts/abandon-feature.sh:*)"
+    ]
   }
 }

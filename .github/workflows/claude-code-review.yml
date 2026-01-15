@@ -9,6 +9,10 @@ on:
       - "src/**/*.tsx"
       - "src/**/*.js"
       - "src/**/*.jsx"
+      - "src/**/*.py"
+      - "src/**/*.sql"
+      - "docker/**"
+      - "**/*.prisma"
 
 jobs:
   claude-review:
