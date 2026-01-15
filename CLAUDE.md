@@ -8,13 +8,23 @@ MSS Industries Product Configurator - A B2B 3D product configurator platform for
 
 ## Tech Stack
 
-- **Framework**: Next.js (App Router)
+### Frontend (`src/frontend/`)
+- **Framework**: Vite + React 18
 - **3D Rendering**: React Three Fiber + Three.js
-- **Database**: SQLite + Prisma (single-file database, can migrate to Postgres later)
+- **Styling**: Tailwind CSS v4
 - **Language**: TypeScript
-- **3D Format**: GLTF/GLB (standard web 3D format)
-- **Utilities**: drei library for R3F helpers (controls, loaders, etc.)
-- **Deployment**: Single container (Docker) or Vercel
+- **Routing**: React Router
+
+### Backend (`src/backend/`)
+- **Framework**: FastAPI (Python 3.11+)
+- **Database**: PostgreSQL + SQLAlchemy 2.0 (async)
+- **3D Generation**: Blender (headless)
+- **Storage**: Azure Blob Storage
+
+### Infrastructure
+- **Local Dev**: Docker Compose (PostgreSQL, Azurite, FastAPI+Blender)
+- **Deployment**: Azure Static Web Apps (frontend) + Azure Container Instances (backend)
+- **3D Format**: GLTF/GLB
 
 ### Specialized Agents
 
@@ -46,11 +56,17 @@ This project uses specialized agents for different types of tasks. Choose the ri
 - When: Feature moved to `features/in-analysis/`, need architectural validation
 - Outputs: Architecture review in feature spec Planning section
 
-**nextjs-developer** - Next.js implementation
-- Use for: In-development phase of feature workflow
-- Examples: Implementing features, creating components, building API routes
-- When: Feature moved to `features/in-development/`, ready to code
-- Best practices: Follows Next.js 14+ App Router patterns, server components, server actions
+**python-development agents** - Backend implementation
+- Use for: FastAPI backend development, API routes, database models
+- Examples: Creating API endpoints, SQLAlchemy models, Pydantic schemas
+- When: Working on `src/backend/` code
+- Available: `fastapi-pro`, `python-pro`, `django-pro` (use fastapi-pro for this project)
+
+**javascript-typescript agents** - Frontend implementation
+- Use for: React/Vite frontend development, components, hooks
+- Examples: Creating React components, API client, state management
+- When: Working on `src/frontend/` code
+- Available: `typescript-pro`, `javascript-pro`
 
 **code-reviewer** - Code quality review
 - Use for: Before merging feature to main
@@ -84,7 +100,7 @@ This project uses specialized agents for different types of tasks. Choose the ri
 
 **Feature Development Flow:**
 1. **Backlog → Analysis**: Use `architect-reviewer` to review architecture
-2. **Analysis → Development**: Use `nextjs-developer` to implement
+2. **Analysis → Development**: Use `fastapi-pro` (backend) or `typescript-pro` (frontend) to implement
 3. **Development → Review**: Use `code-reviewer` before merge
 4. **Throughout**: Use `Explore` to understand codebase, `simple-task` for quick fixes
 
