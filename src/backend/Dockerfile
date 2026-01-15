@@ -1,7 +1,7 @@
 # MSS Industries Product Configurator - Backend Dockerfile
 # Python 3.11+ with Blender headless
 
-FROM python:3.11-slim AS base
+FROM python:3.11-slim
 
 # Install system dependencies and Blender
 # Note: libgl1-mesa-glx replaced by libgl1 in newer Debian
@@ -25,19 +25,10 @@ RUN useradd -m -u 1000 appuser && \
 WORKDIR /app
 
 # Copy dependency file first for better layer caching
-COPY pyproject.toml ./
+COPY --chown=appuser:appuser pyproject.toml ./
 
-# Install Python dependencies from pyproject.toml (production only)
-RUN pip install --no-cache-dir \
-    "fastapi>=0.109.0" \
-    "uvicorn[standard]>=0.27.0" \
-    "sqlalchemy[asyncio]>=2.0.25" \
-    "asyncpg>=0.29.0" \
-    "aiosqlite>=0.19.0" \
-    "pydantic>=2.5.0" \
-    "pydantic-settings>=2.1.0" \
-    "alembic>=1.13.0" \
-    "python-multipart>=0.0.6"
+# Install Python dependencies from pyproject.toml
+RUN pip install --no-cache-dir .
 
 # Copy application code (changes more frequently)
 COPY --chown=appuser:appuser . .
