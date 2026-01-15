@@ -34,7 +34,8 @@ RUN pip install --no-cache-dir \
     "pydantic>=2.5.0" \
     "pydantic-settings>=2.1.0" \
     "alembic>=1.13.0" \
-    "python-multipart>=0.0.6"
+    "python-multipart>=0.0.6" \
+    "argon2-cffi>=23.1.0"
 
 # Copy application code (changes more frequently)
 COPY --chown=appuser:appuser . .
