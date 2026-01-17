@@ -116,10 +116,11 @@ This project uses specialized agents for different types of tasks. Choose the ri
 ### Running Tests
 ```bash
 cd src/backend
-pip install -e ".[dev]"
-pytest -v                    # Run all tests
-pytest -v tests/api/         # Run API tests only
-pytest --cov=app             # Run with coverage
+make install                 # Install dependencies
+make test                    # Run tests with coverage
+make lint                    # Run linter
+make format                  # Auto-format code
+make check                   # Run lint + test
 ```
 
 ### Test Structure

@@ -27,7 +27,7 @@ class Base(DeclarativeBase):
 
     # Enable automatic __tablename__ generation
     @declared_attr.directive
-    def __tablename__(cls) -> str:
+    def __tablename__(cls) -> str:  # noqa: N805
         """Generate table name from class name (lowercase with underscores)."""
         # Convert CamelCase to snake_case
         name = cls.__name__

@@ -26,10 +26,10 @@ jobs:
           cache-dependency-path: src/backend/pyproject.toml
 
       - name: Install dependencies
-        run: pip install -e ".[dev]"
+        run: make install
 
-      - name: Lint with ruff
-        run: ruff check app
+      - name: Lint
+        run: make lint
 
-      - name: Run tests with coverage
-        run: pytest --cov=app --cov-report=term-missing --cov-fail-under=50
+      - name: Test
+        run: make test-ci
