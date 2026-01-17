@@ -11,9 +11,9 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.models.base import BaseModel
 
 if TYPE_CHECKING:
+    from app.db.models.client import Client
     from app.db.models.job import Job
     from app.db.models.product import Product
-    from app.db.models.user import User
 
 
 class Configuration(BaseModel):
@@ -23,7 +23,7 @@ class Configuration(BaseModel):
     Attributes:
         id: UUID primary key
         product_id: Foreign key to Product
-        user_id: Foreign key to User
+        client_id: Foreign key to Client
         name: Configuration name
         config_data: JSON configuration values (validated against product schema)
         product_schema_version: Schema version at time of creation
@@ -39,9 +39,9 @@ class Configuration(BaseModel):
         nullable=False,
         index=True,
     )
-    user_id: Mapped[str] = mapped_column(
+    client_id: Mapped[str] = mapped_column(
         UUID(as_uuid=False),
-        ForeignKey("users.id", ondelete="CASCADE"),
+        ForeignKey("clients.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -51,7 +51,7 @@ class Configuration(BaseModel):
 
     # Relationships
     product: Mapped["Product"] = relationship("Product", back_populates="configurations")
-    user: Mapped["User"] = relationship("User", back_populates="configurations")
+    client: Mapped["Client"] = relationship("Client", back_populates="configurations")
     jobs: Mapped[list["Job"]] = relationship(
         "Job",
         back_populates="configuration",

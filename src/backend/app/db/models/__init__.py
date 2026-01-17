@@ -10,7 +10,6 @@ from app.db.models.client import Client
 from app.db.models.configuration import Configuration
 from app.db.models.job import Job, JobStatus
 from app.db.models.product import Product
-from app.db.models.user import User
 
 __all__ = [
     # Base classes
@@ -23,7 +22,6 @@ __all__ = [
     "Configuration",
     "Job",
     "Product",
-    "User",
     # Enums
     "JobStatus",
 ]

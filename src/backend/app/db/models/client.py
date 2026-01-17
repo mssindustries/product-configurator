@@ -10,8 +10,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.models.base import BaseModel
 
 if TYPE_CHECKING:
+    from app.db.models.configuration import Configuration
     from app.db.models.product import Product
-    from app.db.models.user import User
 
 
 class Client(BaseModel):
@@ -30,13 +30,13 @@ class Client(BaseModel):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
 
     # Relationships
-    users: Mapped[list["User"]] = relationship(
-        "User",
+    products: Mapped[list["Product"]] = relationship(
+        "Product",
         back_populates="client",
         cascade="all, delete-orphan",
     )
-    products: Mapped[list["Product"]] = relationship(
-        "Product",
+    configurations: Mapped[list["Configuration"]] = relationship(
+        "Configuration",
         back_populates="client",
         cascade="all, delete-orphan",
     )
