@@ -21,9 +21,14 @@ class ConfigurationBase(BaseSchema):
 
 
 class ConfigurationCreate(ConfigurationBase):
-    """Schema for creating a new configuration."""
+    """Schema for creating a new configuration.
+
+    NOTE: client_id is required until authentication is implemented.
+    After auth is added, client_id will be inferred from the authenticated user.
+    """
 
     product_id: str = Field(..., description="ID of the product to configure")
+    client_id: str = Field(..., description="Client ID (required until auth is implemented)")
 
 
 class ConfigurationUpdate(BaseSchema):
@@ -38,7 +43,7 @@ class ConfigurationResponse(ConfigurationBase):
 
     id: str
     product_id: str
-    user_id: str
+    client_id: str
     product_schema_version: str
     created_at: datetime
     updated_at: datetime
