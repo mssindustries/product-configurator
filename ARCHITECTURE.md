@@ -30,7 +30,7 @@ The platform is a B2B 3D product configurator that allows manufacturers to offer
 │  │                      │      │                                          │ │
 │  │  - Generated GLB     │      │  - Clients      - Jobs                   │ │
 │  │    models            │      │  - Products     - Users                  │ │
-│  │  - Textures/Assets   │      │  - Configurations - ApiKeys              │ │
+│  │  - Textures/Assets   │      │  - Configurations                        │ │
 │  └──────────────────────┘      └──────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -125,13 +125,11 @@ src/backend/
 │   │   └── exceptions.py          # Blender-specific exceptions
 │   ├── core/
 │   │   ├── config.py              # App configuration (Pydantic Settings)
-│   │   ├── security.py            # API key validation
 │   │   └── exceptions.py          # Base exception classes
 │   ├── db/
 │   │   ├── models/                # SQLAlchemy models
 │   │   │   ├── base.py            # Base model with common fields
 │   │   │   ├── client.py
-│   │   │   ├── api_key.py
 │   │   │   ├── user.py
 │   │   │   ├── product.py
 │   │   │   ├── configuration.py
@@ -165,7 +163,7 @@ src/backend/
 ### API Endpoints
 
 #### Authentication
-All API requests require an `X-API-Key` header.
+> **TODO**: Authentication not yet implemented. See [Future Considerations](#future-considerations) for planned approach.
 
 #### Health
 | Method | Endpoint | Description |
@@ -209,9 +207,9 @@ def validate_configuration(config_data: dict, product: Product):
 ## Data Model
 
 ```
-┌─────────────┐     ┌─────────────┐     ┌─────────────────┐
-│   Client    │────<│   ApiKey    │     │                 │
-└─────────────┘     └─────────────┘     │                 │
+┌─────────────┐                         ┌─────────────────┐
+│   Client    │                         │                 │
+└─────────────┘                         │                 │
       │                                  │                 │
       │             ┌─────────────┐     │  Configuration  │
       └────────────>│   Product   │────<│                 │
@@ -231,16 +229,6 @@ def validate_configuration(config_data: dict, product: Product):
 - `name` - Business name
 - `created_at` - Creation timestamp
 - `updated_at` - Last update timestamp
-
-**ApiKey** - API authentication keys (separate table for rotation support)
-- `id` - Primary key
-- `client_id` - Foreign key to Client
-- `key_hash` - Hashed API key (argon2)
-- `name` - Key identifier (e.g., "Production", "Development")
-- `expires_at` - Optional expiration timestamp
-- `revoked_at` - Revocation timestamp (null if active)
-- `last_used_at` - Last usage timestamp
-- `created_at` - Creation timestamp
 
 **User** - Individual user within a client
 - `id` - Primary key
@@ -474,16 +462,22 @@ tests/
 
 ## Security
 
-### API Authentication
-- API keys issued per client via separate ApiKey table
-- Keys stored hashed using argon2
-- Transmitted via `X-API-Key` header
-- Support for key rotation (multiple active keys, expiration, revocation)
+### Authentication
+> **TODO**: User authentication not yet implemented.
+>
+> **Planned approach:**
+> - User login with email/password
+> - JWT tokens stored in httpOnly cookies
+> - Session-based access control
+> - User belongs to a Client (multi-tenancy)
 
 ### Data Isolation
-- All queries scoped to client via API key
-- Users can only access their client's data
-- Job results stored with client-prefixed paths in Blob Storage
+> **TODO**: Data isolation will be enforced after authentication is implemented.
+>
+> **Planned approach:**
+> - All queries scoped to client via authenticated user's client_id
+> - Users can only access their client's data
+> - Job results stored with client-prefixed paths in Blob Storage
 
 ### Input Validation
 - All configuration data validated against JSON Schema before Blender processing
@@ -495,9 +489,16 @@ Structured logging should be implemented throughout the application. Consider Az
 
 ## Future Considerations
 
+### High Priority
+- **User Authentication** - Email/password login, JWT sessions, password reset
+- **Access Control** - Ability to disable client access when contracts end
+
+### Medium Priority
 - **WebSocket support** for real-time job progress updates
 - **Separate worker containers** with message queue for horizontal scaling
 - **Redis** for job queue if scaling requires it
+
+### Low Priority
 - **CDN** for GLB file delivery
 - **Azure AD integration** for enterprise SSO
 - **Kubernetes** deployment for auto-scaling
