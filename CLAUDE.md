@@ -31,6 +31,13 @@ MSS Industries Product Configurator - A B2B 3D product configurator platform for
 
 This project uses specialized agents for different types of tasks. Choose the right agent based on the task complexity and phase of work.
 
+**IMPORTANT: Use agents proactively, not as a last resort.**
+- Backend implementation → spawn `fastapi-pro` agent
+- Frontend implementation → spawn `typescript-pro` agent
+- Multi-file feature work → use agents, don't do it all directly
+- Independent tasks → run multiple agents in parallel
+- Before merge → run `code-reviewer` agent
+
 #### Agent Selection Guide
 
 **simple-task** - Simple, straightforward changes
