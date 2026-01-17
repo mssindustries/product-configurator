@@ -2,20 +2,22 @@
 Products API endpoints.
 
 Provides CRUD operations for product templates:
-- GET /api/v1/products - List products for current client
+- GET /api/v1/products - List all products
 - GET /api/v1/products/{id} - Get product details
 - POST /api/v1/products - Create new product
+
+NOTE: Authentication is not yet implemented. These endpoints are currently
+public. When authentication is added, endpoints will be scoped to the
+authenticated client.
 """
 
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, HTTPException, Query, status
 from sqlalchemy import func, select
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import CurrentClient
-from app.db import get_db
+from app.api.deps import DbSession
 from app.db.models import Product
 from app.schemas.product import ProductCreate, ProductListResponse, ProductResponse
 
@@ -24,13 +26,12 @@ router = APIRouter()
 
 @router.get("", response_model=ProductListResponse)
 async def list_products(
-    db: Annotated[AsyncSession, Depends(get_db)],
-    current_client: CurrentClient,
+    db: DbSession,
     skip: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=1, le=100)] = 20,
 ) -> ProductListResponse:
     """
-    List all products for the authenticated client.
+    List all products.
 
     Query parameters:
     - skip: Number of products to skip (for pagination)
@@ -40,16 +41,13 @@ async def list_products(
         ProductListResponse with items and total count.
     """
     # Get total count
-    count_stmt = select(func.count()).select_from(Product).where(
-        Product.client_id == current_client.id
-    )
+    count_stmt = select(func.count()).select_from(Product)
     count_result = await db.execute(count_stmt)
     total = count_result.scalar_one()
 
     # Get paginated products
     stmt = (
         select(Product)
-        .where(Product.client_id == current_client.id)
         .order_by(Product.created_at.desc())
         .offset(skip)
         .limit(limit)
@@ -79,13 +77,10 @@ async def list_products(
 @router.get("/{product_id}", response_model=ProductResponse)
 async def get_product(
     product_id: UUID,
-    db: Annotated[AsyncSession, Depends(get_db)],
-    current_client: CurrentClient,
+    db: DbSession,
 ) -> ProductResponse:
     """
     Get a specific product by ID.
-
-    Only returns products belonging to the authenticated client.
 
     Args:
         product_id: UUID of the product to retrieve
@@ -94,12 +89,9 @@ async def get_product(
         ProductResponse with full product details including config_schema.
 
     Raises:
-        HTTPException 404: Product not found or belongs to another client.
+        HTTPException 404: Product not found.
     """
-    stmt = select(Product).where(
-        Product.id == str(product_id),
-        Product.client_id == current_client.id,
-    )
+    stmt = select(Product).where(Product.id == str(product_id))
     result = await db.execute(stmt)
     product = result.scalar_one_or_none()
 
@@ -125,13 +117,14 @@ async def get_product(
 @router.post("", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)
 async def create_product(
     product_data: ProductCreate,
-    db: Annotated[AsyncSession, Depends(get_db)],
-    current_client: CurrentClient,
+    db: DbSession,
 ) -> ProductResponse:
     """
-    Create a new product for the authenticated client.
+    Create a new product.
 
-    The product will automatically be associated with the current client.
+    NOTE: This endpoint currently requires client_id in the request body.
+    When authentication is implemented, client_id will be inferred from
+    the authenticated user.
 
     Args:
         product_data: Product creation data (name, description, template_blob_path, etc.)
@@ -144,7 +137,7 @@ async def create_product(
     """
     # Create new product instance
     product = Product(
-        client_id=current_client.id,
+        client_id=product_data.client_id,
         name=product_data.name,
         description=product_data.description,
         template_blob_path=product_data.template_blob_path,

@@ -18,6 +18,7 @@ MSS Industries Product Configurator - A B2B 3D product configurator platform for
 ### Backend (`src/backend/`)
 - **Framework**: FastAPI (Python 3.11+)
 - **Database**: PostgreSQL + SQLAlchemy 2.0 (async)
+- **Migrations**: Alembic (NOT needed until production deployment - use SQLAlchemy create_all for dev)
 - **3D Generation**: Blender (headless)
 - **Storage**: Azure Blob Storage
 

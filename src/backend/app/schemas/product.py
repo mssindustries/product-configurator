@@ -24,9 +24,13 @@ class ProductBase(BaseSchema):
 
 
 class ProductCreate(ProductBase):
-    """Schema for creating a new product."""
+    """Schema for creating a new product.
 
-    pass
+    NOTE: client_id is required until authentication is implemented.
+    After auth is added, client_id will be inferred from the authenticated user.
+    """
+
+    client_id: str = Field(..., description="Client ID (required until auth is implemented)")
 
 
 class ProductUpdate(BaseSchema):

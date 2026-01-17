@@ -5,7 +5,6 @@ All models are exported from this module for convenient imports:
     from app.db.models import Client, Product, Configuration, Job
 """
 
-from app.db.models.api_key import ApiKey
 from app.db.models.base import Base, BaseModel, TimestampMixin, UUIDMixin
 from app.db.models.client import Client
 from app.db.models.configuration import Configuration
@@ -20,7 +19,6 @@ __all__ = [
     "TimestampMixin",
     "UUIDMixin",
     # Models
-    "ApiKey",
     "Client",
     "Configuration",
     "Job",
