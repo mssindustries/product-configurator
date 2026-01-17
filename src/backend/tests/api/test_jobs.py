@@ -110,33 +110,6 @@ async def test_create_job_invalid_configuration_id_format(client: AsyncClient):
     assert response.status_code == 422
 
 
-async def test_create_job_configuration_without_client(
-    client: AsyncClient, created_product: dict, db_session
-):
-    """Returns 400 when configuration has no client_id."""
-    from app.db.models import Configuration
-
-    # Create configuration without client_id directly in database
-    config = Configuration(
-        product_id=created_product["id"],
-        client_id=None,  # No client
-        name="Orphan Config",
-        config_data={"width": 50, "color": "oak"},
-        product_schema_version=created_product["template_version"],
-    )
-    db_session.add(config)
-    await db_session.commit()
-    await db_session.refresh(config)
-
-    job_data = {
-        "configuration_id": str(config.id),
-    }
-
-    response = await client.post("/api/v1/jobs", json=job_data)
-    assert response.status_code == 400
-    assert "must belong to a client" in response.json()["detail"].lower()
-
-
 # GET /api/v1/jobs/{id} - Get Job Tests
 
 

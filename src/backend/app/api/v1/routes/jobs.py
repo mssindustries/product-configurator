@@ -47,7 +47,7 @@ async def create_job(
         HTTPException 422: Validation error (handled by FastAPI).
     """
     # Validate configuration exists and has a client
-    stmt = select(Configuration).where(Configuration.id == job_data.configuration_id)
+    stmt = select(Configuration).where(Configuration.id == str(job_data.configuration_id))
     result = await db.execute(stmt)
     configuration = result.scalar_one_or_none()
 
@@ -66,7 +66,7 @@ async def create_job(
 
     # Create new job instance
     job = Job(
-        configuration_id=job_data.configuration_id,
+        configuration_id=str(job_data.configuration_id),
         status=JobStatus.PENDING,
         progress=0,
         max_retries=3,  # Default from requirements
