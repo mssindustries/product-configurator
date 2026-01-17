@@ -3,6 +3,7 @@ Pydantic schemas for Job entity.
 """
 
 from datetime import datetime
+from uuid import UUID
 
 from pydantic import Field
 
@@ -13,7 +14,7 @@ from app.schemas.base import BaseSchema
 class JobCreate(BaseSchema):
     """Schema for creating a new GLB generation job."""
 
-    configuration_id: str = Field(
+    configuration_id: UUID = Field(
         ...,
         description="ID of the configuration to generate GLB for",
     )
