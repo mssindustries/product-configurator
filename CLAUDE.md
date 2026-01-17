@@ -110,3 +110,38 @@ This project uses specialized agents for different types of tasks. Choose the ri
 - Don't understand code? → `Explore`
 - Need to plan approach? → `Plan` or EnterPlanMode
 - Need to run commands? → `Bash`
+
+## Testing
+
+### Running Tests
+```bash
+cd src/backend
+make install                 # Install dependencies
+make test                    # Run tests with coverage
+make lint                    # Run linter
+make format                  # Auto-format code
+make check                   # Run lint + test
+```
+
+### Test Structure
+- Tests live in `src/backend/tests/`
+- Test files: `test_*.py`
+- Test functions: `test_*`
+- Use fixtures from `conftest.py` for database and client
+
+### Writing Tests
+- Use `client` fixture for API endpoint tests
+- Use `db_session` fixture for direct database tests
+- Each test gets a fresh database (SQLite in-memory)
+- Tests run in parallel - don't share state between tests
+
+### What to Test
+- API endpoint responses (status codes, response shape)
+- Validation errors (missing fields, invalid data)
+- Business logic in services
+- Edge cases (empty lists, not found, duplicates)
+
+### What NOT to Test
+- Third-party libraries (SQLAlchemy, Pydantic)
+- Framework internals (FastAPI routing)
+- Database driver behavior
