@@ -1,10 +1,16 @@
-.PHONY: help install test lint format check clean
+.PHONY: help install test lint format check clean build-debug debug
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
 
+build-debug: ## Build API container with dev dependencies
+	docker compose -f ../../docker-compose.yml -f ../../docker-compose.debug.yml build api
+
+debug: ## Start API with debugpy (attach VS Code on port 5678)
+	docker compose -f ../../docker-compose.yml -f ../../docker-compose.debug.yml up api
+
 install: ## Install dependencies (including dev)
-	uv sync --all-extras
+	uv sync
 
 test: ## Run tests with coverage
 	uv run pytest -v --cov=app --cov-report=term-missing

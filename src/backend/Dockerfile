@@ -31,7 +31,13 @@ WORKDIR /app
 COPY --chown=appuser:appuser . .
 
 # Install Python dependencies from lockfile
-RUN uv sync --frozen --no-dev --no-install-project
+# Set DEV_MODE=true to include dev dependencies (debugpy, pytest, etc.)
+ARG DEV_MODE=false
+RUN if [ "$DEV_MODE" = "true" ]; then \
+      uv sync --frozen --group dev --no-install-project; \
+    else \
+      uv sync --frozen --no-dev --no-install-project; \
+    fi
 
 # Switch to non-root user
 USER appuser
