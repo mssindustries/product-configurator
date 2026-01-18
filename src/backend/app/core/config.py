@@ -48,9 +48,9 @@ class Settings(BaseSettings):
         description="Blender process timeout in seconds",
     )
 
-    # CORS Settings
+    # CORS Settings (allow all origins in development)
     cors_origins: list[str] = Field(
-        default=["http://localhost:5173"],
+        default=["*"],
         description="Allowed CORS origins",
     )
 

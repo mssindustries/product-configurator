@@ -2,6 +2,8 @@
 FastAPI application entry point.
 """
 
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -16,12 +18,24 @@ from app.core.exceptions import (
     NotFoundError,
     ValidationError,
 )
+from app.db.models import Base
+from app.db.session import engine
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application lifespan: create tables on startup."""
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    yield
+
 
 # Create FastAPI application
 app = FastAPI(
     title=settings.api_title,
     version=settings.api_version,
     description=settings.api_description,
+    lifespan=lifespan,
 )
 
 # Configure CORS

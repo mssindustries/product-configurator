@@ -26,16 +26,17 @@ services:
     env_file:
       - .env.docker
     # Override CMD to enable hot reload for development
-    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    command: ["fastapi", "dev", "app/main.py", "--host", "0.0.0.0", "--port", "8000"]
     ports:
       - "8000:8000"
     volumes:
       # Mount source code for hot reload
       - ./src/backend:/app
-      # Exclude Python cache and build artifacts
+      # Exclude Python cache, build artifacts, and venv (use container's venv)
       - /app/__pycache__
       - /app/.pytest_cache
       - /app/app.egg-info
+      - /app/.venv
     depends_on:
       db:
         condition: service_healthy

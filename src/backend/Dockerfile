@@ -3,6 +3,9 @@
 
 FROM python:3.11-slim
 
+# Install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
 # Install system dependencies and Blender
 # Note: libgl1-mesa-glx replaced by libgl1 in newer Debian
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -24,21 +27,17 @@ RUN useradd -m -u 1000 appuser && \
 
 WORKDIR /app
 
-# Install Python dependencies (explicit for better layer caching)
-RUN pip install --no-cache-dir \
-    "fastapi>=0.109.0" \
-    "uvicorn[standard]>=0.27.0" \
-    "sqlalchemy[asyncio]>=2.0.25" \
-    "asyncpg>=0.29.0" \
-    "aiosqlite>=0.19.0" \
-    "pydantic>=2.5.0" \
-    "pydantic-settings>=2.1.0" \
-    "alembic>=1.13.0" \
-    "python-multipart>=0.0.6" \
-    "argon2-cffi>=23.1.0"
-
-# Copy application code (changes more frequently)
+# Copy all application code
 COPY --chown=appuser:appuser . .
+
+# Install Python dependencies from lockfile
+# Set DEV_MODE=true to include dev dependencies (debugpy, pytest, etc.)
+ARG DEV_MODE=false
+RUN if [ "$DEV_MODE" = "true" ]; then \
+      uv sync --frozen --group dev --no-install-project; \
+    else \
+      uv sync --frozen --no-dev --no-install-project; \
+    fi
 
 # Switch to non-root user
 USER appuser
@@ -50,11 +49,12 @@ EXPOSE 8000
 ENV PYTHONUNBUFFERED=1 \
     BLENDER_PATH=/usr/bin/blender \
     HOST=0.0.0.0 \
-    PORT=8000
+    PORT=8000 \
+    PATH="/app/.venv/bin:$PATH"
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"
 
-# Run the application (no --reload for production)
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Run the application
+CMD ["fastapi", "run", "app/main.py", "--host", "0.0.0.0", "--port", "8000"]
