@@ -27,14 +27,11 @@ RUN useradd -m -u 1000 appuser && \
 
 WORKDIR /app
 
-# Copy dependency files first for better layer caching
-COPY --chown=appuser:appuser pyproject.toml uv.lock ./
+# Copy all application code
+COPY --chown=appuser:appuser . .
 
 # Install Python dependencies from lockfile
-RUN uv sync --frozen --no-dev
-
-# Copy application code (changes more frequently)
-COPY --chown=appuser:appuser . .
+RUN uv sync --frozen --no-dev --no-install-project
 
 # Switch to non-root user
 USER appuser
@@ -46,7 +43,8 @@ EXPOSE 8000
 ENV PYTHONUNBUFFERED=1 \
     BLENDER_PATH=/usr/bin/blender \
     HOST=0.0.0.0 \
-    PORT=8000
+    PORT=8000 \
+    PATH="/app/.venv/bin:$PATH"
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
