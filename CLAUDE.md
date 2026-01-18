@@ -27,96 +27,95 @@ MSS Industries Product Configurator - A B2B 3D product configurator platform for
 - **Deployment**: Azure Static Web Apps (frontend) + Azure Container Instances (backend)
 - **3D Format**: GLTF/GLB
 
-### Specialized Agents
+## Plugins & Automation
 
-This project uses specialized agents for different types of tasks. Choose the right agent based on the task complexity and phase of work.
+This project uses Claude Code plugins. Use them proactively, not as a last resort.
 
-**IMPORTANT: Use agents proactively, not as a last resort.**
-- Backend implementation → spawn `fastapi-pro` agent
-- Frontend implementation → spawn `typescript-pro` agent
-- Multi-file feature work → use agents, don't do it all directly
+### Quick Reference
+
+| Task | Command/Agent | Notes |
+|------|---------------|-------|
+| Start new feature | `/feature-dev` | Guided workflow with architecture focus |
+| Design React UI | `/frontend-design` | High-quality, distinctive interfaces |
+| Create commit | `/commit` | Auto-generates message from changes |
+| Commit + PR | `/commit-push-pr` | Full workflow in one step |
+| Review PR | `/code-review` | Structured quality review |
+| Debug issue | `/systematic-debugging` | 4-phase root cause analysis |
+| Write tests first | `/test-driven-development` | RED-GREEN-REFACTOR cycle |
+| Backend work | `fastapi-pro` agent | FastAPI endpoints, SQLAlchemy models |
+| Frontend work | `typescript-pro` agent | React components, hooks |
+| Explore code | `Explore` agent | Fast codebase search |
+
+### Skills (Slash Commands)
+
+Invoke with `/skillname` for guided workflows.
+
+**Planning:**
+- `/brainstorming` - Refine ideas before implementation (use before any creative work)
+- `/writing-plans` - Create detailed implementation plans with file paths
+- `/feature-dev` - Guided feature development with codebase awareness
+
+**Development:**
+- `/frontend-design` - Create distinctive React UIs (use for `src/frontend/` components)
+- `/test-driven-development` - Write failing test → make it pass → refactor
+- `/python-testing-patterns` - pytest fixtures and testing strategies for `src/backend/`
+
+**Git & Review:**
+- `/commit` - Stage changes and create commit with generated message
+- `/commit-push-pr` - Commit, push, and open PR in one command
+- `/code-review` - Review PR for bugs, security, code quality
+- `/clean_gone` - Remove local branches deleted from remote
+
+**Debugging:**
+- `/systematic-debugging` - Root cause analysis before proposing fixes
+- `/verification-before-completion` - Run tests/checks before claiming done
+
+### Agents
+
+Spawn agents for implementation. Use Task tool with `subagent_type`.
+
+**Primary Agents for This Project:**
+
+| Agent | Domain | Use For |
+|-------|--------|---------|
+| `fastapi-pro` | `src/backend/` | API endpoints, SQLAlchemy models, Pydantic schemas |
+| `typescript-pro` | `src/frontend/` | React components, Three.js/R3F, hooks |
+| `Explore` | Any | Understanding code patterns, finding files |
+| `code-reviewer` | Any | Pre-merge quality review |
+| `simple-task` | Any | Single-file fixes, typos, config changes |
+
+**Agent Rules:**
+- Backend implementation → spawn `fastapi-pro`
+- Frontend implementation → spawn `typescript-pro`
+- Multi-file changes → use agents, don't edit directly
 - Independent tasks → run multiple agents in parallel
-- Before merge → run `code-reviewer` agent
+- Before merge → run `code-reviewer`
 
-#### Agent Selection Guide
+### Browser Automation
 
-**simple-task** - Simple, straightforward changes
-- Use for: Bug fixes, typos, small edits, single-file changes
-- Examples: Fix typo in component, update configuration value, add missing prop
-- When: Task is clear, no architectural decisions needed 
-- Avoid: Multi-file changes, new features, architectural decisions
+Playwright MCP tools are available for UI testing. Key tools: `browser_navigate`, `browser_snapshot`, `browser_click`, `browser_console_messages`.
 
-**Explore** - Fast codebase exploration
-- Use for: Understanding code structure, finding files, answering "where/how" questions
-- Examples: "Where are errors handled?", "How does authentication work?", "Find all API routes"
-- When: Need to understand codebase before planning or implementing
-- Thoroughness levels: "quick" (basic search), "medium" (moderate), "very thorough" (comprehensive)
+### Workflow Examples
 
-**Plan** - Implementation planning
-- Use for: Designing approach before implementation
-- Examples: Planning new feature architecture, refactoring strategy, integration approach
-- When: Non-trivial implementation that needs approval before coding
-- Note: Often better to use EnterPlanMode directly instead of Plan agent
+**Adding a New API Endpoint:**
+1. `/brainstorming` - Clarify requirements
+2. `/writing-plans` - Plan the endpoint, models, tests
+3. Spawn `fastapi-pro` agent - Implement in `src/backend/`
+4. `/verification-before-completion` - Run `make test`
+5. `/commit-push-pr` - Create PR
 
-**architect-reviewer** - Architecture review and analysis
-- Use for: In-analysis phase of feature workflow
-- Examples: Evaluating feature architecture, identifying risks, reviewing system design
-- When: Feature moved to `features/in-analysis/`, need architectural validation
-- Outputs: Architecture review in feature spec Planning section
+**Building a New React Component:**
+1. `/frontend-design` - Design the component with high visual quality
+2. Spawn `typescript-pro` agent - Implement in `src/frontend/`
+3. Test in browser (Playwright or manual)
+4. `/commit` - Commit changes
 
-**python-development agents** - Backend implementation
-- Use for: FastAPI backend development, API routes, database models
-- Examples: Creating API endpoints, SQLAlchemy models, Pydantic schemas
-- When: Working on `src/backend/` code
-- Available: `fastapi-pro`, `python-pro`, `django-pro` (use fastapi-pro for this project)
-
-**javascript-typescript agents** - Frontend implementation
-- Use for: React/Vite frontend development, components, hooks
-- Examples: Creating React components, API client, state management
-- When: Working on `src/frontend/` code
-- Available: `typescript-pro`, `javascript-pro`
-
-**code-reviewer** - Code quality review
-- Use for: Before merging feature to main
-- Examples: Security review, performance check, best practices validation
-- When: Feature status is `in-review`, implementation complete
-- Outputs: Code review feedback in feature spec Code Review section
-
-**prompt-engineer** - Prompt optimization
-- Use for: Creating prompts that are clear for other sub-agents
-- Examples: Refining user prompts, designing prompts to be given to other agents
-- When: Feature prompts are vague or needs better structure to optimize token usage
-
-**business-analyst** - Requirements and issue refinement
-- Use for: Refining requirements, analyzing business needs, reviewing issue specifications
-- Examples: Cleaning up draft issues, removing technical implementation details, ensuring user stories are clear
-- When: Need to refine requirements before technical planning begins
-- Important: Keep user stories and acceptance criteria **implementation-agnostic**. Remove specific technical details (frameworks, libraries, file paths, code examples). Focus on business value and user needs, not how to implement.
-
-**general-purpose** - Research and complex searches
-- Use for: Multi-step research, complex codebase searches
-- Examples: Finding patterns across many files, researching best approaches
-- When: Task requires multiple search rounds or complex investigation
-
-**Bash** - Terminal operations
-- Use for: Git operations, running commands, build tasks
-- Examples: Running tests, checking git status, installing dependencies
-- When: Need to execute shell commands
-- Avoid: File operations (use Read/Edit/Write tools instead)
-
-#### Workflow Integration
-
-**Feature Development Flow:**
-1. **Backlog → Analysis**: Use `architect-reviewer` to review architecture
-2. **Analysis → Development**: Use `fastapi-pro` (backend) or `typescript-pro` (frontend) to implement
-3. **Development → Review**: Use `code-reviewer` before merge
-4. **Throughout**: Use `Explore` to understand codebase, `simple-task` for quick fixes
-
-**Ad-hoc Tasks:**
-- Small fix needed? → `simple-task`
-- Don't understand code? → `Explore`
-- Need to plan approach? → `Plan` or EnterPlanMode
-- Need to run commands? → `Bash`
+**Fixing a Bug:**
+1. `/systematic-debugging` - Find root cause
+2. `/test-driven-development` - Write failing test in `src/backend/tests/`
+3. Fix the bug
+4. `/verification-before-completion` - Confirm `make test` passes
+5. `/commit` - Commit the fix
 
 ## Testing
 

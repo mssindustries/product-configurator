@@ -4,20 +4,9 @@
       "Bash(ls:*)",
       "Bash(tree:*)",
       "Bash(cat:*)",
-      "Bash(git add:*)",
-      "Bash(git branch:*)",
-      "Bash(git checkout:*)",
-      "Bash(git commit:*)",
-      "Bash(git mv:*)",
-      "Bash(git pull:*)",
-      "Bash(git push:*)",
-      "Bash(git stash:*)",
+      "Bash(git:*)",
       "Bash(gh:*)",
-      "Bash(./scripts/complete-feature.sh:*)",
-      "Bash(./scripts/new-feature.sh:*)",
-      "Bash(./scripts/move-to-analysis.sh:*)",
-      "Bash(./scripts/start-development.sh:*)",
-      "Bash(./scripts/abandon-feature.sh:*)"
+      "Bash(./scripts/*.sh:*)"
     ]
   },
   "enabledPlugins": {
@@ -29,6 +18,7 @@
     "feature-dev@claude-plugins-official": true,
     "javascript-typescript@claude-code-workflows": true,
     "commit-commands@claude-plugins-official": true,
-    "superpowers@claude-plugins-official": true
+    "superpowers@claude-plugins-official": true,
+    "playwright@claude-plugins-official": true
   }
 }
