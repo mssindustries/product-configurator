@@ -4,7 +4,7 @@
 
 import { ReactNode } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Environment } from '@react-three/drei';
+import { OrbitControls } from '@react-three/drei';
 import { Lights } from './Lights';
 
 export interface Scene3DProps {
@@ -36,7 +36,7 @@ export function Scene3D({
   children,
   backgroundColor = '#f0f0f0',
   shadows = true,
-  showEnvironment = true,
+  // showEnvironment = true, // Disabled due to compatibility issues
   fov = 50,
   cameraPosition = [5, 3, 5],
 }: Scene3DProps) {
@@ -54,10 +54,10 @@ export function Scene3D({
       {/* Lighting */}
       <Lights />
 
-      {/* Environment for reflections */}
-      {showEnvironment && (
+      {/* Environment for reflections - disabled due to compatibility issues */}
+      {/* {showEnvironment && (
         <Environment preset="studio" />
-      )}
+      )} */}
 
       {/* Camera controls */}
       <OrbitControls
