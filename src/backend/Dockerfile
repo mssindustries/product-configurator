@@ -3,6 +3,9 @@
 
 FROM python:3.11-slim
 
+# Install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
 # Install system dependencies and Blender
 # Note: libgl1-mesa-glx replaced by libgl1 in newer Debian
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -24,11 +27,11 @@ RUN useradd -m -u 1000 appuser && \
 
 WORKDIR /app
 
-# Copy dependency file first for better layer caching
-COPY --chown=appuser:appuser pyproject.toml .
+# Copy dependency files first for better layer caching
+COPY --chown=appuser:appuser pyproject.toml uv.lock ./
 
-# Install Python dependencies from pyproject.toml
-RUN pip install --no-cache-dir --upgrade .
+# Install Python dependencies from lockfile
+RUN uv sync --frozen --no-dev
 
 # Copy application code (changes more frequently)
 COPY --chown=appuser:appuser . .

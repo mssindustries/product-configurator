@@ -1,25 +1,22 @@
-.PHONY: dev dev-backend dev-frontend stop logs install
+.PHONY: help dev dev-backend dev-frontend stop logs install
 
-# Start everything
-dev: dev-backend dev-frontend
+help: ## Show this help
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
 
-# Start backend services (PostgreSQL, Azurite, FastAPI)
-dev-backend:
+dev: dev-backend dev-frontend ## Start everything (backend + frontend)
+
+dev-backend: ## Start backend services (PostgreSQL, Azurite, FastAPI)
 	docker compose up -d
 
-# Start frontend dev server
-dev-frontend:
+dev-frontend: ## Start frontend dev server
 	cd src/frontend && npm run dev
 
-# Stop all services
-stop:
+stop: ## Stop all services
 	docker compose down
 
-# View backend logs
-logs:
+logs: ## View backend logs
 	docker compose logs -f
 
-# Install all dependencies
-install:
+install: ## Install all dependencies
 	cd src/frontend && npm install
 	$(MAKE) -C src/backend install
