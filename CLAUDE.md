@@ -300,7 +300,7 @@ When triggered:
 2. **Create implementation plan:**
    - **Simple plan:** Files to touch + brief steps
    - **Complex plan:** Architecture overview + detailed TDD tasks
-3. **Store plan** in `docs/plans/YYYY-MM-DD-<issue-number>-<slug>.md`
+3. **Store plan** in `plans/YYYY-MM-DD-<issue-number>-<slug>.md`
 4. **Comment on issue** linking to the plan
 5. **Wait for approval** - do NOT start coding
 6. Move to In Development only after approval
@@ -319,7 +319,7 @@ When triggered:
 
 ### Plan Formats
 
-Plans are stored in `docs/plans/` with naming: `YYYY-MM-DD-<issue-number>-<slug>.md`
+Plans are stored in `plans/` with naming: `YYYY-MM-DD-<issue-number>-<slug>.md`
 
 #### Simple Plan Format
 
