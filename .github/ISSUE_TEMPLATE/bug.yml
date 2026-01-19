@@ -28,7 +28,7 @@ body:
         3. Select a GLB file larger than 50MB
         4. Observe the error
     validations:
-      required: true
+      required: false
 
   - type: textarea
     id: expected-behavior
@@ -37,7 +37,7 @@ body:
       description: What should happen?
       placeholder: "The model should load and display in the viewer"
     validations:
-      required: true
+      required: false
 
   - type: textarea
     id: actual-behavior
@@ -46,7 +46,7 @@ body:
       description: What actually happens?
       placeholder: "The page freezes and eventually shows 'Page Unresponsive'"
     validations:
-      required: true
+      required: false
 
   - type: textarea
     id: environment
