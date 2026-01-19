@@ -107,6 +107,18 @@ module containerApp 'modules/containerApp.bicep' = {
   }
 }
 
+// Role assignments for Container App managed identity
+// Must be deployed after Container App to get its principal ID
+module roleAssignments 'modules/roleAssignments.bicep' = {
+  name: 'deploy-roleAssignments'
+  scope: az.resourceGroup(resourceGroupName)
+  params: {
+    containerAppPrincipalId: containerApp.outputs.principalId
+    containerRegistryId: containerRegistry.outputs.id
+    storageAccountId: storageAccount.outputs.id
+  }
+}
+
 module staticWebApp 'modules/staticWebApp.bicep' = {
   name: 'deploy-staticWebApp'
   scope: az.resourceGroup(resourceGroupName)

@@ -38,7 +38,7 @@ var databaseName = 'configurator'
 // Construct PostgreSQL connection string for SQLAlchemy async driver
 var databaseUrl = 'postgresql+asyncpg://${postgresUser}:${postgresPassword}@${postgresHost}:5432/${databaseName}'
 
-resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
+resource containerApp 'Microsoft.App/containerApps@2025-01-01' = {
   name: name
   location: location
   properties: {
@@ -112,3 +112,6 @@ output id string = containerApp.id
 
 @description('The fully qualified domain name (FQDN) of the Container App')
 output fqdn string = containerApp.properties.configuration.ingress.fqdn
+
+@description('The principal ID of the Container App system-assigned managed identity')
+output principalId string = containerApp.identity.principalId
