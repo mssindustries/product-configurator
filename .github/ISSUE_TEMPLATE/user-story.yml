@@ -1,0 +1,64 @@
+name: User Story
+description: A user-focused feature or functionality request
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## User Story
+        Describe the feature from the user's perspective.
+
+  - type: textarea
+    id: story
+    attributes:
+      label: User Story
+      description: "Format: As a [role], I want [capability] so that [benefit]"
+      placeholder: "As a manufacturer, I want to upload 3D models so that customers can visualize my products."
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Additional context about this user story
+      placeholder: Provide any additional context, background, or details...
+    validations:
+      required: false
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: Specific, testable requirements that must be met
+      placeholder: |
+        - [ ] User can upload a .glb or .gltf file
+        - [ ] Uploaded model is visible in the 3D viewer
+        - [ ] Invalid file types show an error message
+    validations:
+      required: true
+
+  - type: textarea
+    id: out-of-scope
+    attributes:
+      label: Out of Scope
+      description: Explicitly state what is NOT part of this story
+      placeholder: |
+        - Animation support
+        - Multiple file upload
+    validations:
+      required: false
+
+  - type: dropdown
+    id: size
+    attributes:
+      label: Estimated Size
+      description: T-shirt size estimate
+      options:
+        - XS (< 1 day)
+        - S (1-2 days)
+        - M (3-5 days)
+        - L (1-2 weeks)
+        - XL (> 2 weeks)
+    validations:
+      required: false

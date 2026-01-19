@@ -1,0 +1,90 @@
+name: Feature
+description: A high-level feature or epic containing multiple user stories
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Feature (Epic)
+        A large capability that may span multiple user stories and iterations.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Feature Summary
+      description: High-level description of the feature
+      placeholder: "3D Product Configuration System - Allow customers to customize products in real-time 3D"
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: What problem does this feature solve?
+      placeholder: |
+        Customers currently can't visualize customizations before ordering,
+        leading to returns and dissatisfaction.
+    validations:
+      required: true
+
+  - type: textarea
+    id: goals
+    attributes:
+      label: Goals
+      description: What are the measurable goals for this feature?
+      placeholder: |
+        - Reduce product returns by 25%
+        - Increase customer engagement time by 50%
+        - Enable real-time 3D visualization
+    validations:
+      required: true
+
+  - type: textarea
+    id: user-stories
+    attributes:
+      label: User Stories
+      description: List the user stories that make up this feature
+      placeholder: |
+        - [ ] As a customer, I can view products in 3D
+        - [ ] As a customer, I can change product colors in real-time
+        - [ ] As a customer, I can change product dimensions
+        - [ ] As a manufacturer, I can upload product templates
+    validations:
+      required: false
+
+  - type: textarea
+    id: success-metrics
+    attributes:
+      label: Success Metrics
+      description: How will we measure success?
+      placeholder: |
+        - Configuration completion rate > 80%
+        - Average session duration > 3 minutes
+        - Return rate < 5%
+    validations:
+      required: false
+
+  - type: textarea
+    id: out-of-scope
+    attributes:
+      label: Out of Scope
+      description: What is explicitly NOT part of this feature?
+      placeholder: |
+        - AR/VR visualization
+        - Mobile app support
+        - Offline mode
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this feature?
+      options:
+        - P0 (Critical)
+        - P1 (High)
+        - P2 (Medium)
+    validations:
+      required: false

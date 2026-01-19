@@ -63,3 +63,6 @@ Thumbs.db
 # Blender
 *.blend1
 *.blend2
+
+# Local plans (root level only, docs/plans/ is tracked)
+/plans/

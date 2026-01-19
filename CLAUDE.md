@@ -46,9 +46,9 @@ This project uses Claude Code plugins. Use them proactively, not as a last resor
 | Frontend work | `typescript-pro` agent | React components, hooks |
 | Explore code | `Explore` agent | Fast codebase search |
 
-### Skills (Slash Commands)
+### Slash Commands
 
-Invoke with `/skillname` for guided workflows.
+Invoke explicitly with `/command-name`. Stored in `.claude/commands/` or as part of a plugin.
 
 **Planning:**
 - `/brainstorming` - Refine ideas before implementation (use before any creative work)
@@ -97,29 +97,38 @@ Playwright MCP tools are available for UI testing. Key tools: `browser_navigate`
 
 ### Workflow Examples
 
-**Adding a New API Endpoint:**
+**Adding a New API Endpoint (Backend):**
 1. `/brainstorming` - Clarify requirements
 2. `/writing-plans` - Plan the endpoint, models, tests
 3. Spawn `fastapi-pro` agent - Implement in `src/backend/`
 4. `/verification-before-completion` - Run `make test`
 5. `/commit-push-pr` - Create PR
 
-**Building a New React Component:**
+**Building a New React Component (Frontend):**
 1. `/frontend-design` - Design the component with high visual quality
 2. Spawn `typescript-pro` agent - Implement in `src/frontend/`
 3. Test in browser (Playwright or manual)
 4. `/commit` - Commit changes
 
+**Building a Full-Stack Feature:**
+1. `/brainstorming` - Clarify requirements
+2. `/writing-plans` - Plan both backend and frontend
+3. Spawn `fastapi-pro` agent - Implement API in `src/backend/`
+4. Spawn `typescript-pro` agent - Implement UI in `src/frontend/`
+5. `/verification-before-completion` - Run all tests
+6. `/commit-push-pr` - Create PR
+
 **Fixing a Bug:**
 1. `/systematic-debugging` - Find root cause
-2. `/test-driven-development` - Write failing test in `src/backend/tests/`
+2. `/test-driven-development` - Write failing test
 3. Fix the bug
-4. `/verification-before-completion` - Confirm `make test` passes
+4. `/verification-before-completion` - Confirm tests pass
 5. `/commit` - Commit the fix
 
 ## Testing
 
-### Running Tests
+### Backend Testing
+
 ```bash
 cd src/backend
 make install                 # Install dependencies
@@ -129,28 +138,54 @@ make format                  # Auto-format code
 make check                   # Run lint + test
 ```
 
-### Test Structure
+**Test Structure:**
 - Tests live in `src/backend/tests/`
 - Test files: `test_*.py`
 - Test functions: `test_*`
 - Use fixtures from `conftest.py` for database and client
 
-### Writing Tests
+**Writing Tests:**
 - Use `client` fixture for API endpoint tests
 - Use `db_session` fixture for direct database tests
 - Each test gets a fresh database (SQLite in-memory)
 - Tests run in parallel - don't share state between tests
 
+### Frontend Testing
+
+```bash
+cd src/frontend
+npm install                  # Install dependencies
+npm test                     # Run tests with Vitest
+npm run lint                 # Run ESLint
+npm run build                # Type-check and build
+```
+
+**Test Structure:**
+- Tests live alongside components or in `__tests__/` directories
+- Test files: `*.test.tsx` or `*.test.ts`
+- Use React Testing Library for component tests
+
+**Visual Testing:**
+- Use Playwright browser automation for E2E tests
+- Key tools: `browser_navigate`, `browser_snapshot`, `browser_click`
+
 ### What to Test
+
+**Backend:**
 - API endpoint responses (status codes, response shape)
 - Validation errors (missing fields, invalid data)
 - Business logic in services
 - Edge cases (empty lists, not found, duplicates)
 
+**Frontend:**
+- Component rendering and user interactions
+- Form validation and submission
+- State management behavior
+
 ### What NOT to Test
-- Third-party libraries (SQLAlchemy, Pydantic)
-- Framework internals (FastAPI routing)
-- Database driver behavior
+- Third-party library internals
+- Framework internals (routing, lifecycle)
+- Browser/driver behavior
 
 ## GitHub Issue Management
 
@@ -162,6 +197,8 @@ This project uses GitHub Projects with issue types and parent-child relationship
 |------|-----|---------|
 | Feature | `IT_kwDODvcDnc4Bz3xm` | High-level features (epics) |
 | User Story | `IT_kwDODvcDnc4B1Xfg` | Individual user stories under features |
+| Task | `IT_kwDODvcDnc4Bz3xk` | A specific piece of work |
+| Bug | `IT_kwDODvcDnc4Bz3xl` | An unexpected problem or behavior |
 
 ### Project
 
@@ -210,18 +247,192 @@ After creating an issue, add it to the project:
 gh project item-add 2 --owner ABladeLabs --url https://github.com/ABladeLabs/mss-industries-product-configurator/issues/ISSUE_NUMBER
 ```
 
-### Reference IDs
+### Repository ID
 
-| Resource | ID |
-|----------|-----|
-| Repository | `R_kgDOQtah4Q` |
-| Feature Issue Type | `IT_kwDODvcDnc4Bz3xm` |
-| User Story Issue Type | `IT_kwDODvcDnc4B1Xfg` |
+`R_kgDOQtah4Q`
 
-### Required Auth Scopes
+## GitHub Issue Workflow
 
-To manage issues and projects, ensure your GitHub CLI has these scopes:
+This workflow enables seamless handoffs between local Claude Code and GitHub Claude Action.
 
-```bash
-gh auth refresh -s project,read:project
+### Project Statuses
+
+| Status | Purpose |
+|--------|---------|
+| Backlog | Not started, waiting in queue |
+| In Analysis | Exploring/understanding the problem, formatting issue |
+| Planning | Creating implementation plan |
+| In Development | Writing code |
+| Done | Complete |
+
+### Handoffs
+
+**You → Claude:**
+1. Push your changes to a branch
+2. Comment `@claude continue from here`
+
+**Claude → You:**
+1. Claude comments on issue/PR with status/summary
+2. You get notified, pull the branch, continue locally
+
+### Status-Specific Guidance
+
+#### Backlog
+
+When triggered:
+1. Move issue to "In Analysis"
+2. Begin analysis process
+
+#### In Analysis
+
+When triggered:
+1. **Format the issue** based on its type (User Story, Task, Bug, Feature)
+2. **Validate requirements:**
+   - Are acceptance criteria clear and complete?
+   - Are there ambiguities or missing details?
+3. **Ask clarifying questions** if needed (comment on issue)
+4. **Move to Planning** when the issue is well-defined
+
+#### Planning
+
+When triggered:
+1. **Determine plan complexity** (simple vs complex)
+2. **Create implementation plan:**
+   - **Simple plan:** Files to touch + brief steps
+   - **Complex plan:** Architecture overview + detailed TDD tasks
+3. **Store plan** in `docs/plans/YYYY-MM-DD-<issue-number>-<slug>.md`
+4. **Comment on issue** linking to the plan
+5. **Wait for approval** - do NOT start coding
+6. Move to In Development only after approval
+
+#### In Development
+
+When triggered:
+1. **Check for existing work** (branches/PRs related to this issue)
+2. **Follow the plan** - it's the contract
+3. **Use TDD for code changes:**
+   - Write test → make it pass → commit
+4. **Adapt with judgment:**
+   - Small adaptations are fine
+   - Significant deviations → stop and ask
+5. **Push to branch, open PR when done**
+
+### Plan Formats
+
+Plans are stored in `docs/plans/` with naming: `YYYY-MM-DD-<issue-number>-<slug>.md`
+
+#### Simple Plan Format
+
+```markdown
+# [Issue Title]
+
+**Issue:** #123
+**Domain:** frontend, backend, infrastructure (list all that apply)
+
+## Files to Modify
+- `path/to/file` - description of changes
+
+## Steps
+1. Step one
+2. Step two
+
+## Verification
+- How to verify the changes work
 ```
+
+#### Complex Plan Format
+
+```markdown
+# [Issue Title] Implementation Plan
+
+**Issue:** #123
+**Domain:** frontend, backend, infrastructure (list all that apply)
+
+**Goal:** One sentence describing what this builds
+
+**Architecture:** How components fit together, data flow
+
+---
+
+## Task 1: [Component Name]
+
+**Files:**
+- Create: `path/to/new`
+- Modify: `path/to/existing`
+- Test: `path/to/test`
+
+**TDD Steps:**
+1. Write failing test
+2. Run test (expect RED)
+3. Implement minimal code
+4. Run test (expect GREEN)
+5. Refactor if needed
+6. Commit
+
+---
+
+## Verification
+- End-to-end testing steps
+```
+
+### Domain-Specific Guidance
+
+When working on an issue, identify the domain and follow the appropriate guidance.
+
+#### Frontend (`src/frontend/`)
+
+**Tools & Commands:**
+- Agent: `typescript-pro`
+- Design: `/frontend-design`
+- Test: `cd src/frontend && npm test`
+- Lint: `cd src/frontend && npm run lint`
+- Dev server: `cd src/frontend && npm run dev`
+
+**Testing Approach:**
+- Component tests with Vitest + React Testing Library
+- Visual testing with Playwright browser automation
+- Test files: `*.test.tsx` or `*.test.ts`
+
+**Key Patterns:**
+- React Three Fiber for 3D rendering
+- Tailwind CSS v4 for styling
+- React Router for navigation
+
+#### Backend (`src/backend/`)
+
+**Tools & Commands:**
+- Agent: `fastapi-pro`
+- Test: `cd src/backend && make test`
+- Lint: `cd src/backend && make lint`
+- Format: `cd src/backend && make format`
+- Full check: `cd src/backend && make check`
+
+**Testing Approach:**
+- pytest with async support
+- Use `client` fixture for API tests
+- Use `db_session` fixture for database tests
+- Test files: `test_*.py`
+
+**Key Patterns:**
+- FastAPI async endpoints
+- SQLAlchemy 2.0 async ORM
+- Pydantic v2 for validation
+
+#### Multi-Domain (e.g., frontend + backend)
+
+When an issue spans multiple domains:
+
+1. **Plan both domains** in a single plan file
+2. **Implement backend first** (API, models, validation)
+3. **Implement frontend second** (components, API calls)
+4. **Verify integration** with end-to-end testing
+
+#### Infrastructure
+
+**Tools & Commands:**
+- Docker Compose for local dev
+- Azure CLI for cloud resources
+
+**Key Files:**
+- `docker-compose.yml` - local services
+- `.github/workflows/` - CI/CD pipelines

@@ -1,0 +1,83 @@
+name: Bug
+description: Report an unexpected problem or behavior
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Bug Report
+        Help us fix issues by providing detailed information.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Bug Summary
+      description: A clear, concise description of the bug
+      placeholder: "The 3D model viewer crashes when loading large GLB files"
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to Reproduce
+      description: Detailed steps to reproduce the bug
+      placeholder: |
+        1. Navigate to the product configurator
+        2. Click "Upload Model"
+        3. Select a GLB file larger than 50MB
+        4. Observe the error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+      description: What should happen?
+      placeholder: "The model should load and display in the viewer"
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: Actual Behavior
+      description: What actually happens?
+      placeholder: "The page freezes and eventually shows 'Page Unresponsive'"
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser, OS, or other relevant environment details
+      placeholder: |
+        - Browser: Chrome 120
+        - OS: Windows 11
+        - Node version: 20.x
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs/Screenshots
+      description: Paste error logs, console output, or attach screenshots
+      placeholder: "Paste error messages or console output here..."
+    validations:
+      required: false
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: How severe is this bug?
+      options:
+        - Critical (system unusable, data loss)
+        - High (major feature broken)
+        - Medium (feature impaired but workaround exists)
+        - Low (minor inconvenience)
+    validations:
+      required: false

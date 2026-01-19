@@ -1,0 +1,67 @@
+name: Task
+description: A specific piece of work that needs to be done
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Task
+        A discrete unit of work, often technical in nature.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: Brief description of what needs to be done
+      placeholder: "Set up database migrations for the products table"
+    validations:
+      required: true
+
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: Technical details, context, or implementation notes
+      placeholder: |
+        - Use Alembic for migrations
+        - Include indexes for common queries
+        - Consider foreign key constraints
+    validations:
+      required: false
+
+  - type: textarea
+    id: definition-of-done
+    attributes:
+      label: Definition of Done
+      description: Specific criteria for when this task is complete
+      placeholder: |
+        - [ ] Migration file created
+        - [ ] Migration runs successfully
+        - [ ] Tests pass
+    validations:
+      required: true
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: Other issues, PRs, or external factors this depends on
+      placeholder: |
+        - Depends on #42 (database schema design)
+        - Needs PostgreSQL 14+
+    validations:
+      required: false
+
+  - type: dropdown
+    id: size
+    attributes:
+      label: Estimated Size
+      description: T-shirt size estimate
+      options:
+        - XS (< 1 day)
+        - S (1-2 days)
+        - M (3-5 days)
+        - L (1-2 weeks)
+        - XL (> 2 weeks)
+    validations:
+      required: false
