@@ -151,3 +151,77 @@ make check                   # Run lint + test
 - Third-party libraries (SQLAlchemy, Pydantic)
 - Framework internals (FastAPI routing)
 - Database driver behavior
+
+## GitHub Issue Management
+
+This project uses GitHub Projects with issue types and parent-child relationships.
+
+### Issue Types
+
+| Type | ID | Use For |
+|------|-----|---------|
+| Feature | `IT_kwDODvcDnc4Bz3xm` | High-level features (epics) |
+| User Story | `IT_kwDODvcDnc4B1Xfg` | Individual user stories under features |
+
+### Project
+
+- **Project Name**: Product Configurator
+- **Project Number**: 2
+- **Owner**: ABladeLabs
+
+### Creating Issues with Issue Types
+
+Use GraphQL to create issues with proper issue types:
+
+```bash
+# Create a Feature
+gh api graphql -f query='
+mutation {
+  createIssue(input: {
+    repositoryId: "R_kgDOQtah4Q"
+    title: "Feature Title"
+    body: "## Feature: Feature Title\n\nDescription here."
+    issueTypeId: "IT_kwDODvcDnc4Bz3xm"
+  }) {
+    issue { id number title }
+  }
+}'
+
+# Create a User Story with parent
+gh api graphql -f query='
+mutation {
+  createIssue(input: {
+    repositoryId: "R_kgDOQtah4Q"
+    title: "As a [role], I can [action]"
+    body: "## User Story\n\nDescription.\n\n### Acceptance Criteria\n- [ ] Criteria 1"
+    issueTypeId: "IT_kwDODvcDnc4B1Xfg"
+    parentIssueId: "PARENT_ISSUE_ID"
+  }) {
+    issue { id number title parent { number } }
+  }
+}'
+```
+
+### Adding Issues to the Project
+
+After creating an issue, add it to the project:
+
+```bash
+gh project item-add 2 --owner ABladeLabs --url https://github.com/ABladeLabs/mss-industries-product-configurator/issues/ISSUE_NUMBER
+```
+
+### Reference IDs
+
+| Resource | ID |
+|----------|-----|
+| Repository | `R_kgDOQtah4Q` |
+| Feature Issue Type | `IT_kwDODvcDnc4Bz3xm` |
+| User Story Issue Type | `IT_kwDODvcDnc4B1Xfg` |
+
+### Required Auth Scopes
+
+To manage issues and projects, ensure your GitHub CLI has these scopes:
+
+```bash
+gh auth refresh -s project,read:project
+```
