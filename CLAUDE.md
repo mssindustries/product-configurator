@@ -455,7 +455,15 @@ When an issue spans multiple domains:
 **Tools & Commands:**
 - Docker Compose for local dev
 - Azure CLI for cloud resources
+- Bicep for Azure IaC
 
 **Key Files:**
 - `docker-compose.yml` - local services
 - `.github/workflows/` - CI/CD pipelines
+- `infra/` - Bicep modules and parameter files
+- `docs/naming-conventions.md` - Azure resource naming
+
+**Bicep Guidelines:**
+- Always verify latest API version for each resource type before writing modules
+- Reference: https://learn.microsoft.com/en-us/azure/templates/
+- Follow naming conventions in `docs/naming-conventions.md`
