@@ -101,6 +101,11 @@ Spawn agents for implementation. Use Task tool with `subagent_type`.
 - Independent tasks → run multiple agents in parallel
 - Before merge → run `code-reviewer`
 
+**Code Review Checklist (Frontend):**
+- Check for opportunities to use existing UI components from `components/ui/`
+- Identify repeated UI patterns that should become reusable components
+- Verify design tokens are used instead of hardcoded colors/spacing
+
 ### Browser Automation
 
 Playwright MCP tools are available for UI testing. Key tools: `browser_navigate`, `browser_snapshot`, `browser_click`, `browser_console_messages`.
@@ -407,6 +412,13 @@ When working on an issue, identify the domain and follow the appropriate guidanc
 - React Three Fiber for 3D rendering
 - Tailwind CSS v4 for styling
 - React Router for navigation
+
+**UI Components:**
+When building UI:
+1. First explore existing components in `src/frontend/src/components/ui/`
+2. Use design tokens from `index.css` (colors: primary, neutral, success, warning, danger)
+3. If a pattern repeats 2+ times, extract it to a reusable component
+4. Use CVA (class-variance-authority) for component variants
 
 #### Backend (`src/backend/`)
 
