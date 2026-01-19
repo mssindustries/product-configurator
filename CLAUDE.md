@@ -24,7 +24,7 @@ MSS Industries Product Configurator - A B2B 3D product configurator platform for
 
 ### Infrastructure
 - **Local Dev**: Docker Compose (PostgreSQL, Azurite, FastAPI+Blender)
-- **Deployment**: Azure Static Web Apps (frontend) + Azure Container Instances (backend)
+- **Deployment**: Azure Static Web Apps (frontend) + Azure Container Apps (backend)
 - **3D Format**: GLTF/GLB
 
 ## Plugins & Automation

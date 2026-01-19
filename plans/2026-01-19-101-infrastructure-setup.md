@@ -12,12 +12,13 @@
 
 ```
 Subscription: MSS Industries
-└── Resource Group: rg-mss-configurator-{env}-{region}
-    ├── Static Web App: stapp-mss-configurator-{env}
-    ├── Container Instance: aci-mss-configurator-{env}-{region}
-    ├── Container Registry: acrmssconfigurator{env}  (no hyphens allowed)
-    ├── PostgreSQL Flexible Server: psql-mss-configurator-{env}-{region}
-    └── Storage Account: stmssconfigurator{env}  (no hyphens allowed)
+└── Resource Group: rg-msscfg-{env}-{region}
+    ├── Static Web App: stapp-msscfg-{env}
+    ├── Container Apps Environment: cae-msscfg-{env}-{region}
+    │   └── Container App: ca-msscfg-{env}
+    ├── Container Registry: acrmsscfg{env}{region}  (no hyphens allowed)
+    ├── PostgreSQL Flexible Server: psql-msscfg-{env}-{region}
+    └── Storage Account: stmsscfg{env}{region}  (no hyphens allowed)
 ```
 
 **Environments:** test, prod
@@ -34,7 +35,8 @@ infra/
 ├── modules/
 │   ├── resourceGroup.bicep
 │   ├── staticWebApp.bicep
-│   ├── containerInstance.bicep
+│   ├── containerAppsEnvironment.bicep
+│   ├── containerApp.bicep
 │   ├── containerRegistry.bicep
 │   ├── postgresFlexible.bicep
 │   └── storageAccount.bicep
@@ -59,7 +61,7 @@ docs/
 - Create: `docs/naming-conventions.md`
 
 **Content:**
-- Document naming pattern: `{resource-prefix}-mss-configurator-{env}-{region}`
+- Document naming pattern: `{resource-prefix}-msscfg-{env}-{region}`
 - List all resource types with examples
 - Note Azure naming restrictions (length, allowed characters)
 - Include table of resource abbreviations
@@ -93,7 +95,7 @@ docs/
 **Notes:**
 - ACR names must be alphanumeric (no hyphens)
 - Use Basic SKU for test, Standard for prod
-- Enable admin user for ACI pull access
+- Container App will use managed identity for pull access (AcrPull role)
 
 ---
 
@@ -132,22 +134,31 @@ docs/
 
 ---
 
-## Task 6: Create Bicep Module - Container Instance
+## Task 6: Create Bicep Modules - Container Apps
 
 **Files:**
-- Create: `infra/modules/containerInstance.bicep`
+- Create: `infra/modules/containerAppsEnvironment.bicep`
+- Create: `infra/modules/containerApp.bicep`
 
-**Parameters:**
+**Container Apps Environment Parameters:**
 - `environment`
 - `location`
+
+**Container App Parameters:**
+- `environment`
+- `location`
+- `containerAppsEnvironmentId`
 - `containerRegistryName`
 - `containerRegistryLoginServer`
 - `imageTag`
 
 **Notes:**
+- Container Apps Environment hosts the app (one per resource group)
 - 2 CPU, 4GB memory for FastAPI + Blender
-- Configure environment variables for database connection
-- Public IP with DNS label
+- Scale: min 0, max 1 for test (scale-to-zero)
+- Ingress: external with HTTPS
+- Configure environment variables for database/storage connection
+- Managed identity for ACR pull access
 
 ---
 
@@ -177,8 +188,8 @@ docs/
 
 **Content:**
 - Import all modules
-- Wire up dependencies (ACR -> ACI, Storage -> ACI, PostgreSQL -> ACI)
-- Output connection strings and URLs
+- Wire up dependencies (ACR -> Container App, Storage -> Container App, PostgreSQL -> Container App)
+- Output connection strings and URLs (including Container App FQDN)
 
 ---
 
@@ -221,6 +232,7 @@ az deployment sub what-if --location eastus --template-file infra/main.bicep --p
 
 ## Notes
 
+- **Container Apps**: Chosen over Container Instances for scale-to-zero, built-in HTTPS, and revision-based deployments.
 - **Secrets**: For MVP, admin passwords will be passed as parameters. Production hardening (#123) will add Key Vault integration.
 - **Networking**: For MVP, resources are publicly accessible. Production hardening will add VNet integration.
 - **Deployment**: Actual deployment to Azure is handled in subsequent issues (#104, #107, #109).
