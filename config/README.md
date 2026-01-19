@@ -4,18 +4,25 @@ This directory contains environment configuration templates for the MSS Product 
 
 ## Usage
 
-1. Copy the appropriate `.env.example` file to create your environment file:
-   ```bash
-   # For test environment
-   cp config/test.env.example config/test.env
+### Test Environment (Local Development)
 
-   # For production environment
-   cp config/prod.env.example config/prod.env
+1. Copy the test template to create your local environment file:
+   ```bash
+   cp config/test.env.example config/test.env
    ```
 
 2. Fill in the placeholder values (marked with `<PLACEHOLDER>`) with actual values.
 
 3. Load the environment file before running deployments or scripts.
+
+### Production Environment
+
+**Do not create a local `prod.env` file.** Production secrets are managed through:
+- **Azure Key Vault** - Stores sensitive values (passwords, connection strings)
+- **GitHub Secrets** - Used by CI/CD pipelines
+- **Container App Secrets** - Injected at runtime from Key Vault
+
+The `prod.env.example` file serves as documentation of what variables the production environment requires. These values are configured in Azure, not in local files.
 
 ## Environment Variables
 
@@ -73,10 +80,9 @@ For local development with Docker Compose:
 ```
 config/
   README.md              # This file
-  test.env.example       # Test environment template
-  prod.env.example       # Production environment template
-  test.env               # Your test environment (gitignored)
-  prod.env               # Your production environment (gitignored)
+  test.env.example       # Test environment template (copy to test.env)
+  prod.env.example       # Production environment reference (do not copy)
+  test.env               # Your local test environment (gitignored)
 ```
 
 ## Naming Conventions
