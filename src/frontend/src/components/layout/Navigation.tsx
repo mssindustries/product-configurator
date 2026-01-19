@@ -1,48 +1,30 @@
-import { NavLink } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 export default function Navigation() {
   return (
     <nav className="bg-white shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex space-x-8">
-            <NavLink
-              to="/"
-              className={({ isActive }) =>
-                `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                  isActive
-                    ? 'border-blue-500 text-gray-900'
-                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                }`
-              }
+        <div className="flex items-center h-16">
+          <span className="text-xl font-bold text-gray-900">MSS Industries</span>
+          <Link
+            to="/"
+            className="flex items-center gap-2 ml-6 text-gray-600 hover:text-gray-900 transition-colors"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
             >
-              Home
-            </NavLink>
-            <NavLink
-              to="/configure/cabinet"
-              className={({ isActive }) =>
-                `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                  isActive
-                    ? 'border-blue-500 text-gray-900'
-                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                }`
-              }
-            >
-              Configurator
-            </NavLink>
-            <NavLink
-              to="/saved"
-              className={({ isActive }) =>
-                `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                  isActive
-                    ? 'border-blue-500 text-gray-900'
-                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                }`
-              }
-            >
-              Saved
-            </NavLink>
-          </div>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+              />
+            </svg>
+            <span className="text-sm font-medium">Home</span>
+          </Link>
         </div>
       </div>
     </nav>

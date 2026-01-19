@@ -40,35 +40,45 @@ This project uses Claude Code plugins. Use them proactively, not as a last resor
 | Create commit | `/commit` | Auto-generates message from changes |
 | Commit + PR | `/commit-push-pr` | Full workflow in one step |
 | Review PR | `/code-review` | Structured quality review |
-| Debug issue | `/systematic-debugging` | 4-phase root cause analysis |
-| Write tests first | `/test-driven-development` | RED-GREEN-REFACTOR cycle |
+| Debug issue | `superpowers:systematic-debugging` | 4-phase root cause analysis |
+| Write tests first | `superpowers:test-driven-development` | RED-GREEN-REFACTOR cycle |
 | Backend work | `fastapi-pro` agent | FastAPI endpoints, SQLAlchemy models |
 | Frontend work | `typescript-pro` agent | React components, hooks |
 | Explore code | `Explore` agent | Fast codebase search |
 
-### Slash Commands
+### Skills
 
-Invoke explicitly with `/command-name`. Stored in `.claude/commands/` or as part of a plugin.
+Skills are plugin-provided prompts. Invoke with `/skill-name`. Some require fully qualified names (e.g., `superpowers:brainstorming`).
 
-**Planning:**
-- `/brainstorming` - Refine ideas before implementation (use before any creative work)
-- `/writing-plans` - Create detailed implementation plans with file paths
-- `/feature-dev` - Guided feature development with codebase awareness
+**Planning & Design:**
+| Skill | Invoke As | Description |
+|-------|-----------|-------------|
+| Feature development | `/feature-dev` | Guided workflow with codebase awareness |
+| Frontend design | `/frontend-design` | Create distinctive React UIs |
+| Brainstorming | `superpowers:brainstorming` | Refine ideas before implementation |
+| Writing plans | `superpowers:writing-plans` | Create detailed implementation plans |
 
 **Development:**
-- `/frontend-design` - Create distinctive React UIs (use for `src/frontend/` components)
-- `/test-driven-development` - Write failing test → make it pass → refactor
-- `/python-testing-patterns` - pytest fixtures and testing strategies for `src/backend/`
+| Skill | Invoke As | Description |
+|-------|-----------|-------------|
+| TDD | `superpowers:test-driven-development` | RED → GREEN → REFACTOR cycle |
+| Python testing | `python-development:python-testing-patterns` | pytest fixtures and strategies |
+| Verification | `superpowers:verification-before-completion` | Run tests before claiming done |
+| Systematic debugging | `superpowers:systematic-debugging` | Root cause analysis |
 
 **Git & Review:**
-- `/commit` - Stage changes and create commit with generated message
-- `/commit-push-pr` - Commit, push, and open PR in one command
-- `/code-review` - Review PR for bugs, security, code quality
-- `/clean_gone` - Remove local branches deleted from remote
+| Skill | Invoke As | Description |
+|-------|-----------|-------------|
+| Commit | `/commit` | Stage and commit with generated message |
+| Commit + PR | `/commit-push-pr` | Full workflow in one step |
+| Code review | `/code-review` | Review PR for bugs and quality |
+| Clean branches | `/clean_gone` | Remove local branches deleted from remote |
 
-**Debugging:**
-- `/systematic-debugging` - Root cause analysis before proposing fixes
-- `/verification-before-completion` - Run tests/checks before claiming done
+### Slash Commands
+
+Local commands stored in `.claude/commands/`. Project-specific shortcuts.
+
+- `/create-issue` - Create a GitHub issue with proper issue type and add it to the project
 
 ### Agents
 
@@ -98,10 +108,10 @@ Playwright MCP tools are available for UI testing. Key tools: `browser_navigate`
 ### Workflow Examples
 
 **Adding a New API Endpoint (Backend):**
-1. `/brainstorming` - Clarify requirements
-2. `/writing-plans` - Plan the endpoint, models, tests
+1. `superpowers:brainstorming` - Clarify requirements
+2. `superpowers:writing-plans` - Plan the endpoint, models, tests
 3. Spawn `fastapi-pro` agent - Implement in `src/backend/`
-4. `/verification-before-completion` - Run `make test`
+4. `superpowers:verification-before-completion` - Run `make test`
 5. `/commit-push-pr` - Create PR
 
 **Building a New React Component (Frontend):**
@@ -111,18 +121,18 @@ Playwright MCP tools are available for UI testing. Key tools: `browser_navigate`
 4. `/commit` - Commit changes
 
 **Building a Full-Stack Feature:**
-1. `/brainstorming` - Clarify requirements
-2. `/writing-plans` - Plan both backend and frontend
+1. `superpowers:brainstorming` - Clarify requirements
+2. `superpowers:writing-plans` - Plan both backend and frontend
 3. Spawn `fastapi-pro` agent - Implement API in `src/backend/`
 4. Spawn `typescript-pro` agent - Implement UI in `src/frontend/`
-5. `/verification-before-completion` - Run all tests
+5. `superpowers:verification-before-completion` - Run all tests
 6. `/commit-push-pr` - Create PR
 
 **Fixing a Bug:**
-1. `/systematic-debugging` - Find root cause
-2. `/test-driven-development` - Write failing test
+1. `superpowers:systematic-debugging` - Find root cause
+2. `superpowers:test-driven-development` - Write failing test
 3. Fix the bug
-4. `/verification-before-completion` - Confirm tests pass
+4. `superpowers:verification-before-completion` - Confirm tests pass
 5. `/commit` - Commit the fix
 
 ## Testing

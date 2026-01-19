@@ -1,8 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Layout from './components/layout/Layout'
-import HomePage from './pages/HomePage'
-import ConfiguratorPage from './pages/ConfiguratorPage'
-import SavedPage from './pages/SavedPage'
+import AdminPage from './pages/AdminPage'
+import ClientsPage from './pages/ClientsPage'
 import NotFoundPage from './pages/NotFoundPage'
 
 function App() {
@@ -10,9 +9,8 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Layout />}>
-          <Route index element={<HomePage />} />
-          <Route path="configure/:productId" element={<ConfiguratorPage />} />
-          <Route path="saved" element={<SavedPage />} />
+          <Route index element={<AdminPage />} />
+          <Route path="clients" element={<ClientsPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>

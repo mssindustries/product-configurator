@@ -3,6 +3,9 @@
  */
 
 import type {
+  Client,
+  ClientCreate,
+  ClientListResponse,
   Product,
   ProductCreate,
   ProductListResponse,
@@ -86,6 +89,21 @@ function buildQueryString(params?: PaginationParams): string {
   if (params.limit !== undefined) searchParams.set('limit', String(params.limit));
   const query = searchParams.toString();
   return query ? `?${query}` : '';
+}
+
+// ============================================================================
+// Clients API
+// ============================================================================
+
+export async function getClients(): Promise<ClientListResponse> {
+  return fetchApi<ClientListResponse>('/api/v1/clients');
+}
+
+export async function createClient(data: ClientCreate): Promise<Client> {
+  return fetchApi<Client>('/api/v1/clients', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
 }
 
 // ============================================================================

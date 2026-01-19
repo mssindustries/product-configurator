@@ -11,6 +11,23 @@ export type JobStatus =
   | 'FAILED'
   | 'CANCELLED';
 
+// Client types
+export interface Client {
+  id: string;
+  name: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ClientCreate {
+  name: string;
+}
+
+export interface ClientListResponse {
+  items: Client[];
+  total: number;
+}
+
 // Product types
 export interface Product {
   id: string;

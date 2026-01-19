@@ -13,6 +13,11 @@ from app.schemas.base import (
     PaginatedResponse,
     TimestampSchema,
 )
+from app.schemas.client import (
+    ClientCreate,
+    ClientListResponse,
+    ClientResponse,
+)
 from app.schemas.configuration import (
     ConfigurationCreate,
     ConfigurationListResponse,
@@ -40,6 +45,10 @@ __all__ = [
     "MessageResponse",
     "PaginatedResponse",
     "TimestampSchema",
+    # Client
+    "ClientCreate",
+    "ClientListResponse",
+    "ClientResponse",
     # Product
     "ProductCreate",
     "ProductListResponse",
