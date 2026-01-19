@@ -15,7 +15,7 @@ body:
       description: Brief description of what needs to be done
       placeholder: "Set up database migrations for the products table"
     validations:
-      required: true
+      required: false
 
   - type: textarea
     id: details
@@ -39,7 +39,7 @@ body:
         - [ ] Migration runs successfully
         - [ ] Tests pass
     validations:
-      required: true
+      required: false
 
   - type: textarea
     id: dependencies
