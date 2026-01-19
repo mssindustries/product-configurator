@@ -24,7 +24,7 @@ MSS Industries Product Configurator - A B2B 3D product configurator platform for
 
 ### Infrastructure
 - **Local Dev**: Docker Compose (PostgreSQL, Azurite, FastAPI+Blender)
-- **Deployment**: Azure Static Web Apps (frontend) + Azure Container Instances (backend)
+- **Deployment**: Azure Static Web Apps (frontend) + Azure Container Apps (backend)
 - **3D Format**: GLTF/GLB
 
 ## Plugins & Automation
@@ -455,7 +455,15 @@ When an issue spans multiple domains:
 **Tools & Commands:**
 - Docker Compose for local dev
 - Azure CLI for cloud resources
+- Bicep for Azure IaC
 
 **Key Files:**
 - `docker-compose.yml` - local services
 - `.github/workflows/` - CI/CD pipelines
+- `infra/` - Bicep modules and parameter files
+- `docs/naming-conventions.md` - Azure resource naming
+
+**Bicep Guidelines:**
+- Always verify latest API version for each resource type before writing modules
+- Reference: https://learn.microsoft.com/en-us/azure/templates/
+- Follow naming conventions in `docs/naming-conventions.md`

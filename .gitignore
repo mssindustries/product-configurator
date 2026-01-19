@@ -38,6 +38,10 @@ dist/
 .env.docker
 !.env.docker.example
 
+# Config environment files (exclude actual .env, allow .env.example)
+config/*.env
+!config/*.env.example
+
 # IDE
 .vscode/
 .idea/
