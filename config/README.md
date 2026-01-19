@@ -85,16 +85,3 @@ config/
   test.env               # Your local test environment (gitignored)
 ```
 
-## Naming Conventions
-
-Resource names follow the pattern documented in `docs/naming-conventions.md`:
-
-```
-{resource-prefix}-msscfg-{env}-{region}
-```
-
-Examples:
-- Resource Group: `rg-msscfg-test-eastus`
-- Container App: `ca-msscfg-test-eastus`
-- Storage Account: `stmsscfgtesteastus` (no hyphens)
-- PostgreSQL: `psql-msscfg-test-eastus`
