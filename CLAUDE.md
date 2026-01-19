@@ -210,16 +210,17 @@ This project uses GitHub Projects with issue types and parent-child relationship
 
 | Type | ID | Use For |
 |------|-----|---------|
-| Feature | `IT_kwDODvcDnc4Bz3xm` | High-level features (epics) |
-| User Story | `IT_kwDODvcDnc4B1Xfg` | Individual user stories under features |
-| Task | `IT_kwDODvcDnc4Bz3xk` | A specific piece of work |
-| Bug | `IT_kwDODvcDnc4Bz3xl` | An unexpected problem or behavior |
+| Feature | `IT_kwDOD0FvSc4B1b4O` | High-level features (epics) |
+| Task | `IT_kwDOD0FvSc4B1b4M` | A specific piece of work |
+| Bug | `IT_kwDOD0FvSc4B1b4N` | An unexpected problem or behavior |
+
+> **Note:** User Story type needs to be created in the mssindustries org if needed.
 
 ### Project
 
 - **Project Name**: Product Configurator
-- **Project Number**: 2
-- **Owner**: ABladeLabs
+- **Project Number**: 1
+- **Owner**: mssindustries
 
 ### Creating Issues with Issue Types
 
@@ -233,20 +234,20 @@ mutation {
     repositoryId: "R_kgDOQtah4Q"
     title: "Feature Title"
     body: "## Feature: Feature Title\n\nDescription here."
-    issueTypeId: "IT_kwDODvcDnc4Bz3xm"
+    issueTypeId: "IT_kwDOD0FvSc4B1b4O"
   }) {
     issue { id number title }
   }
 }'
 
-# Create a User Story with parent
+# Create a Task with parent
 gh api graphql -f query='
 mutation {
   createIssue(input: {
     repositoryId: "R_kgDOQtah4Q"
-    title: "As a [role], I can [action]"
-    body: "## User Story\n\nDescription.\n\n### Acceptance Criteria\n- [ ] Criteria 1"
-    issueTypeId: "IT_kwDODvcDnc4B1Xfg"
+    title: "Task title"
+    body: "## Task\n\nDescription.\n\n### Acceptance Criteria\n- [ ] Criteria 1"
+    issueTypeId: "IT_kwDOD0FvSc4B1b4M"
     parentIssueId: "PARENT_ISSUE_ID"
   }) {
     issue { id number title parent { number } }
@@ -259,7 +260,7 @@ mutation {
 After creating an issue, add it to the project:
 
 ```bash
-gh project item-add 2 --owner ABladeLabs --url https://github.com/ABladeLabs/mss-industries-product-configurator/issues/ISSUE_NUMBER
+gh project item-add 1 --owner mssindustries --url https://github.com/mssindustries/product-configurator/issues/ISSUE_NUMBER
 ```
 
 ### Repository ID
