@@ -299,7 +299,7 @@ When triggered:
 2. Begin analysis process
 
 #### In Analysis
-
+Imagine you are a product owner/business analyst and want to provide additional business context to the issue. You leave technical implementation details out of it. 
 When triggered:
 1. **Format the issue** based on its type (User Story, Task, Bug, Feature)
 2. **Validate requirements:**
