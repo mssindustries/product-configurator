@@ -57,7 +57,7 @@ COPY --from=builder --chown=appuser:appuser /app/.venv /app/.venv
 
 # Copy application code
 COPY --chown=appuser:appuser ./app ./app
-COPY --chown=appuser:appuser ./alembic ./alembic
+COPY --chown=appuser:appuser ./migrations ./migrations
 COPY --chown=appuser:appuser ./alembic.ini ./alembic.ini
 
 # Switch to non-root user
