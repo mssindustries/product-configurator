@@ -5,7 +5,7 @@ targetScope = 'subscription'
 param environment string
 
 @description('Azure region for the resource group')
-param location string = 'eastus'
+param location string = 'westus2'
 
 var name = 'rg-msscfg-${environment}-${location}'
 

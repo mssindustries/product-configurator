@@ -3,7 +3,7 @@
 param environment string
 
 @description('Azure region for resource metadata. Static Web Apps are globally distributed.')
-param location string = 'eastus'
+param location string = 'westus2'
 
 // Future use: Configure linked backend for API proxying
 // Currently unused - deployment workflow handles VITE_API_URL at build time

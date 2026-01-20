@@ -13,7 +13,7 @@ targetScope = 'subscription'
 param environment string
 
 @description('Azure region for all resources')
-param location string = 'eastus'
+param location string = 'westus2'
 
 @description('Administrator login name for the PostgreSQL server')
 param postgresAdminLogin string = 'pgadmin'

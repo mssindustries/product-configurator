@@ -3,12 +3,12 @@
 param environment string
 
 @description('Azure region for the resource')
-param location string = 'eastus'
+param location string = 'westus2'
 
 @description('Resource ID of the Container Apps Environment')
 param containerAppsEnvironmentId string
 
-@description('Login server URL for the container registry (e.g., acrmsscfgtesteastus.azurecr.io)')
+@description('Login server URL for the container registry (e.g., acrmsscfgtestwestus2.azurecr.io)')
 param containerRegistryLoginServer string
 
 @description('Docker image tag to deploy')

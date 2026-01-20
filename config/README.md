@@ -31,22 +31,22 @@ The `prod.env.example` file serves as documentation of what variables the produc
 | Variable | Description | Example |
 |----------|-------------|---------|
 | `DATABASE_URL` | PostgreSQL async connection string | `postgresql+asyncpg://user:pass@host:5432/db` |
-| `AZURE_STORAGE_ACCOUNT_NAME` | Storage account name | `stmsscfgtesteastus` |
-| `AZURE_STORAGE_BLOB_ENDPOINT` | Blob service endpoint URL | `https://stmsscfgtesteastus.blob.core.windows.net` |
+| `AZURE_STORAGE_ACCOUNT_NAME` | Storage account name | `stmsscfgtestwestus2` |
+| `AZURE_STORAGE_BLOB_ENDPOINT` | Blob service endpoint URL | `https://stmsscfgtestwestus2.blob.core.windows.net` |
 
 ### Frontend (Vite)
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `VITE_API_URL` | Backend API URL (Container App FQDN) | `https://ca-msscfg-test-eastus.azurecontainerapps.io` |
+| `VITE_API_URL` | Backend API URL (Container App FQDN) | `https://ca-msscfg-test-westus2.azurecontainerapps.io` |
 
 ### Deployment
 
 | Variable | Description | Example |
 |----------|-------------|---------|
 | `AZURE_SUBSCRIPTION_ID` | Azure subscription ID | `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx` |
-| `AZURE_RESOURCE_GROUP` | Resource group name | `rg-msscfg-test-eastus` |
-| `AZURE_LOCATION` | Azure region | `eastus` |
+| `AZURE_RESOURCE_GROUP` | Resource group name | `rg-msscfg-test-westus2` |
+| `AZURE_LOCATION` | Azure region | `westus2` |
 | `AZURE_ENVIRONMENT` | Environment name | `test` or `prod` |
 
 ## Secrets Management

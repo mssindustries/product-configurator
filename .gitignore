@@ -67,3 +67,6 @@ Thumbs.db
 # Blender
 *.blend1
 *.blend2
+
+# Azure Bicep local parameter files (contain secrets)
+*.local.bicepparam

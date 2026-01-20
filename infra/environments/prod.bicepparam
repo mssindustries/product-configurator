@@ -1,7 +1,7 @@
 using '../main.bicep'
 
 param environment = 'prod'
-param location = 'eastus'
+param location = 'westus2'
 param postgresAdminLogin = 'pgadmin'
 // postgresAdminPassword must be provided at deployment time via:
 //   az deployment sub create ... --parameters postgresAdminPassword=<value>

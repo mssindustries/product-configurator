@@ -3,7 +3,7 @@
 param environment string
 
 @description('Azure region for the resource')
-param location string = 'eastus'
+param location string = 'westus2'
 
 @description('Administrator login name for the PostgreSQL server')
 param administratorLogin string
