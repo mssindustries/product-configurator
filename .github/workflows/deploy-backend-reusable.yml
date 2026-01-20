@@ -1,0 +1,211 @@
+name: Deploy Backend (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: 'Environment to deploy to (test or prod)'
+        required: true
+        type: string
+      region:
+        description: 'Azure region'
+        required: false
+        type: string
+        default: 'westus2'
+      image-tag:
+        description: 'Docker image tag to use (if empty, generates from SHA)'
+        required: false
+        type: string
+        default: ''
+      skip-build:
+        description: 'Skip build step (use existing image)'
+        required: false
+        type: boolean
+        default: false
+    secrets:
+      ACR_USERNAME:
+        required: true
+      ACR_PASSWORD:
+        required: true
+      AZURE_CREDENTIALS:
+        required: true
+      DATABASE_URL:
+        required: false
+      AZURE_STORAGE_CONNECTION_STRING:
+        required: false
+    outputs:
+      image-tag:
+        description: 'The Docker image tag that was deployed'
+        value: ${{ jobs.deploy.outputs.image-tag }}
+      image-full:
+        description: 'The full Docker image URL'
+        value: ${{ jobs.deploy.outputs.image-full }}
+
+jobs:
+  deploy:
+    name: Deploy to ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    outputs:
+      image-tag: ${{ steps.meta.outputs.image-tag }}
+      image-full: ${{ steps.meta.outputs.image-full }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Generate resource names from environment
+        id: resources
+        run: |
+          ENV="${{ inputs.environment }}"
+          REGION="${{ inputs.region }}"
+
+          # Follow naming conventions from docs/naming-conventions.md
+          # Storage account names: alphanumeric only (no hyphens)
+          REGION_NO_HYPHENS=$(echo "$REGION" | tr -d '-')
+
+          # Generate resource names
+          REGISTRY="acrmsscfg${ENV}${REGION_NO_HYPHENS}.azurecr.io"
+          CONTAINER_APP="ca-msscfg-${ENV}"
+          RESOURCE_GROUP="rg-msscfg-${ENV}-${REGION}"
+
+          echo "registry=${REGISTRY}" >> $GITHUB_OUTPUT
+          echo "container-app=${CONTAINER_APP}" >> $GITHUB_OUTPUT
+          echo "resource-group=${RESOURCE_GROUP}" >> $GITHUB_OUTPUT
+          echo "region=${REGION}" >> $GITHUB_OUTPUT
+
+      - name: Generate image metadata
+        id: meta
+        run: |
+          # Use provided tag or generate from SHA
+          if [ -n "${{ inputs.image-tag }}" ]; then
+            IMAGE_TAG="${{ inputs.image-tag }}"
+          else
+            IMAGE_TAG="${GITHUB_SHA::8}"
+          fi
+
+          IMAGE_NAME="msscfg-backend"
+          IMAGE_FULL="${{ steps.resources.outputs.registry }}/${IMAGE_NAME}:${IMAGE_TAG}"
+
+          echo "image-tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
+          echo "image-name=${IMAGE_NAME}" >> $GITHUB_OUTPUT
+          echo "image-full=${IMAGE_FULL}" >> $GITHUB_OUTPUT
+
+          echo "### Deployment to ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment**: \`${{ inputs.environment }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Image**: \`${IMAGE_FULL}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tag**: \`${IMAGE_TAG}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Registry**: \`${{ steps.resources.outputs.registry }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Container App**: \`${{ steps.resources.outputs.container-app }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Resource Group**: \`${{ steps.resources.outputs.resource-group }}\`" >> $GITHUB_STEP_SUMMARY
+
+      # TODO: Add Azure Container Registry authentication
+      # - name: Login to Azure Container Registry
+      #   uses: azure/docker-login@v1
+      #   with:
+      #     login-server: ${{ steps.resources.outputs.registry }}
+      #     username: ${{ secrets.ACR_USERNAME }}
+      #     password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Set up Docker Buildx
+        if: ${{ !inputs.skip-build }}
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        if: ${{ !inputs.skip-build }}
+        uses: docker/build-push-action@v5
+        with:
+          context: ./src/backend
+          file: ./src/backend/Dockerfile
+          push: false  # TODO: Change to true after ACR authentication is configured
+          tags: |
+            ${{ steps.meta.outputs.image-full }}
+            ${{ steps.resources.outputs.registry }}/${{ steps.meta.outputs.image-name }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            DEV_MODE=false
+          provenance: false
+
+      # TODO: Add container image scanning (only on build)
+      # - name: Scan image for vulnerabilities
+      #   if: ${{ !inputs.skip-build }}
+      #   uses: aquasecurity/trivy-action@master
+      #   with:
+      #     image-ref: ${{ steps.meta.outputs.image-full }}
+      #     format: 'sarif'
+      #     output: 'trivy-results.sarif'
+      #     severity: 'CRITICAL,HIGH'
+
+      # TODO: Upload scan results to GitHub Security
+      # - name: Upload Trivy results to GitHub Security
+      #   if: ${{ !inputs.skip-build && always() }}
+      #   uses: github/codeql-action/upload-sarif@v3
+      #   with:
+      #     sarif_file: 'trivy-results.sarif'
+
+      - name: Build summary
+        if: ${{ !inputs.skip-build }}
+        run: |
+          echo "### Build Complete ✅" >> $GITHUB_STEP_SUMMARY
+          echo "Image built successfully and ready for deployment" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Note**: Image push disabled until ACR authentication is configured" >> $GITHUB_STEP_SUMMARY
+
+      - name: Skip build notice
+        if: ${{ inputs.skip-build }}
+        run: |
+          echo "### Build Skipped" >> $GITHUB_STEP_SUMMARY
+          echo "Using existing image: \`${{ steps.meta.outputs.image-full }}\`" >> $GITHUB_STEP_SUMMARY
+
+      # TODO: Add Azure authentication
+      # - name: Login to Azure
+      #   uses: azure/login@v1
+      #   with:
+      #     creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # TODO: Add Container Apps deployment
+      # - name: Deploy to Azure Container Apps
+      #   uses: azure/container-apps-deploy-action@v1
+      #   with:
+      #     containerAppName: ${{ steps.resources.outputs.container-app }}
+      #     resourceGroup: ${{ steps.resources.outputs.resource-group }}
+      #     imageToDeploy: ${{ steps.meta.outputs.image-full }}
+      #     environmentVariables: |
+      #       ENVIRONMENT=${{ inputs.environment }}
+      #     # TODO: Add secrets configuration (only if provided)
+      #     # secrets: |
+      #     #   database-url=${{ secrets.DATABASE_URL }}
+      #     #   azure-storage-connection-string=${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+
+      # TODO: Add health check
+      # - name: Health check
+      #   run: |
+      #     APP_URL=$(az containerapp show \
+      #       --name ${{ steps.resources.outputs.container-app }} \
+      #       --resource-group ${{ steps.resources.outputs.resource-group }} \
+      #       --query properties.configuration.ingress.fqdn \
+      #       --output tsv)
+      #
+      #     RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" https://${APP_URL}/health)
+      #
+      #     if [ "$RESPONSE" -eq 200 ]; then
+      #       echo "### Health Check: PASSED ✅" >> $GITHUB_STEP_SUMMARY
+      #       echo "- **Endpoint**: \`https://${APP_URL}/health\`" >> $GITHUB_STEP_SUMMARY
+      #       echo "- **Status Code**: \`${RESPONSE}\`" >> $GITHUB_STEP_SUMMARY
+      #     else
+      #       echo "### Health Check: FAILED ❌" >> $GITHUB_STEP_SUMMARY
+      #       echo "- **Endpoint**: \`https://${APP_URL}/health\`" >> $GITHUB_STEP_SUMMARY
+      #       echo "- **Status Code**: \`${RESPONSE}\`" >> $GITHUB_STEP_SUMMARY
+      #       exit 1
+      #     fi
+
+      - name: Deployment summary
+        run: |
+          echo "### Deployment Status" >> $GITHUB_STEP_SUMMARY
+          echo "**Build**: ${{ inputs.skip-build && '⏭️ Skipped' || '✅ Complete' }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Deploy**: ⏸️ Pending (authentication not configured)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Deployed At**: \`$(date -u +"%Y-%m-%d %H:%M:%S UTC")\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Deployed By**: \`${{ github.actor }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
