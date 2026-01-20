@@ -21,7 +21,7 @@
     },
     "location": {
       "type": "string",
-      "defaultValue": "eastus",
+      "defaultValue": "westus2",
       "metadata": {
         "description": "Azure region for all resources"
       }
@@ -92,7 +92,7 @@
             },
             "location": {
               "type": "string",
-              "defaultValue": "eastus",
+              "defaultValue": "westus2",
               "metadata": {
                 "description": "Azure region for the resource group"
               }
@@ -180,7 +180,7 @@
             },
             "location": {
               "type": "string",
-              "defaultValue": "eastus",
+              "defaultValue": "westus2",
               "metadata": {
                 "description": "Azure region for the resource group"
               }
@@ -285,7 +285,7 @@
             },
             "location": {
               "type": "string",
-              "defaultValue": "eastus",
+              "defaultValue": "westus2",
               "metadata": {
                 "description": "Azure region for the resource"
               }
@@ -433,7 +433,7 @@
             },
             "location": {
               "type": "string",
-              "defaultValue": "eastus",
+              "defaultValue": "westus2",
               "metadata": {
                 "description": "Azure region for the resource"
               }
@@ -566,7 +566,7 @@
             },
             "location": {
               "type": "string",
-              "defaultValue": "eastus",
+              "defaultValue": "westus2",
               "metadata": {
                 "description": "Azure region for the resource"
               }
@@ -683,7 +683,7 @@
             },
             "location": {
               "type": "string",
-              "defaultValue": "eastus",
+              "defaultValue": "westus2",
               "metadata": {
                 "description": "Azure region for the resource"
               }
@@ -697,7 +697,7 @@
             "containerRegistryLoginServer": {
               "type": "string",
               "metadata": {
-                "description": "Login server URL for the container registry (e.g., acrmsscfgtesteastus.azurecr.io)"
+                "description": "Login server URL for the container registry (e.g., acrmsscfgtestwestus2.azurecr.io)"
               }
             },
             "imageTag": {
@@ -888,7 +888,7 @@
             },
             "location": {
               "type": "string",
-              "defaultValue": "eastus",
+              "defaultValue": "westus2",
               "metadata": {
                 "description": "Azure region for resource metadata. Static Web Apps are globally distributed."
               }

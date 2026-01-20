@@ -22,7 +22,7 @@ Subscription: MSS Industries
 ```
 
 **Environments:** test, prod
-**Default Region:** eastus
+**Default Region:** westus2
 
 ---
 
@@ -75,7 +75,7 @@ docs/
 
 **Parameters:**
 - `environment` (test/prod)
-- `location` (default: eastus)
+- `location` (default: westus2)
 
 **Output:**
 - Resource group name
@@ -215,7 +215,7 @@ docs/
 **Commands:**
 ```bash
 az bicep build --file infra/main.bicep
-az deployment sub what-if --location eastus --template-file infra/main.bicep --parameters infra/environments/test.bicepparam
+az deployment sub what-if --location westus2 --template-file infra/main.bicep --parameters infra/environments/test.bicepparam
 ```
 
 ---

@@ -3,7 +3,7 @@
 param environment string
 
 @description('Azure region for the resource')
-param location string = 'eastus'
+param location string = 'westus2'
 
 // Storage account names must be alphanumeric only (no hyphens), 3-24 chars
 var name = 'stmsscfg${environment}${replace(location, '-', '')}'

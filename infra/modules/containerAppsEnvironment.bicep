@@ -3,7 +3,7 @@
 param environment string
 
 @description('Azure region for the resource')
-param location string = 'eastus'
+param location string = 'westus2'
 
 var name = 'cae-msscfg-${environment}-${location}'
 

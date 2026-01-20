@@ -13,7 +13,7 @@ Naming conventions for Azure resources in the MSS Product Configurator project.
 | `resource-prefix` | Azure resource type abbreviation | See table below |
 | `msscfg` | Workload identifier (MSS Configurator) | Fixed |
 | `env` | Environment | `test`, `prod` |
-| `region` | Azure region | `eastus`, `westus2`, etc. |
+| `region` | Azure region | `westus2`, `westus2`, etc. |
 
 ## Resource Prefixes
 
@@ -31,12 +31,12 @@ Naming conventions for Azure resources in the MSS Product Configurator project.
 
 Standard resource (hyphens allowed):
 ```
-psql-msscfg-test-eastus
+psql-msscfg-test-westus2
 ```
 
 Alphanumeric-only resource (no hyphens):
 ```
-stmsscfgtesteastus
+stmsscfgtestwestus2
 ```
 
 ## Notes

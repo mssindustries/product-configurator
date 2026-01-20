@@ -3,7 +3,7 @@
 param environment string
 
 @description('Azure region for the resource group')
-param location string = 'eastus'
+param location string = 'westus2'
 
 // ACR names must be alphanumeric only (no hyphens)
 var name = 'acrmsscfg${environment}${replace(location, '-', '')}'
