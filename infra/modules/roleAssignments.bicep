@@ -34,9 +34,17 @@ resource storageBlobRoleAssignment 'Microsoft.Authorization/roleAssignments@2022
   }
 }
 
-// Reference existing resources to scope the role assignments
-resource containerRegistry 'Microsoft.ContainerRegistry/registries@2025-04-01' existing = {
-  name: last(split(containerRegistryId, '/'))
+// Parse ACR resource ID to extract subscription, resource group, and name
+// Expected format: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}
+var acrIdParts = split(containerRegistryId, '/')
+var acrSubscriptionId = acrIdParts[2]
+var acrResourceGroupName = acrIdParts[4]
+var acrName = acrIdParts[8]
+
+// Reference existing ACR - supports cross-resource-group reference
+resource containerRegistry 'Microsoft.ContainerRegistry/registries@2025-11-01' existing = {
+  name: acrName
+  scope: resourceGroup(acrSubscriptionId, acrResourceGroupName)
 }
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2024-01-01' existing = {

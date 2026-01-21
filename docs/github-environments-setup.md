@@ -26,12 +26,12 @@ In your GitHub repository:
 
 **Environment Secrets:**
 ```
-ACR_USERNAME          # Azure Container Registry username
-ACR_PASSWORD          # Azure Container Registry password
-AZURE_CREDENTIALS     # Azure service principal credentials (JSON)
+AZURE_CREDENTIALS     # Azure service principal for Container Apps deployment
 DATABASE_URL          # PostgreSQL connection string
-AZURE_STORAGE_CONNECTION_STRING  # (Optional - if not using managed identity)
+AZURE_STORAGE_CONNECTION_STRING  # Optional
 ```
+
+**Note:** ACR authentication uses shared repository-level secrets.
 
 **Environment Variables:**
 ```
@@ -49,17 +49,37 @@ AZURE_STORAGE_CONNECTION_STRING  # (Optional - if not using managed identity)
 
 **Environment Secrets:**
 ```
-ACR_USERNAME          # Azure Container Registry username (prod)
-ACR_PASSWORD          # Azure Container Registry password (prod)
-AZURE_CREDENTIALS     # Azure service principal credentials (JSON, prod)
-DATABASE_URL          # PostgreSQL connection string (prod)
-AZURE_STORAGE_CONNECTION_STRING  # (Optional - if not using managed identity)
+AZURE_CREDENTIALS     # Azure service principal for Container Apps deployment
+DATABASE_URL          # PostgreSQL connection string
+AZURE_STORAGE_CONNECTION_STRING  # Optional
 ```
+
+**Note:** ACR authentication uses shared repository-level secrets.
 
 **Environment Variables:**
 ```
 (None required - resource names are set dynamically in workflow)
 ```
+
+## Repository-Level Secrets (Shared ACR)
+
+Create service principal with AcrPush role:
+
+```bash
+ACR_NAME="acrmsscfgsharedwestus2"
+SP_NAME="sp-msscfg-github-acr"
+ACR_ID=$(az acr show --name $ACR_NAME --query id --output tsv)
+
+az ad sp create-for-rbac \
+  --name $SP_NAME \
+  --role AcrPush \
+  --scopes $ACR_ID
+```
+
+Add these to GitHub repository secrets:
+- SHARED_ACR_USERNAME (appId)
+- SHARED_ACR_PASSWORD (password)
+- SHARED_ACR_LOGIN_SERVER (acrmsscfgsharedwestus2.azurecr.io)
 
 ## Secret Values
 
@@ -181,10 +201,12 @@ After configuring environments:
 
 The workflow automatically selects resource names based on the environment:
 
-| Environment | Registry | Container App | Resource Group |
-|-------------|----------|---------------|----------------|
-| `test` | `acrmsscfgtestwestus2.azurecr.io` | `ca-msscfg-test` | `rg-msscfg-test-westus2` |
-| `prod` | `acrmsscfgprodwestus2.azurecr.io` | `ca-msscfg-prod` | `rg-msscfg-prod-westus2` |
+| Environment | Registry (Shared) | Container App | Resource Group |
+|-------------|-------------------|---------------|----------------|
+| `test` | `acrmsscfgsharedwestus2.azurecr.io` | `ca-msscfg-test` | `rg-msscfg-test-westus2` |
+| `prod` | `acrmsscfgsharedwestus2.azurecr.io` | `ca-msscfg-prod` | `rg-msscfg-prod-westus2` |
+
+**Note:** Both environments use the same shared ACR.
 
 ## Troubleshooting
 

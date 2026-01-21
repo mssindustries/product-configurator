@@ -2,7 +2,7 @@
 param location string = 'westus2'
 
 var name = 'acrmsscfgshared${replace(location, '-', '')}'
-var sku = 'Standard'  // Upgraded from Basic
+var sku = 'Basic'  // Upgraded from Basic
 
 resource containerRegistry 'Microsoft.ContainerRegistry/registries@2025-11-01' = {
   name: name

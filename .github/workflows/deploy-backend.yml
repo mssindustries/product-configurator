@@ -17,6 +17,9 @@ on:
           - prod
         default: test
 
+# This workflow uses a shared ACR (acrmsscfgsharedwestus2.azurecr.io) for both test and prod.
+# The image is built once in the test job and reused in the prod job.
+
 jobs:
   deploy-test:
     name: Deploy to Test
