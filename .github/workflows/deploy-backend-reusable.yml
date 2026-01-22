@@ -22,12 +22,13 @@ on:
         required: false
         type: boolean
         default: false
+    environment:
+      SHARED_ACR_LOGIN_SERVER:
+        required: true
     secrets:
       SHARED_ACR_USERNAME:
         required: true
       SHARED_ACR_PASSWORD:
-        required: true
-      SHARED_ACR_LOGIN_SERVER:
         required: true
       AZURE_CREDENTIALS:
         required: true
