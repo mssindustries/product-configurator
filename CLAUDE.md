@@ -464,7 +464,7 @@ When an issue spans multiple domains:
 - `docs/naming-conventions.md` - Azure resource naming
 
 **Bicep Guidelines:**
-- Always verify latest API version for each resource type before writing modules
+- Always verify latest stable API version for each resource type before writing modules
 - Follow naming conventions in `docs/naming-conventions.md`
 
 **Finding Latest API Versions:**
