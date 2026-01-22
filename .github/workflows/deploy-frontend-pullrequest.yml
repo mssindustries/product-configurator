@@ -15,6 +15,10 @@ on:
       - 'src/frontend/**'
       - '.github/workflows/deploy-frontend*.yml'
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   deploy:
     uses: ./.github/workflows/deploy-frontend-reusable.yml
