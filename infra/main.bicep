@@ -22,9 +22,6 @@ param postgresAdminLogin string = 'pgadmin'
 @description('Administrator password for the PostgreSQL server')
 param postgresAdminPassword string
 
-@description('Docker image tag to deploy for the backend Container App')
-param imageTag string = 'latest'
-
 // Resource group name must be calculated at compile time for module scoping
 // Uses the same naming convention as modules/resourceGroup.bicep
 var resourceGroupName = 'rg-msscfg-${environment}-${location}'
@@ -113,7 +110,6 @@ module containerApp 'modules/containerApp.bicep' = {
     location: location
     containerAppsEnvironmentId: containerAppsEnvironment.outputs.id
     containerRegistryLoginServer: sharedContainerRegistry.outputs.loginServer
-    imageTag: imageTag
     postgresHost: postgresFlexible.outputs.fqdn
     postgresUser: postgresAdminLogin
     postgresPassword: postgresAdminPassword
@@ -122,15 +118,29 @@ module containerApp 'modules/containerApp.bicep' = {
   }
 }
 
+// ============================================================================
+// Role Assignments
+// ============================================================================
 // Role assignments for Container App managed identity
 // Must be deployed after Container App to get its principal ID
-module roleAssignments 'modules/roleAssignments.bicep' = {
-  name: 'deploy-roleAssignments'
+
+// ACR role assignment - deployed to shared resource group
+module acrRoleAssignment 'modules/containerRegistryRoleAssignment.bicep' = {
+  name: 'deploy-acrRoleAssignment'
+  scope: az.resourceGroup(sharedResourceGroupName)
+  params: {
+    acrName: 'acrmsscfgshared${replace(location, '-', '')}'
+    containerAppPrincipalId: containerApp.outputs.principalId
+  }
+}
+
+// Storage role assignment - deployed to environment resource group
+module storageRoleAssignment 'modules/storageAccountRoleAssignment.bicep' = {
+  name: 'deploy-storageRoleAssignment'
   scope: az.resourceGroup(resourceGroupName)
   params: {
+    storageAccountName: storageAccount.outputs.name
     containerAppPrincipalId: containerApp.outputs.principalId
-    containerRegistryId: sharedContainerRegistry.outputs.id
-    storageAccountId: storageAccount.outputs.id
   }
 }
 

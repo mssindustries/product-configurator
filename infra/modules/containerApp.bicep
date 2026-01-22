@@ -11,9 +11,6 @@ param containerAppsEnvironmentId string
 @description('Login server URL for the container registry (e.g., acrmsscfgtestwestus2.azurecr.io)')
 param containerRegistryLoginServer string
 
-@description('Docker image tag to deploy')
-param imageTag string = 'latest'
-
 @description('FQDN of the PostgreSQL Flexible Server')
 param postgresHost string
 
@@ -32,7 +29,9 @@ param storageBlobEndpoint string
 
 // Container App names: max 32 chars, per naming-conventions.md ca- prefix, no region suffix
 var name = 'ca-msscfg-${environment}'
-var imageName = '${containerRegistryLoginServer}/msscfg-backend:${imageTag}'
+// Use Microsoft placeholder image for initial deployment
+// Update to actual image after role assignments are created: ${containerRegistryLoginServer}/msscfg-backend:latest
+var imageName = 'mcr.microsoft.com/k8se/quickstart:latest'
 var databaseName = 'configurator'
 
 // Construct PostgreSQL connection string for SQLAlchemy async driver
