@@ -5,7 +5,7 @@ param location string = 'westus2'
 
 var name = 'rg-msscfg-shared-${location}'
 
-resource resourceGroup 'Microsoft.Resources/resourceGroups@2025-04-01' = {
+resource resourceGroup 'Microsoft.Resources/resourceGroups@2023-07-01' = {
   name: name
   location: location
   tags: {

@@ -17,7 +17,7 @@ var name = 'stapp-msscfg-${environment}'
 // Free tier is sufficient for MVP (both test and prod)
 var sku = 'Free'
 
-resource staticWebApp 'Microsoft.Web/staticSites@2024-04-01' = {
+resource staticWebApp 'Microsoft.Web/staticSites@2025-03-01' = {
   name: name
   location: location
   sku: {

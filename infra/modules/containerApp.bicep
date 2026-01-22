@@ -39,7 +39,7 @@ var databaseName = 'configurator'
 // Construct PostgreSQL connection string for SQLAlchemy async driver
 var databaseUrl = 'postgresql+asyncpg://${postgresUser}:${postgresPassword}@${postgresHost}:5432/${databaseName}'
 
-resource containerApp 'Microsoft.App/containerApps@2025-01-01' = {
+resource containerApp 'Microsoft.App/containerApps@2026-01-01' = {
   name: name
   location: location
   properties: {

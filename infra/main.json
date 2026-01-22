@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.39.26.7824",
-      "templateHash": "2936018911457169743"
+      "templateHash": "6998017855192937634"
     }
   },
   "parameters": {
@@ -70,7 +70,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.39.26.7824",
-              "templateHash": "9527048567875241699"
+              "templateHash": "11856079962054434440"
             }
           },
           "parameters": {
@@ -98,7 +98,7 @@
           "resources": [
             {
               "type": "Microsoft.Resources/resourceGroups",
-              "apiVersion": "2025-04-01",
+              "apiVersion": "2023-07-01",
               "name": "[variables('name')]",
               "location": "[parameters('location')]",
               "tags": {
@@ -127,7 +127,7 @@
               "metadata": {
                 "description": "The location of the resource group"
               },
-              "value": "[reference(subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('name')), '2025-04-01', 'full').location]"
+              "value": "[reference(subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('name')), '2023-07-01', 'full').location]"
             }
           }
         }
@@ -155,7 +155,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.39.26.7824",
-              "templateHash": "14075738715861289540"
+              "templateHash": "13740773483962369312"
             }
           },
           "parameters": {
@@ -173,7 +173,7 @@
           "resources": [
             {
               "type": "Microsoft.Resources/resourceGroups",
-              "apiVersion": "2025-04-01",
+              "apiVersion": "2023-07-01",
               "name": "[variables('name')]",
               "location": "[parameters('location')]",
               "tags": {
@@ -202,7 +202,7 @@
               "metadata": {
                 "description": "The location of the resource group"
               },
-              "value": "[reference(subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('name')), '2025-04-01', 'full').location]"
+              "value": "[reference(subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('name')), '2023-07-01', 'full').location]"
             }
           }
         }
@@ -473,7 +473,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.39.26.7824",
-              "templateHash": "7910667217159433479"
+              "templateHash": "8854868534008849588"
             }
           },
           "parameters": {
@@ -502,7 +502,7 @@
           "resources": [
             {
               "type": "Microsoft.Storage/storageAccounts",
-              "apiVersion": "2024-01-01",
+              "apiVersion": "2025-06-01",
               "name": "[variables('name')]",
               "location": "[parameters('location')]",
               "kind": "StorageV2",
@@ -523,7 +523,7 @@
             },
             {
               "type": "Microsoft.Storage/storageAccounts/blobServices",
-              "apiVersion": "2024-01-01",
+              "apiVersion": "2025-06-01",
               "name": "[format('{0}/{1}', variables('name'), 'default')]",
               "dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('name'))]"
@@ -531,7 +531,7 @@
             },
             {
               "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
-              "apiVersion": "2024-01-01",
+              "apiVersion": "2025-06-01",
               "name": "[format('{0}/{1}/{2}', variables('name'), 'default', 'templates')]",
               "properties": {
                 "publicAccess": "None"
@@ -542,7 +542,7 @@
             },
             {
               "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
-              "apiVersion": "2024-01-01",
+              "apiVersion": "2025-06-01",
               "name": "[format('{0}/{1}/{2}', variables('name'), 'default', 'generated')]",
               "properties": {
                 "publicAccess": "None"
@@ -572,7 +572,7 @@
               "metadata": {
                 "description": "The primary blob endpoint URL for connection strings"
               },
-              "value": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('name')), '2024-01-01').primaryEndpoints.blob]"
+              "value": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('name')), '2025-06-01').primaryEndpoints.blob]"
             }
           }
         }
@@ -606,7 +606,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.39.26.7824",
-              "templateHash": "5890133350748522850"
+              "templateHash": "14493852186491812854"
             }
           },
           "parameters": {
@@ -634,7 +634,7 @@
           "resources": [
             {
               "type": "Microsoft.App/managedEnvironments",
-              "apiVersion": "2025-07-01",
+              "apiVersion": "2026-01-01",
               "name": "[variables('name')]",
               "location": "[parameters('location')]",
               "properties": {
@@ -699,7 +699,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.39.26.7824",
-              "templateHash": "8958583555410430915"
+              "templateHash": "11564546204058537953"
             }
           },
           "parameters": {
@@ -727,7 +727,7 @@
           "resources": [
             {
               "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
-              "apiVersion": "2023-01-31",
+              "apiVersion": "2024-11-30",
               "name": "[variables('name')]",
               "location": "[parameters('location')]",
               "tags": {
@@ -749,14 +749,14 @@
               "metadata": {
                 "description": "The principal ID (object ID) of the managed identity"
               },
-              "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('name')), '2023-01-31').principalId]"
+              "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('name')), '2024-11-30').principalId]"
             },
             "clientId": {
               "type": "string",
               "metadata": {
                 "description": "The client ID of the managed identity"
               },
-              "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('name')), '2023-01-31').clientId]"
+              "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('name')), '2024-11-30').clientId]"
             },
             "name": {
               "type": "string",
@@ -944,7 +944,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.39.26.7824",
-              "templateHash": "8406285772850976762"
+              "templateHash": "18222650419082027374"
             }
           },
           "parameters": {
@@ -1023,7 +1023,7 @@
           "resources": [
             {
               "type": "Microsoft.App/containerApps",
-              "apiVersion": "2025-01-01",
+              "apiVersion": "2026-01-01",
               "name": "[variables('name')]",
               "location": "[parameters('location')]",
               "properties": {
@@ -1111,7 +1111,7 @@
               "metadata": {
                 "description": "The fully qualified domain name (FQDN) of the Container App"
               },
-              "value": "[reference(resourceId('Microsoft.App/containerApps', variables('name')), '2025-01-01').configuration.ingress.fqdn]"
+              "value": "[reference(resourceId('Microsoft.App/containerApps', variables('name')), '2026-01-01').configuration.ingress.fqdn]"
             }
           }
         }
@@ -1154,7 +1154,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.39.26.7824",
-              "templateHash": "796531498775669158"
+              "templateHash": "17094467524110931582"
             }
           },
           "parameters": {
@@ -1190,7 +1190,7 @@
           "resources": [
             {
               "type": "Microsoft.Web/staticSites",
-              "apiVersion": "2024-04-01",
+              "apiVersion": "2025-03-01",
               "name": "[variables('name')]",
               "location": "[parameters('location')]",
               "sku": {
@@ -1230,7 +1230,7 @@
               "metadata": {
                 "description": "The default hostname (*.azurestaticapps.net URL) of the Static Web App"
               },
-              "value": "[reference(resourceId('Microsoft.Web/staticSites', variables('name')), '2024-04-01').defaultHostname]"
+              "value": "[reference(resourceId('Microsoft.Web/staticSites', variables('name')), '2025-03-01').defaultHostname]"
             }
           }
         }

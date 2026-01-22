@@ -7,7 +7,7 @@ param location string = 'westus2'
 
 var name = 'cae-msscfg-${environment}-${location}'
 
-resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2025-07-01' = {
+resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2026-01-01' = {
   name: name
   location: location
   properties: {
