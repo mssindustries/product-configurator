@@ -22,12 +22,10 @@ param postgresAdminLogin string = 'pgadmin'
 @description('Administrator password for the PostgreSQL server')
 param postgresAdminPassword string
 
-@description('Docker image tag to deploy for the backend Container App')
-param imageTag string = 'latest'
-
 // Resource group name must be calculated at compile time for module scoping
 // Uses the same naming convention as modules/resourceGroup.bicep
 var resourceGroupName = 'rg-msscfg-${environment}-${location}'
+var sharedResourceGroupName = 'rg-msscfg-shared-${location}'
 
 // ============================================================================
 // Resource Group (subscription scope)
@@ -42,21 +40,35 @@ module rg 'modules/resourceGroup.bicep' = {
 }
 
 // ============================================================================
+// Shared Infrastructure (deployed first, used by all environments)
+// ============================================================================
+// These resources are deployed at subscription scope and must exist before
+// environment-specific resources. Deployment order:
+// 1. sharedRg: Shared resource group for cross-environment resources
+// 2. sharedContainerRegistry: Shared ACR used by both test and prod environments
+
+module sharedRg 'modules/sharedResourceGroup.bicep' = {
+  name: 'deploy-sharedResourceGroup'
+  params: {
+    location: location
+  }
+}
+
+module sharedContainerRegistry 'modules/sharedContainerRegistry.bicep' = {
+  name: 'deploy-sharedContainerRegistry'
+  scope: az.resourceGroup(sharedResourceGroupName)
+  dependsOn: [sharedRg]
+  params: {
+    location: location
+  }
+}
+
+// ============================================================================
 // All other resources (resource group scope)
 // ============================================================================
 // Deployed as a nested deployment to the resource group created above.
 // These modules can be deployed in parallel within the resource group.
 // ============================================================================
-
-module containerRegistry 'modules/containerRegistry.bicep' = {
-  name: 'deploy-containerRegistry'
-  scope: az.resourceGroup(resourceGroupName)
-  dependsOn: [rg]
-  params: {
-    environment: environment
-    location: location
-  }
-}
 
 module postgresFlexible 'modules/postgresFlexible.bicep' = {
   name: 'deploy-postgresFlexible'
@@ -90,32 +102,75 @@ module containerAppsEnvironment 'modules/containerAppsEnvironment.bicep' = {
   }
 }
 
+// ============================================================================
+// Managed Identity (deployed before role assignments)
+// ============================================================================
+// User-assigned managed identity for Container App
+// This identity is created independently so role assignments can be created
+// BEFORE the Container App deployment, solving the chicken-and-egg problem
+// with ACR authentication on first deployment.
+
+module managedIdentity 'modules/managedIdentity.bicep' = {
+  name: 'deploy-managedIdentity'
+  scope: az.resourceGroup(resourceGroupName)
+  dependsOn: [rg]
+  params: {
+    environment: environment
+    location: location
+  }
+}
+
+// ============================================================================
+// Role Assignments (deployed before Container App)
+// ============================================================================
+// Role assignments for the user-assigned managed identity
+// These are deployed BEFORE the Container App so permissions exist before
+// the Container App tries to pull images from ACR on first deployment.
+
+// ACR role assignment - deployed to shared resource group
+module acrRoleAssignment 'modules/containerRegistryRoleAssignment.bicep' = {
+  name: 'deploy-acrRoleAssignment'
+  scope: az.resourceGroup(sharedResourceGroupName)
+  params: {
+    acrName: 'acrmsscfgshared${replace(location, '-', '')}'
+    containerAppPrincipalId: managedIdentity.outputs.principalId
+  }
+}
+
+// Storage role assignment - deployed to environment resource group
+module storageRoleAssignment 'modules/storageAccountRoleAssignment.bicep' = {
+  name: 'deploy-storageRoleAssignment'
+  scope: az.resourceGroup(resourceGroupName)
+  params: {
+    storageAccountName: storageAccount.outputs.name
+    containerAppPrincipalId: managedIdentity.outputs.principalId
+  }
+}
+
+// ============================================================================
+// Container App (deployed after role assignments)
+// ============================================================================
+// Container App uses the user-assigned managed identity which already has
+// role assignments in place, allowing it to pull from ACR on first deployment.
+
 module containerApp 'modules/containerApp.bicep' = {
   name: 'deploy-containerApp'
   scope: az.resourceGroup(resourceGroupName)
+  dependsOn: [
+    acrRoleAssignment
+    storageRoleAssignment
+  ]
   params: {
     environment: environment
     location: location
     containerAppsEnvironmentId: containerAppsEnvironment.outputs.id
-    containerRegistryLoginServer: containerRegistry.outputs.loginServer
-    imageTag: imageTag
+    containerRegistryLoginServer: sharedContainerRegistry.outputs.loginServer
+    userAssignedIdentityId: managedIdentity.outputs.id
     postgresHost: postgresFlexible.outputs.fqdn
     postgresUser: postgresAdminLogin
     postgresPassword: postgresAdminPassword
     storageAccountName: storageAccount.outputs.name
     storageBlobEndpoint: storageAccount.outputs.primaryBlobEndpoint
-  }
-}
-
-// Role assignments for Container App managed identity
-// Must be deployed after Container App to get its principal ID
-module roleAssignments 'modules/roleAssignments.bicep' = {
-  name: 'deploy-roleAssignments'
-  scope: az.resourceGroup(resourceGroupName)
-  params: {
-    containerAppPrincipalId: containerApp.outputs.principalId
-    containerRegistryId: containerRegistry.outputs.id
-    storageAccountId: storageAccount.outputs.id
   }
 }
 
@@ -137,7 +192,7 @@ module staticWebApp 'modules/staticWebApp.bicep' = {
 output resourceGroupName string = rg.outputs.name
 
 @description('The login server URL for the container registry')
-output containerRegistryLoginServer string = containerRegistry.outputs.loginServer
+output containerRegistryLoginServer string = sharedContainerRegistry.outputs.loginServer
 
 @description('The FQDN of the PostgreSQL Flexible Server')
 output postgresHost string = postgresFlexible.outputs.fqdn

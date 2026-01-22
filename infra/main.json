@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.39.26.7824",
-      "templateHash": "2922820342373533983"
+      "templateHash": "6998017855192937634"
     }
   },
   "parameters": {
@@ -38,17 +38,11 @@
       "metadata": {
         "description": "Administrator password for the PostgreSQL server"
       }
-    },
-    "imageTag": {
-      "type": "string",
-      "defaultValue": "latest",
-      "metadata": {
-        "description": "Docker image tag to deploy for the backend Container App"
-      }
     }
   },
   "variables": {
-    "resourceGroupName": "[format('rg-msscfg-{0}-{1}', parameters('environment'), parameters('location'))]"
+    "resourceGroupName": "[format('rg-msscfg-{0}-{1}', parameters('environment'), parameters('location'))]",
+    "sharedResourceGroupName": "[format('rg-msscfg-shared-{0}', parameters('location'))]"
   },
   "resources": [
     {
@@ -76,7 +70,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.39.26.7824",
-              "templateHash": "18357791511868355252"
+              "templateHash": "11856079962054434440"
             }
           },
           "parameters": {
@@ -104,7 +98,7 @@
           "resources": [
             {
               "type": "Microsoft.Resources/resourceGroups",
-              "apiVersion": "2025-04-01",
+              "apiVersion": "2023-07-01",
               "name": "[variables('name')]",
               "location": "[parameters('location')]",
               "tags": {
@@ -133,7 +127,7 @@
               "metadata": {
                 "description": "The location of the resource group"
               },
-              "value": "[reference(subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('name')), '2025-04-01', 'full').location]"
+              "value": "[reference(subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('name')), '2023-07-01', 'full').location]"
             }
           }
         }
@@ -142,17 +136,89 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2025-04-01",
-      "name": "deploy-containerRegistry",
-      "resourceGroup": "[variables('resourceGroupName')]",
+      "name": "deploy-sharedResourceGroup",
+      "location": "[deployment().location]",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
         },
         "mode": "Incremental",
         "parameters": {
-          "environment": {
-            "value": "[parameters('environment')]"
+          "location": {
+            "value": "[parameters('location')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.39.26.7824",
+              "templateHash": "13740773483962369312"
+            }
           },
+          "parameters": {
+            "location": {
+              "type": "string",
+              "defaultValue": "westus2",
+              "metadata": {
+                "description": "Azure region for the shared resource group"
+              }
+            }
+          },
+          "variables": {
+            "name": "[format('rg-msscfg-shared-{0}', parameters('location'))]"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Resources/resourceGroups",
+              "apiVersion": "2023-07-01",
+              "name": "[variables('name')]",
+              "location": "[parameters('location')]",
+              "tags": {
+                "environment": "shared",
+                "workload": "msscfg"
+              }
+            }
+          ],
+          "outputs": {
+            "name": {
+              "type": "string",
+              "metadata": {
+                "description": "The name of the resource group"
+              },
+              "value": "[variables('name')]"
+            },
+            "id": {
+              "type": "string",
+              "metadata": {
+                "description": "The resource ID of the resource group"
+              },
+              "value": "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('name'))]"
+            },
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "The location of the resource group"
+              },
+              "value": "[reference(subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('name')), '2023-07-01', 'full').location]"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "deploy-sharedContainerRegistry",
+      "resourceGroup": "[variables('sharedResourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
           "location": {
             "value": "[parameters('location')]"
           }
@@ -164,36 +230,26 @@
             "_generator": {
               "name": "bicep",
               "version": "0.39.26.7824",
-              "templateHash": "7297347469311005129"
+              "templateHash": "9682114924391754686"
             }
           },
           "parameters": {
-            "environment": {
-              "type": "string",
-              "allowedValues": [
-                "test",
-                "prod"
-              ],
-              "metadata": {
-                "description": "Environment name (test, prod)"
-              }
-            },
             "location": {
               "type": "string",
               "defaultValue": "westus2",
               "metadata": {
-                "description": "Azure region for the resource group"
+                "description": "Azure region for the shared container registry"
               }
             }
           },
           "variables": {
-            "name": "[format('acrmsscfg{0}{1}', parameters('environment'), replace(parameters('location'), '-', ''))]",
+            "name": "[format('acrmsscfgshared{0}', replace(parameters('location'), '-', ''))]",
             "sku": "Basic"
           },
           "resources": [
             {
               "type": "Microsoft.ContainerRegistry/registries",
-              "apiVersion": "2025-04-01",
+              "apiVersion": "2025-11-01",
               "name": "[variables('name')]",
               "location": "[parameters('location')]",
               "sku": {
@@ -204,7 +260,7 @@
                 "publicNetworkAccess": "Enabled"
               },
               "tags": {
-                "environment": "[parameters('environment')]",
+                "environment": "shared",
                 "workload": "msscfg"
               }
             }
@@ -229,13 +285,13 @@
               "metadata": {
                 "description": "The login server URL for the container registry"
               },
-              "value": "[reference(resourceId('Microsoft.ContainerRegistry/registries', variables('name')), '2025-04-01').loginServer]"
+              "value": "[reference(resourceId('Microsoft.ContainerRegistry/registries', variables('name')), '2025-11-01').loginServer]"
             }
           }
         }
       },
       "dependsOn": [
-        "[subscriptionResourceId('Microsoft.Resources/deployments', 'deploy-resourceGroup')]"
+        "[subscriptionResourceId('Microsoft.Resources/deployments', 'deploy-sharedResourceGroup')]"
       ]
     },
     {
@@ -269,7 +325,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.39.26.7824",
-              "templateHash": "4456652563139697799"
+              "templateHash": "3223655253808082486"
             }
           },
           "parameters": {
@@ -417,7 +473,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.39.26.7824",
-              "templateHash": "8350614296320420225"
+              "templateHash": "8854868534008849588"
             }
           },
           "parameters": {
@@ -446,7 +502,7 @@
           "resources": [
             {
               "type": "Microsoft.Storage/storageAccounts",
-              "apiVersion": "2024-01-01",
+              "apiVersion": "2025-06-01",
               "name": "[variables('name')]",
               "location": "[parameters('location')]",
               "kind": "StorageV2",
@@ -467,7 +523,7 @@
             },
             {
               "type": "Microsoft.Storage/storageAccounts/blobServices",
-              "apiVersion": "2024-01-01",
+              "apiVersion": "2025-06-01",
               "name": "[format('{0}/{1}', variables('name'), 'default')]",
               "dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('name'))]"
@@ -475,7 +531,7 @@
             },
             {
               "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
-              "apiVersion": "2024-01-01",
+              "apiVersion": "2025-06-01",
               "name": "[format('{0}/{1}/{2}', variables('name'), 'default', 'templates')]",
               "properties": {
                 "publicAccess": "None"
@@ -486,7 +542,7 @@
             },
             {
               "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
-              "apiVersion": "2024-01-01",
+              "apiVersion": "2025-06-01",
               "name": "[format('{0}/{1}/{2}', variables('name'), 'default', 'generated')]",
               "properties": {
                 "publicAccess": "None"
@@ -516,7 +572,7 @@
               "metadata": {
                 "description": "The primary blob endpoint URL for connection strings"
               },
-              "value": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('name')), '2024-01-01').primaryEndpoints.blob]"
+              "value": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('name')), '2025-06-01').primaryEndpoints.blob]"
             }
           }
         }
@@ -550,7 +606,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.39.26.7824",
-              "templateHash": "17554137613312579989"
+              "templateHash": "14493852186491812854"
             }
           },
           "parameters": {
@@ -578,7 +634,7 @@
           "resources": [
             {
               "type": "Microsoft.App/managedEnvironments",
-              "apiVersion": "2024-03-01",
+              "apiVersion": "2026-01-01",
               "name": "[variables('name')]",
               "location": "[parameters('location')]",
               "properties": {
@@ -621,6 +677,227 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2025-04-01",
+      "name": "deploy-managedIdentity",
+      "resourceGroup": "[variables('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "environment": {
+            "value": "[parameters('environment')]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.39.26.7824",
+              "templateHash": "11564546204058537953"
+            }
+          },
+          "parameters": {
+            "environment": {
+              "type": "string",
+              "allowedValues": [
+                "test",
+                "prod"
+              ],
+              "metadata": {
+                "description": "Environment name (test, prod)"
+              }
+            },
+            "location": {
+              "type": "string",
+              "defaultValue": "westus2",
+              "metadata": {
+                "description": "Azure region for the managed identity"
+              }
+            }
+          },
+          "variables": {
+            "name": "[format('id-msscfg-{0}-{1}', parameters('environment'), parameters('location'))]"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+              "apiVersion": "2024-11-30",
+              "name": "[variables('name')]",
+              "location": "[parameters('location')]",
+              "tags": {
+                "environment": "[parameters('environment')]",
+                "workload": "msscfg"
+              }
+            }
+          ],
+          "outputs": {
+            "id": {
+              "type": "string",
+              "metadata": {
+                "description": "The resource ID of the managed identity"
+              },
+              "value": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('name'))]"
+            },
+            "principalId": {
+              "type": "string",
+              "metadata": {
+                "description": "The principal ID (object ID) of the managed identity"
+              },
+              "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('name')), '2024-11-30').principalId]"
+            },
+            "clientId": {
+              "type": "string",
+              "metadata": {
+                "description": "The client ID of the managed identity"
+              },
+              "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('name')), '2024-11-30').clientId]"
+            },
+            "name": {
+              "type": "string",
+              "metadata": {
+                "description": "The name of the managed identity"
+              },
+              "value": "[variables('name')]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[subscriptionResourceId('Microsoft.Resources/deployments', 'deploy-resourceGroup')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "deploy-acrRoleAssignment",
+      "resourceGroup": "[variables('sharedResourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "acrName": {
+            "value": "[format('acrmsscfgshared{0}', replace(parameters('location'), '-', ''))]"
+          },
+          "containerAppPrincipalId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'deploy-managedIdentity'), '2025-04-01').outputs.principalId.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.39.26.7824",
+              "templateHash": "10426463055438601307"
+            }
+          },
+          "parameters": {
+            "acrName": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the Container Registry"
+              }
+            },
+            "containerAppPrincipalId": {
+              "type": "string",
+              "metadata": {
+                "description": "Principal ID of the Container App managed identity"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2022-04-01",
+              "scope": "[format('Microsoft.ContainerRegistry/registries/{0}', parameters('acrName'))]",
+              "name": "[guid(resourceId('Microsoft.ContainerRegistry/registries', parameters('acrName')), parameters('containerAppPrincipalId'), subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '7f951dda-4ed3-4680-a7ca-43fe172d538d'))]",
+              "properties": {
+                "principalId": "[parameters('containerAppPrincipalId')]",
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '7f951dda-4ed3-4680-a7ca-43fe172d538d')]",
+                "principalType": "ServicePrincipal"
+              }
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'deploy-managedIdentity')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "deploy-storageRoleAssignment",
+      "resourceGroup": "[variables('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "storageAccountName": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'deploy-storageAccount'), '2025-04-01').outputs.name.value]"
+          },
+          "containerAppPrincipalId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'deploy-managedIdentity'), '2025-04-01').outputs.principalId.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.39.26.7824",
+              "templateHash": "2692654345718904442"
+            }
+          },
+          "parameters": {
+            "storageAccountName": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the Storage Account"
+              }
+            },
+            "containerAppPrincipalId": {
+              "type": "string",
+              "metadata": {
+                "description": "Principal ID of the Container App managed identity"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2022-04-01",
+              "scope": "[format('Microsoft.Storage/storageAccounts/{0}', parameters('storageAccountName'))]",
+              "name": "[guid(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), parameters('containerAppPrincipalId'), subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'))]",
+              "properties": {
+                "principalId": "[parameters('containerAppPrincipalId')]",
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')]",
+                "principalType": "ServicePrincipal"
+              }
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'deploy-managedIdentity')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'deploy-storageAccount')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
       "name": "deploy-containerApp",
       "resourceGroup": "[variables('resourceGroupName')]",
       "properties": {
@@ -639,10 +916,10 @@
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'deploy-containerAppsEnvironment'), '2025-04-01').outputs.id.value]"
           },
           "containerRegistryLoginServer": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'deploy-containerRegistry'), '2025-04-01').outputs.loginServer.value]"
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('sharedResourceGroupName')), 'Microsoft.Resources/deployments', 'deploy-sharedContainerRegistry'), '2025-04-01').outputs.loginServer.value]"
           },
-          "imageTag": {
-            "value": "[parameters('imageTag')]"
+          "userAssignedIdentityId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'deploy-managedIdentity'), '2025-04-01').outputs.id.value]"
           },
           "postgresHost": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'deploy-postgresFlexible'), '2025-04-01').outputs.fqdn.value]"
@@ -667,7 +944,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.39.26.7824",
-              "templateHash": "498768453872686499"
+              "templateHash": "18222650419082027374"
             }
           },
           "parameters": {
@@ -700,11 +977,10 @@
                 "description": "Login server URL for the container registry (e.g., acrmsscfgtestwestus2.azurecr.io)"
               }
             },
-            "imageTag": {
+            "userAssignedIdentityId": {
               "type": "string",
-              "defaultValue": "latest",
               "metadata": {
-                "description": "Docker image tag to deploy"
+                "description": "Resource ID of the user-assigned managed identity"
               }
             },
             "postgresHost": {
@@ -740,14 +1016,14 @@
           },
           "variables": {
             "name": "[format('ca-msscfg-{0}', parameters('environment'))]",
-            "imageName": "[format('{0}/msscfg-backend:{1}', parameters('containerRegistryLoginServer'), parameters('imageTag'))]",
+            "imageName": "[format('{0}/msscfg-backend:latest', parameters('containerRegistryLoginServer'))]",
             "databaseName": "configurator",
             "databaseUrl": "[format('postgresql+asyncpg://{0}:{1}@{2}:5432/{3}', parameters('postgresUser'), parameters('postgresPassword'), parameters('postgresHost'), variables('databaseName'))]"
           },
           "resources": [
             {
               "type": "Microsoft.App/containerApps",
-              "apiVersion": "2024-03-01",
+              "apiVersion": "2026-01-01",
               "name": "[variables('name')]",
               "location": "[parameters('location')]",
               "properties": {
@@ -768,7 +1044,7 @@
                   "registries": [
                     {
                       "server": "[parameters('containerRegistryLoginServer')]",
-                      "identity": "system"
+                      "identity": "[parameters('userAssignedIdentityId')]"
                     }
                   ]
                 },
@@ -804,7 +1080,10 @@
                 }
               },
               "identity": {
-                "type": "SystemAssigned"
+                "type": "UserAssigned",
+                "userAssignedIdentities": {
+                  "[format('{0}', parameters('userAssignedIdentityId'))]": {}
+                }
               },
               "tags": {
                 "environment": "[parameters('environment')]",
@@ -832,16 +1111,19 @@
               "metadata": {
                 "description": "The fully qualified domain name (FQDN) of the Container App"
               },
-              "value": "[reference(resourceId('Microsoft.App/containerApps', variables('name')), '2024-03-01').configuration.ingress.fqdn]"
+              "value": "[reference(resourceId('Microsoft.App/containerApps', variables('name')), '2026-01-01').configuration.ingress.fqdn]"
             }
           }
         }
       },
       "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('sharedResourceGroupName')), 'Microsoft.Resources/deployments', 'deploy-acrRoleAssignment')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'deploy-containerAppsEnvironment')]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'deploy-containerRegistry')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'deploy-managedIdentity')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'deploy-postgresFlexible')]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'deploy-storageAccount')]"
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('sharedResourceGroupName')), 'Microsoft.Resources/deployments', 'deploy-sharedContainerRegistry')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'deploy-storageAccount')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'deploy-storageRoleAssignment')]"
       ]
     },
     {
@@ -872,7 +1154,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.39.26.7824",
-              "templateHash": "7957103872362169813"
+              "templateHash": "17094467524110931582"
             }
           },
           "parameters": {
@@ -908,7 +1190,7 @@
           "resources": [
             {
               "type": "Microsoft.Web/staticSites",
-              "apiVersion": "2024-04-01",
+              "apiVersion": "2025-03-01",
               "name": "[variables('name')]",
               "location": "[parameters('location')]",
               "sku": {
@@ -948,7 +1230,7 @@
               "metadata": {
                 "description": "The default hostname (*.azurestaticapps.net URL) of the Static Web App"
               },
-              "value": "[reference(resourceId('Microsoft.Web/staticSites', variables('name')), '2024-04-01').defaultHostname]"
+              "value": "[reference(resourceId('Microsoft.Web/staticSites', variables('name')), '2025-03-01').defaultHostname]"
             }
           }
         }
@@ -971,7 +1253,7 @@
       "metadata": {
         "description": "The login server URL for the container registry"
       },
-      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'deploy-containerRegistry'), '2025-04-01').outputs.loginServer.value]"
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('sharedResourceGroupName')), 'Microsoft.Resources/deployments', 'deploy-sharedContainerRegistry'), '2025-04-01').outputs.loginServer.value]"
     },
     "postgresHost": {
       "type": "string",

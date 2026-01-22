@@ -11,8 +11,8 @@ param containerAppsEnvironmentId string
 @description('Login server URL for the container registry (e.g., acrmsscfgtestwestus2.azurecr.io)')
 param containerRegistryLoginServer string
 
-@description('Docker image tag to deploy')
-param imageTag string = 'latest'
+@description('Resource ID of the user-assigned managed identity')
+param userAssignedIdentityId string
 
 @description('FQDN of the PostgreSQL Flexible Server')
 param postgresHost string
@@ -32,13 +32,14 @@ param storageBlobEndpoint string
 
 // Container App names: max 32 chars, per naming-conventions.md ca- prefix, no region suffix
 var name = 'ca-msscfg-${environment}'
-var imageName = '${containerRegistryLoginServer}/msscfg-backend:${imageTag}'
+// Use actual backend image from shared ACR
+var imageName = '${containerRegistryLoginServer}/msscfg-backend:latest'
 var databaseName = 'configurator'
 
 // Construct PostgreSQL connection string for SQLAlchemy async driver
 var databaseUrl = 'postgresql+asyncpg://${postgresUser}:${postgresPassword}@${postgresHost}:5432/${databaseName}'
 
-resource containerApp 'Microsoft.App/containerApps@2025-01-01' = {
+resource containerApp 'Microsoft.App/containerApps@2026-01-01' = {
   name: name
   location: location
   properties: {
@@ -59,8 +60,9 @@ resource containerApp 'Microsoft.App/containerApps@2025-01-01' = {
       registries: [
         {
           server: containerRegistryLoginServer
-          // Using managed identity for ACR pull (requires AcrPull role assignment)
-          identity: 'system'
+          // Using user-assigned managed identity for ACR pull
+          // Role assignment is created before Container App deployment
+          identity: userAssignedIdentityId
         }
       ]
     }
@@ -96,7 +98,10 @@ resource containerApp 'Microsoft.App/containerApps@2025-01-01' = {
     }
   }
   identity: {
-    type: 'SystemAssigned'
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${userAssignedIdentityId}': {}
+    }
   }
   tags: {
     environment: environment
@@ -112,6 +117,3 @@ output id string = containerApp.id
 
 @description('The fully qualified domain name (FQDN) of the Container App')
 output fqdn string = containerApp.properties.configuration.ingress.fqdn
-
-@description('The principal ID of the Container App system-assigned managed identity')
-output principalId string = containerApp.identity.principalId

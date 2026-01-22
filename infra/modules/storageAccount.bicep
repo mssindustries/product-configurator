@@ -11,7 +11,7 @@ var name = 'stmsscfg${environment}${replace(location, '-', '')}'
 // Standard_LRS is sufficient for both test and prod (cost-effective for blob storage)
 var sku = 'Standard_LRS'
 
-resource storageAccount 'Microsoft.Storage/storageAccounts@2024-01-01' = {
+resource storageAccount 'Microsoft.Storage/storageAccounts@2025-06-01' = {
   name: name
   location: location
   kind: 'StorageV2'
@@ -31,12 +31,12 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2024-01-01' = {
   }
 }
 
-resource blobServices 'Microsoft.Storage/storageAccounts/blobServices@2024-01-01' = {
+resource blobServices 'Microsoft.Storage/storageAccounts/blobServices@2025-06-01' = {
   parent: storageAccount
   name: 'default'
 }
 
-resource templatesContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2024-01-01' = {
+resource templatesContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2025-06-01' = {
   parent: blobServices
   name: 'templates'
   properties: {
@@ -44,7 +44,7 @@ resource templatesContainer 'Microsoft.Storage/storageAccounts/blobServices/cont
   }
 }
 
-resource generatedContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2024-01-01' = {
+resource generatedContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2025-06-01' = {
   parent: blobServices
   name: 'generated'
   properties: {

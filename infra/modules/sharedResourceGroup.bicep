@@ -1,19 +1,15 @@
 targetScope = 'subscription'
 
-@description('Environment name (test, prod)')
-@allowed(['test', 'prod'])
-param environment string
-
-@description('Azure region for the resource group')
+@description('Azure region for the shared resource group')
 param location string = 'westus2'
 
-var name = 'rg-msscfg-${environment}-${location}'
+var name = 'rg-msscfg-shared-${location}'
 
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2023-07-01' = {
   name: name
   location: location
   tags: {
-    environment: environment
+    environment: 'shared'
     workload: 'msscfg'
   }
 }

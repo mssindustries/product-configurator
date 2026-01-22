@@ -1,17 +1,10 @@
-@description('Environment name (test, prod)')
-@allowed(['test', 'prod'])
-param environment string
-
-@description('Azure region for the resource group')
+@description('Azure region for the shared container registry')
 param location string = 'westus2'
 
-// ACR names must be alphanumeric only (no hyphens)
-var name = 'acrmsscfg${environment}${replace(location, '-', '')}'
+var name = 'acrmsscfgshared${replace(location, '-', '')}'
+var sku = 'Basic'  // Upgraded from Basic
 
-// Basic SKU is sufficient for single-app workloads
-var sku = 'Basic'
-
-resource containerRegistry 'Microsoft.ContainerRegistry/registries@2025-04-01' = {
+resource containerRegistry 'Microsoft.ContainerRegistry/registries@2025-11-01' = {
   name: name
   location: location
   sku: {
@@ -19,10 +12,12 @@ resource containerRegistry 'Microsoft.ContainerRegistry/registries@2025-04-01' =
   }
   properties: {
     adminUserEnabled: false
+    // Public access enabled for GitHub Actions workflows
+    // Authentication still required via managed identity or service principal
     publicNetworkAccess: 'Enabled'
   }
   tags: {
-    environment: environment
+    environment: 'shared'
     workload: 'msscfg'
   }
 }
