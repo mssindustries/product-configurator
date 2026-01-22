@@ -47,8 +47,8 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: ${{ github.event_name == 'pull_request' && github.event.action == 'closed' && 'close' || 'upload' }}
-          app_location: "src/frontend"
-          output_location: "dist"
+          app_location: "src/frontend/dist"
+          skip_app_build: true
           api_location: ""
 
       - name: Deployment summary
