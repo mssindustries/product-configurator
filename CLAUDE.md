@@ -465,5 +465,28 @@ When an issue spans multiple domains:
 
 **Bicep Guidelines:**
 - Always verify latest API version for each resource type before writing modules
-- Reference: https://learn.microsoft.com/en-us/azure/templates/
 - Follow naming conventions in `docs/naming-conventions.md`
+
+**Finding Latest API Versions:**
+```bash
+# Get available API versions for a resource type (newest first)
+az provider show \
+  --namespace <PROVIDER> \
+  --query "resourceTypes[?resourceType=='<TYPE>'].apiVersions | [0]" \
+  --out table
+
+# Examples:
+az provider show --namespace Microsoft.ContainerRegistry --query "resourceTypes[?resourceType=='registries'].apiVersions | [0]" --out table
+az provider show --namespace Microsoft.App --query "resourceTypes[?resourceType=='containerApps'].apiVersions | [0]" --out table
+az provider show --namespace Microsoft.ManagedIdentity --query "resourceTypes[?resourceType=='userAssignedIdentities'].apiVersions | [0]" --out table
+```
+
+**Common Resource Providers:**
+- `Microsoft.ContainerRegistry` - Container registries
+- `Microsoft.App` - Container Apps
+- `Microsoft.Storage` - Storage accounts
+- `Microsoft.DBforPostgreSQL` - PostgreSQL servers
+- `Microsoft.ManagedIdentity` - Managed identities
+- `Microsoft.Web` - Static Web Apps
+
+**Reference:** https://learn.microsoft.com/en-us/azure/templates/
