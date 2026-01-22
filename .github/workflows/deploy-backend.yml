@@ -6,39 +6,43 @@ on:
     paths:
       - 'src/backend/**'
       - '.github/workflows/deploy-backend*.yml'
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'src/backend/**'
+      - '.github/workflows/deploy-backend*.yml'
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Environment to deploy to (test always runs, prod only from main)'
-        required: false
+        description: 'Environment to deploy to (test or prod)'
+        required: true
         type: choice
         options:
           - test
           - prod
         default: test
 
-# This workflow uses a shared ACR (acrmsscfgsharedwestus2.azurecr.io) for both test and prod.
-# The image is built once in the test job and reused in the prod job.
-
 jobs:
   deploy-test:
-    name: Deploy to Test
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    uses: ./.github/workflows/deploy-backend-reusable.yml
+    with:
+      environment: ${{ inputs.environment || 'test' }}
+      region: westus2
+      skip-build: false
+    secrets:
+      SHARED_ACR_USERNAME: ${{ secrets.SHARED_ACR_USERNAME }}
+      SHARED_ACR_PASSWORD: ${{ secrets.SHARED_ACR_PASSWORD }}
+      AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+
+  deploy-pr:
+    if: github.event_name == 'pull_request'
     uses: ./.github/workflows/deploy-backend-reusable.yml
     with:
       environment: test
       region: westus2
       skip-build: false
-    secrets: inherit
-
-  deploy-prod:
-    name: Deploy to Production
-    needs: deploy-test
-    # Only run for main branch (automatic on push or manual dispatch from main)
-    if: github.ref == 'refs/heads/main'
-    uses: ./.github/workflows/deploy-backend-reusable.yml
-    with:
-      environment: prod
-      region: westus2
-      image-tag: ${{ needs.deploy-test.outputs.image-tag }}  # Reuse image from test
-      skip-build: true  # Don't rebuild, use test image
-    secrets: inherit
+    secrets:
+      SHARED_ACR_USERNAME: ${{ secrets.SHARED_ACR_USERNAME }}
+      SHARED_ACR_PASSWORD: ${{ secrets.SHARED_ACR_PASSWORD }}
+      AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
