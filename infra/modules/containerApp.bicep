@@ -29,9 +29,8 @@ param storageBlobEndpoint string
 
 // Container App names: max 32 chars, per naming-conventions.md ca- prefix, no region suffix
 var name = 'ca-msscfg-${environment}'
-// Use Microsoft placeholder image for initial deployment
-// Update to actual image after role assignments are created: ${containerRegistryLoginServer}/msscfg-backend:latest
-var imageName = 'mcr.microsoft.com/k8se/quickstart:latest'
+// Use actual backend image from shared ACR
+var imageName = '${containerRegistryLoginServer}/msscfg-backend:latest'
 var databaseName = 'configurator'
 
 // Construct PostgreSQL connection string for SQLAlchemy async driver
