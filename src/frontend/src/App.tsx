@@ -1,4 +1,4 @@
-// Test deployment
+// Test PR preview URL comment
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Layout from './components/layout/Layout'
 import AdminPage from './pages/AdminPage'
