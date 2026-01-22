@@ -1,0 +1,25 @@
+# Deploy Frontend - Pull Requests
+#
+# Triggers:
+#   - Pull request opened, updated, synchronized, or closed
+#
+# Deploys to: Test environment only (creates PR preview environments)
+# Related workflow: deploy-frontend-main.yml (main branch deploys)
+
+name: Deploy Frontend (Pull Request)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    paths:
+      - 'src/frontend/**'
+      - '.github/workflows/deploy-frontend*.yml'
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/deploy-frontend-reusable.yml
+    with:
+      environment: test
+      is-preview: true
+    secrets:
+      AZURE_STATIC_WEB_APPS_API_TOKEN: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
