@@ -102,27 +102,30 @@ module containerAppsEnvironment 'modules/containerAppsEnvironment.bicep' = {
   }
 }
 
-module containerApp 'modules/containerApp.bicep' = {
-  name: 'deploy-containerApp'
+// ============================================================================
+// Managed Identity (deployed before role assignments)
+// ============================================================================
+// User-assigned managed identity for Container App
+// This identity is created independently so role assignments can be created
+// BEFORE the Container App deployment, solving the chicken-and-egg problem
+// with ACR authentication on first deployment.
+
+module managedIdentity 'modules/managedIdentity.bicep' = {
+  name: 'deploy-managedIdentity'
   scope: az.resourceGroup(resourceGroupName)
+  dependsOn: [rg]
   params: {
     environment: environment
     location: location
-    containerAppsEnvironmentId: containerAppsEnvironment.outputs.id
-    containerRegistryLoginServer: sharedContainerRegistry.outputs.loginServer
-    postgresHost: postgresFlexible.outputs.fqdn
-    postgresUser: postgresAdminLogin
-    postgresPassword: postgresAdminPassword
-    storageAccountName: storageAccount.outputs.name
-    storageBlobEndpoint: storageAccount.outputs.primaryBlobEndpoint
   }
 }
 
 // ============================================================================
-// Role Assignments
+// Role Assignments (deployed before Container App)
 // ============================================================================
-// Role assignments for Container App managed identity
-// Must be deployed after Container App to get its principal ID
+// Role assignments for the user-assigned managed identity
+// These are deployed BEFORE the Container App so permissions exist before
+// the Container App tries to pull images from ACR on first deployment.
 
 // ACR role assignment - deployed to shared resource group
 module acrRoleAssignment 'modules/containerRegistryRoleAssignment.bicep' = {
@@ -130,7 +133,7 @@ module acrRoleAssignment 'modules/containerRegistryRoleAssignment.bicep' = {
   scope: az.resourceGroup(sharedResourceGroupName)
   params: {
     acrName: 'acrmsscfgshared${replace(location, '-', '')}'
-    containerAppPrincipalId: containerApp.outputs.principalId
+    containerAppPrincipalId: managedIdentity.outputs.principalId
   }
 }
 
@@ -140,7 +143,34 @@ module storageRoleAssignment 'modules/storageAccountRoleAssignment.bicep' = {
   scope: az.resourceGroup(resourceGroupName)
   params: {
     storageAccountName: storageAccount.outputs.name
-    containerAppPrincipalId: containerApp.outputs.principalId
+    containerAppPrincipalId: managedIdentity.outputs.principalId
+  }
+}
+
+// ============================================================================
+// Container App (deployed after role assignments)
+// ============================================================================
+// Container App uses the user-assigned managed identity which already has
+// role assignments in place, allowing it to pull from ACR on first deployment.
+
+module containerApp 'modules/containerApp.bicep' = {
+  name: 'deploy-containerApp'
+  scope: az.resourceGroup(resourceGroupName)
+  dependsOn: [
+    acrRoleAssignment
+    storageRoleAssignment
+  ]
+  params: {
+    environment: environment
+    location: location
+    containerAppsEnvironmentId: containerAppsEnvironment.outputs.id
+    containerRegistryLoginServer: sharedContainerRegistry.outputs.loginServer
+    userAssignedIdentityId: managedIdentity.outputs.id
+    postgresHost: postgresFlexible.outputs.fqdn
+    postgresUser: postgresAdminLogin
+    postgresPassword: postgresAdminPassword
+    storageAccountName: storageAccount.outputs.name
+    storageBlobEndpoint: storageAccount.outputs.primaryBlobEndpoint
   }
 }
 

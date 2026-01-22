@@ -6,6 +6,30 @@ This document explains how to configure GitHub environments for the MSS Product 
 
 The backend deployment workflow (`.github/workflows/deploy-backend.yml`) uses GitHub environments to manage deployments to `test` and `prod` environments with different credentials and protection rules.
 
+## Infrastructure Architecture
+
+### User-Assigned Managed Identity Pattern
+
+The infrastructure uses **user-assigned managed identities** to solve the chicken-and-egg problem with Container Apps and ACR authentication on fresh deployments:
+
+**Deployment Order:**
+1. **User-Assigned Identity** - Created first as an independent resource
+2. **Role Assignments** - Granted before Container App deployment:
+   - `AcrPull` role on shared ACR
+   - `Storage Blob Data Contributor` role on Storage Account
+3. **Container App** - Deployed with pre-configured identity that already has permissions
+
+**Benefits:**
+- Works on fresh deployments (e.g., deploying prod from scratch)
+- No chicken-and-egg problem with ACR authentication
+- No temporary admin credentials needed
+- Fully managed identity authentication
+- Production-ready Azure best practice
+
+**Resources:**
+- User-Assigned Identity: `id-msscfg-{environment}-{location}`
+- Container App: Uses the user-assigned identity, not system-assigned
+
 ## Environment Configuration
 
 ### 1. Create Environments
@@ -98,15 +122,18 @@ az acr credential show --name acrmsscfgtestwestus2
 
 **Option 2: Service Principal (Recommended)**
 ```bash
-# Create service principal with AcrPush role
+# Create service principal with AcrPush role on SHARED ACR
 az ad sp create-for-rbac \
-  --name "msscfg-github-acr-test" \
+  --name "msscfg-github-acr-shared" \
   --role AcrPush \
-  --scopes /subscriptions/<SUBSCRIPTION_ID>/resourceGroups/rg-msscfg-test-westus2/providers/Microsoft.ContainerRegistry/registries/acrmsscfgtestwestus2
+  --scopes /subscriptions/<SUBSCRIPTION_ID>/resourceGroups/rg-msscfg-shared-westus2/providers/Microsoft.ContainerRegistry/registries/acrmsscfgsharedwestus2
 
-# Use appId as ACR_USERNAME
-# Use password as ACR_PASSWORD
+# Use appId as SHARED_ACR_USERNAME
+# Use password as SHARED_ACR_PASSWORD
+# The login server is: acrmsscfgsharedwestus2.azurecr.io
 ```
+
+**Note:** The shared ACR is used by both test and prod environments, so only one service principal is needed for both.
 
 ### AZURE_CREDENTIALS
 

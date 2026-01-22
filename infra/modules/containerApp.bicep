@@ -11,6 +11,9 @@ param containerAppsEnvironmentId string
 @description('Login server URL for the container registry (e.g., acrmsscfgtestwestus2.azurecr.io)')
 param containerRegistryLoginServer string
 
+@description('Resource ID of the user-assigned managed identity')
+param userAssignedIdentityId string
+
 @description('FQDN of the PostgreSQL Flexible Server')
 param postgresHost string
 
@@ -57,8 +60,9 @@ resource containerApp 'Microsoft.App/containerApps@2025-01-01' = {
       registries: [
         {
           server: containerRegistryLoginServer
-          // Using managed identity for ACR pull (requires AcrPull role assignment)
-          identity: 'system'
+          // Using user-assigned managed identity for ACR pull
+          // Role assignment is created before Container App deployment
+          identity: userAssignedIdentityId
         }
       ]
     }
@@ -94,7 +98,10 @@ resource containerApp 'Microsoft.App/containerApps@2025-01-01' = {
     }
   }
   identity: {
-    type: 'SystemAssigned'
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${userAssignedIdentityId}': {}
+    }
   }
   tags: {
     environment: environment
@@ -110,6 +117,3 @@ output id string = containerApp.id
 
 @description('The fully qualified domain name (FQDN) of the Container App')
 output fqdn string = containerApp.properties.configuration.ingress.fqdn
-
-@description('The principal ID of the Container App system-assigned managed identity')
-output principalId string = containerApp.identity.principalId
