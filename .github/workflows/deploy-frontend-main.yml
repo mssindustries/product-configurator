@@ -29,7 +29,7 @@ jobs:
   deploy:
     uses: ./.github/workflows/deploy-frontend-reusable.yml
     with:
-      environment: ${{ inputs.environment || 'test' }}
+      environment: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'test' }}
       is-preview: false
     secrets:
       AZURE_STATIC_WEB_APPS_API_TOKEN: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
