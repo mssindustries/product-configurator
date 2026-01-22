@@ -63,7 +63,7 @@ jobs:
           REGION="${{ inputs.region }}"
 
           # Use shared ACR for all environments
-          REGISTRY="${{ secrets.SHARED_ACR_LOGIN_SERVER }}"
+          REGISTRY="${{ env.SHARED_ACR_LOGIN_SERVER }}"
           CONTAINER_APP="ca-msscfg-${ENV}"
           RESOURCE_GROUP="rg-msscfg-${ENV}-${REGION}"
 
@@ -100,7 +100,7 @@ jobs:
       - name: Login to Azure Container Registry
         uses: azure/docker-login@v1
         with:
-          login-server: ${{ secrets.SHARED_ACR_LOGIN_SERVER }}
+          login-server: ${{ env.SHARED_ACR_LOGIN_SERVER }}
           username: ${{ secrets.SHARED_ACR_USERNAME }}
           password: ${{ secrets.SHARED_ACR_PASSWORD }}
 
@@ -146,7 +146,7 @@ jobs:
         run: |
           echo "### Build Complete ✅" >> $GITHUB_STEP_SUMMARY
           echo "Image built and pushed to shared ACR" >> $GITHUB_STEP_SUMMARY
-          echo "- **Registry**: \`${{ secrets.SHARED_ACR_LOGIN_SERVER }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Registry**: \`${{ env.SHARED_ACR_LOGIN_SERVER }}\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Skip build notice
         if: ${{ inputs.skip-build }}
