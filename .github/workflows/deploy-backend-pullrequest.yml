@@ -1,28 +1,80 @@
-# Deploy Backend - Pull Requests
+# Backend Pull Request Workflow
 #
-# Triggers:
-#   - Pull request opened, updated, or synchronized
+# Pipeline: Test → Build → Deploy
+# - Test: Runs linting and unit tests
+# - Build: Builds Docker image, tags as pr-<number>, pushes to ACR
+# - Deploy: Deploys tested image to test Container Apps environment
 #
-# Deploys to: Test environment only (no prod access)
-# Related workflow: deploy-backend-main.yml (main branch deploys)
+# Image tag example: pr-130 (overwrites on subsequent commits to same PR)
 
-name: Deploy Backend (Pull Request)
+name: Backend (Pull Request)
 
 on:
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
       - 'src/backend/**'
+      - '.github/workflows/backend*.yml'
       - '.github/workflows/deploy-backend*.yml'
+      - '.github/workflows/build-backend-reusable.yml'
 
 jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/backend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Cache uv dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/uv
+            src/backend/.venv
+          key: ${{ runner.os }}-uv-${{ hashFiles('src/backend/uv.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-uv-
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Install dependencies
+        run: make install
+
+      - name: Lint
+        run: make lint
+
+      - name: Test
+        run: make test-ci
+
+  build:
+    name: Build
+    needs: test
+    uses: ./.github/workflows/build-backend-reusable.yml
+    with:
+      tag: pr-${{ github.event.pull_request.number }}
+    secrets:
+      SHARED_ACR_USERNAME: ${{ secrets.SHARED_ACR_USERNAME }}
+      SHARED_ACR_PASSWORD: ${{ secrets.SHARED_ACR_PASSWORD }}
+
   deploy:
+    name: Deploy to Test
+    needs: build
+    if: github.event.pull_request.draft == false
     uses: ./.github/workflows/deploy-backend-reusable.yml
     with:
       environment: test
       region: westus2
-      skip-build: false
+      image_tag: ${{ needs.build.outputs.image_tag }}
     secrets:
-      SHARED_ACR_USERNAME: ${{ secrets.SHARED_ACR_USERNAME }}
-      SHARED_ACR_PASSWORD: ${{ secrets.SHARED_ACR_PASSWORD }}
       AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
