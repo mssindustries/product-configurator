@@ -9,11 +9,6 @@
 
 name: Backend (Pull Request)
 
-permissions:
-  contents: read
-  actions: write  # Required for GitHub Actions cache in build workflow
-  pull-requests: read  # Required to read PR info
-
 on:
   pull_request:
     types: [opened, synchronize, reopened]
