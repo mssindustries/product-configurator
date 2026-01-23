@@ -43,7 +43,7 @@ jobs:
       - name: Generate image metadata
         id: meta
         run: |
-          IMAGE_FULL="${SHARED_ACR_LOGIN_SERVER}/msscfg-backend:${{ inputs.tag }}"
+          IMAGE_FULL="${{ env.SHARED_ACR_LOGIN_SERVER }}/msscfg-backend:${{ inputs.tag }}"
           echo "image-full=${IMAGE_FULL}" >> $GITHUB_OUTPUT
           echo "### Docker Image Built" >> $GITHUB_STEP_SUMMARY
           echo "- **Image:** \`${IMAGE_FULL}\`" >> $GITHUB_STEP_SUMMARY
