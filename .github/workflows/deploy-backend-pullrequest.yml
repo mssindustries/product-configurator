@@ -9,6 +9,11 @@
 
 name: Backend (Pull Request)
 
+permissions:
+  contents: read
+  actions: write  # Required for GitHub Actions cache in build workflow
+  pull-requests: read  # Required to read PR info
+
 on:
   pull_request:
     types: [opened, synchronize, reopened]
@@ -60,9 +65,6 @@ jobs:
   build:
     name: Build
     needs: test
-    permissions:
-      contents: read
-      actions: write  # Required for GitHub Actions cache in reusable workflow
     uses: ./.github/workflows/build-backend-reusable.yml
     with:
       tag: pr-${{ github.event.pull_request.number }}
