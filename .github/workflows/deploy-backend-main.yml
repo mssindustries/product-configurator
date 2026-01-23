@@ -26,13 +26,22 @@ on:
         default: test
 
 jobs:
+  build:
+    name: Build
+    uses: ./.github/workflows/build-backend-reusable.yml
+    with:
+      tag: sha-${{ github.sha }}
+    secrets:
+      SHARED_ACR_USERNAME: ${{ secrets.SHARED_ACR_USERNAME }}
+      SHARED_ACR_PASSWORD: ${{ secrets.SHARED_ACR_PASSWORD }}
+
   deploy:
+    name: Deploy
+    needs: build
     uses: ./.github/workflows/deploy-backend-reusable.yml
     with:
       environment: ${{ (github.event_name == 'workflow_dispatch' && inputs.environment) || 'test' }}
       region: westus2
-      skip-build: false
+      image_tag: ${{ needs.build.outputs.image_tag }}
     secrets:
-      SHARED_ACR_USERNAME: ${{ secrets.SHARED_ACR_USERNAME }}
-      SHARED_ACR_PASSWORD: ${{ secrets.SHARED_ACR_PASSWORD }}
       AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
