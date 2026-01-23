@@ -21,9 +21,6 @@ jobs:
   build:
     name: Build and Push
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      actions: write  # Required for GitHub Actions cache
     env:
       SHARED_ACR_LOGIN_SERVER: acrmsscfgsharedwestus2.azurecr.io
     outputs:

@@ -60,6 +60,9 @@ jobs:
   build:
     name: Build
     needs: test
+    permissions:
+      contents: read
+      actions: write  # Required for GitHub Actions cache in reusable workflow
     uses: ./.github/workflows/build-backend-reusable.yml
     with:
       tag: pr-${{ github.event.pull_request.number }}
