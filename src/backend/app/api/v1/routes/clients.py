@@ -4,6 +4,7 @@ Clients API endpoints.
 Provides operations for managing clients:
 - GET /api/v1/clients - List all clients
 - POST /api/v1/clients - Create new client
+- PATCH /api/v1/clients/{client_id}/toggle-status - Toggle client enabled status
 """
 
 from fastapi import APIRouter, HTTPException, status
@@ -41,6 +42,7 @@ async def list_clients(
         ClientResponse(
             id=str(client.id),
             name=client.name,
+            enabled=client.enabled,
             created_at=client.created_at,
             updated_at=client.updated_at,
         )
@@ -89,6 +91,50 @@ async def create_client(
     return ClientResponse(
         id=str(client.id),
         name=client.name,
+        enabled=client.enabled,
+        created_at=client.created_at,
+        updated_at=client.updated_at,
+    )
+
+
+@router.patch("/{client_id}/toggle-status", response_model=ClientResponse)
+async def toggle_client_status(
+    client_id: str,
+    db: DbSession,
+) -> ClientResponse:
+    """
+    Toggle client enabled status.
+
+    Args:
+        client_id: The UUID of the client to toggle
+
+    Returns:
+        ClientResponse with the updated client details.
+
+    Raises:
+        HTTPException 404: Client not found.
+    """
+    # Fetch the client
+    stmt = select(Client).where(Client.id == client_id)
+    result = await db.execute(stmt)
+    client = result.scalar_one_or_none()
+
+    if not client:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Client with id '{client_id}' not found",
+        )
+
+    # Toggle the enabled status
+    client.enabled = not client.enabled
+
+    await db.commit()
+    await db.refresh(client)
+
+    return ClientResponse(
+        id=str(client.id),
+        name=client.name,
+        enabled=client.enabled,
         created_at=client.created_at,
         updated_at=client.updated_at,
     )

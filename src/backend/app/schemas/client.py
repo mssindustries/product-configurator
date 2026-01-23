@@ -13,6 +13,7 @@ class ClientBase(BaseSchema):
     """Base client schema with shared fields."""
 
     name: str = Field(..., min_length=1, max_length=255)
+    enabled: bool = True
 
 
 class ClientCreate(ClientBase):

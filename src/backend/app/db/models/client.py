@@ -4,7 +4,7 @@ Client model - Business customer account.
 
 from typing import TYPE_CHECKING
 
-from sqlalchemy import String
+from sqlalchemy import Boolean, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.models.base import BaseModel
@@ -21,6 +21,7 @@ class Client(BaseModel):
     Attributes:
         id: UUID primary key
         name: Business name
+        enabled: Whether the client is enabled
         created_at: Creation timestamp
         updated_at: Last update timestamp
     """
@@ -28,6 +29,7 @@ class Client(BaseModel):
     __tablename__ = "clients"
 
     name: Mapped[str] = mapped_column(String(255), nullable=False)
+    enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="true")
 
     # Relationships
     products: Mapped[list["Product"]] = relationship(

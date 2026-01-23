@@ -68,3 +68,51 @@ async def test_create_client_empty_name(client: AsyncClient):
     """Returns 422 for empty name."""
     response = await client.post("/api/v1/clients", json={"name": ""})
     assert response.status_code == 422
+
+
+async def test_client_has_enabled_field_default_true(client: AsyncClient, sample_client_data: dict):
+    """New clients are enabled by default."""
+    response = await client.post("/api/v1/clients", json=sample_client_data)
+    assert response.status_code == 201
+    data = response.json()
+    assert data["enabled"] is True
+
+
+async def test_toggle_client_status_enabled_to_disabled(client: AsyncClient, sample_client_data: dict):
+    """Toggles client from enabled to disabled."""
+    # Create a client (enabled by default)
+    create_response = await client.post("/api/v1/clients", json=sample_client_data)
+    assert create_response.status_code == 201
+    client_id = create_response.json()["id"]
+    assert create_response.json()["enabled"] is True
+
+    # Toggle status to disabled
+    toggle_response = await client.patch(f"/api/v1/clients/{client_id}/toggle-status")
+    assert toggle_response.status_code == 200
+    data = toggle_response.json()
+    assert data["enabled"] is False
+    assert data["id"] == client_id
+
+
+async def test_toggle_client_status_disabled_to_enabled(client: AsyncClient, sample_client_data: dict):
+    """Toggles client from disabled to enabled."""
+    # Create a client
+    create_response = await client.post("/api/v1/clients", json=sample_client_data)
+    client_id = create_response.json()["id"]
+
+    # Toggle to disabled
+    await client.patch(f"/api/v1/clients/{client_id}/toggle-status")
+
+    # Toggle back to enabled
+    toggle_response = await client.patch(f"/api/v1/clients/{client_id}/toggle-status")
+    assert toggle_response.status_code == 200
+    data = toggle_response.json()
+    assert data["enabled"] is True
+
+
+async def test_toggle_client_status_not_found(client: AsyncClient):
+    """Returns 404 when client not found."""
+    fake_id = "00000000-0000-0000-0000-000000000000"
+    response = await client.patch(f"/api/v1/clients/{fake_id}/toggle-status")
+    assert response.status_code == 404
+    assert "not found" in response.json()["detail"].lower()
