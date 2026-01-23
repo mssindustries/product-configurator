@@ -1,0 +1,63 @@
+name: Build Backend (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        description: 'Image tag (e.g., pr-130, sha-abc123)'
+        required: true
+        type: string
+    secrets:
+      SHARED_ACR_USERNAME:
+        required: true
+      SHARED_ACR_PASSWORD:
+        required: true
+    outputs:
+      image_tag:
+        description: 'Full image tag with registry'
+        value: ${{ jobs.build.outputs.image_tag }}
+
+jobs:
+  build:
+    name: Build and Push
+    runs-on: ubuntu-latest
+    env:
+      SHARED_ACR_LOGIN_SERVER: acrmsscfgsharedwestus2.azurecr.io
+    outputs:
+      image_tag: ${{ steps.meta.outputs.image-full }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to ACR
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ env.SHARED_ACR_LOGIN_SERVER }}
+          username: ${{ secrets.SHARED_ACR_USERNAME }}
+          password: ${{ secrets.SHARED_ACR_PASSWORD }}
+
+      - name: Generate image metadata
+        id: meta
+        run: |
+          IMAGE_FULL="${{ env.SHARED_ACR_LOGIN_SERVER }}/msscfg-backend:${{ inputs.tag }}"
+          echo "image-full=${IMAGE_FULL}" >> $GITHUB_OUTPUT
+          echo "### Docker Image Built" >> $GITHUB_STEP_SUMMARY
+          echo "- **Image:** \`${IMAGE_FULL}\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: ./src/backend
+          file: ./src/backend/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.image-full }}
+          # TODO: Re-enable GitHub Actions cache when permissions issue is resolved
+          # cache-from: type=gha
+          # cache-to: type=gha,mode=max
+          build-args: |
+            DEV_MODE=false
+          provenance: false
