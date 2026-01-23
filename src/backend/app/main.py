@@ -1,5 +1,6 @@
 """
 FastAPI application entry point.
+Test backend PR workflow quality gates.
 """
 
 from contextlib import asynccontextmanager
