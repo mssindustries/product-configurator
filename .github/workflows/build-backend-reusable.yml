@@ -55,8 +55,6 @@ jobs:
           file: ./src/backend/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.image-full }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
           build-args: |
             DEV_MODE=false
           provenance: false
