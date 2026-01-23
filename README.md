@@ -12,50 +12,47 @@
 
 ### Branch Naming Guidelines
 
-Use the following patterns for branch names:
+**Issue-based work:**
+```
+issue/{number}-description
+```
+All feature development, bugs, and tasks tied to GitHub issues.
 
-**Feature branches:**
-```
-feature/short-description
-```
-For new features or enhancements. Examples:
-- `feature/pr-workflow-quality-gates`
-- `feature/frontend-deployment-workflow`
+Examples:
+- `issue/101-infrastructure-setup`
+- `issue/95-theming-system`
 
-**Backend-specific work:**
+**Experiments and testing:**
 ```
-backend/short-description
+test/description
 ```
-For backend-only changes. Examples:
-- `backend/container-deployment-workflows`
-- `backend/api-optimization`
+Proof-of-concepts, workflow testing, trying things out.
 
-**Infrastructure work:**
-```
-infrastructure/short-description
-```
-For infrastructure and deployment changes. Examples:
-- `infrastructure/deploy-azure-test-environment`
-- `infrastructure/add-monitoring`
-
-**Test/experimental branches:**
-```
-test/short-description
-```
-For testing workflows, proof-of-concepts, or experiments. Examples:
+Examples:
 - `test/backend-pr-workflow`
-- `test/pr-preview-url-comment`
+- `test/new-caching-strategy`
 
-**Issue-based branches:**
+**Hotfixes:**
 ```
-{issue-number}-short-description
+fix/description
 ```
-When working directly on a GitHub issue. Examples:
-- `101-infrastructure-setup`
-- `95-set-up-consistent-themingstyling-system-with-cva`
+Urgent fixes that need to go directly to main.
+
+Examples:
+- `fix/critical-security-patch`
+- `fix/production-outage`
+
+**Non-feature work:**
+```
+chore/description
+```
+Documentation, configuration, cleanup, refactoring.
+
+Examples:
+- `chore/update-dependencies`
+- `chore/cleanup-old-migrations`
 
 **Guidelines:**
 - Use kebab-case (lowercase with hyphens)
-- Keep descriptions concise but clear
-- Prefix clearly indicates the scope/domain
-- Delete branches after merging
+- Keep descriptions concise (2-4 words)
+- Delete branches after merging (use `/clean_gone`)

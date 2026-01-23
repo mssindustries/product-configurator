@@ -493,49 +493,12 @@ az provider show --namespace Microsoft.ManagedIdentity --query "resourceTypes[?r
 
 ## Branch Naming Guidelines
 
-Use consistent branch naming patterns to indicate the scope and purpose of the work.
+See the [Branch Naming Guidelines in README.md](README.md#branch-naming-guidelines) for the current branch naming conventions.
 
-### Patterns
+**Quick summary:**
+- `issue/{number}-description` - issue-based work
+- `test/description` - experiments and testing
+- `fix/description` - hotfixes
+- `chore/description` - non-feature work
 
-**Feature branches:**
-```
-feature/short-description
-```
-For new features or enhancements.
-- Examples: `feature/pr-workflow-quality-gates`, `feature/frontend-deployment-workflow`
-
-**Backend-specific work:**
-```
-backend/short-description
-```
-For backend-only changes.
-- Examples: `backend/container-deployment-workflows`, `backend/api-optimization`
-
-**Infrastructure work:**
-```
-infrastructure/short-description
-```
-For infrastructure and deployment changes.
-- Examples: `infrastructure/deploy-azure-test-environment`, `infrastructure/add-monitoring`
-
-**Test/experimental branches:**
-```
-test/short-description
-```
-For testing workflows, proof-of-concepts, or experiments.
-- Examples: `test/backend-pr-workflow`, `test/pr-preview-url-comment`
-
-**Issue-based branches:**
-```
-{issue-number}-short-description
-```
-When working directly on a GitHub issue.
-- Examples: `101-infrastructure-setup`, `95-set-up-consistent-themingstyling-system-with-cva`
-
-### Guidelines
-
-- Use kebab-case (lowercase with hyphens)
-- Keep descriptions concise but clear (2-5 words)
-- Prefix clearly indicates the scope/domain
-- Delete branches after merging (use `/clean_gone` to clean up)
-- For Claude GitHub Action branches, the format is: `claude/issue-{number}-{timestamp}`
+**Note:** Claude GitHub Action branches use the format: `claude/issue-{number}-{timestamp}`
