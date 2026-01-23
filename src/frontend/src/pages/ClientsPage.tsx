@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getClients, createClient, ApiClientError } from '../services/api';
+import { getClients, createClient, toggleClientStatus, ApiClientError } from '../services/api';
 import type { Client } from '../types/api';
 import { Button, Card, Input, Modal, Alert } from '../components/ui';
 
@@ -196,15 +196,63 @@ function AddClientModal({
 /**
  * Client row component.
  */
-function ClientRow({ client }: { client: Client }) {
+function ClientRow({
+  client,
+  onToggleStatus
+}: {
+  client: Client;
+  onToggleStatus: (clientId: string) => void;
+}) {
+  const [isToggling, setIsToggling] = useState(false);
+
+  const handleToggle = async () => {
+    setIsToggling(true);
+    try {
+      await onToggleStatus(client.id);
+    } finally {
+      setIsToggling(false);
+    }
+  };
+
   return (
     <div className="p-4 hover:bg-neutral-50 transition-colors">
       <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-medium text-neutral-900">{client.name}</h3>
+        <div className="flex-1">
+          <div className="flex items-center gap-3">
+            <h3 className="text-lg font-medium text-neutral-900">{client.name}</h3>
+            <span
+              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                client.enabled
+                  ? 'bg-success-100 text-success-800'
+                  : 'bg-neutral-200 text-neutral-700'
+              }`}
+            >
+              {client.enabled ? 'Enabled' : 'Disabled'}
+            </span>
+          </div>
           <p className="text-sm text-neutral-500">
             Created {formatDate(client.created_at)}
           </p>
+        </div>
+        <div className="flex items-center">
+          <button
+            type="button"
+            onClick={handleToggle}
+            disabled={isToggling}
+            className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${
+              client.enabled ? 'bg-primary-600' : 'bg-neutral-200'
+            } ${isToggling ? 'opacity-50 cursor-not-allowed' : ''}`}
+            role="switch"
+            aria-checked={client.enabled}
+            aria-label={`Toggle ${client.name} status`}
+          >
+            <span
+              aria-hidden="true"
+              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                client.enabled ? 'translate-x-5' : 'translate-x-0'
+              }`}
+            />
+          </button>
         </div>
       </div>
     </div>
@@ -281,6 +329,33 @@ export default function ClientsPage() {
     setIsModalOpen(false);
   };
 
+  const handleToggleStatus = async (clientId: string) => {
+    try {
+      // Optimistic update
+      setClients((prevClients) =>
+        prevClients.map((c) =>
+          c.id === clientId ? { ...c, enabled: !c.enabled } : c
+        )
+      );
+
+      // Call API
+      const updatedClient = await toggleClientStatus(clientId);
+
+      // Update with server response
+      setClients((prevClients) =>
+        prevClients.map((c) => (c.id === clientId ? updatedClient : c))
+      );
+    } catch (err) {
+      // Revert on error by refetching
+      await fetchClients();
+
+      // Show error (optional - could add a toast notification)
+      if (err instanceof ApiClientError) {
+        console.error('Failed to toggle client status:', err.detail || err.message);
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-neutral-100 p-8">
       <div className="max-w-4xl mx-auto">
@@ -323,7 +398,7 @@ export default function ClientsPage() {
           <Card>
             <div className="divide-y divide-neutral-200">
               {clients.map((client) => (
-                <ClientRow key={client.id} client={client} />
+                <ClientRow key={client.id} client={client} onToggleStatus={handleToggleStatus} />
               ))}
             </div>
           </Card>

@@ -106,6 +106,12 @@ export async function createClient(data: ClientCreate): Promise<Client> {
   });
 }
 
+export async function toggleClientStatus(clientId: string): Promise<Client> {
+  return fetchApi<Client>(`/api/v1/clients/${clientId}/toggle-status`, {
+    method: 'PATCH',
+  });
+}
+
 // ============================================================================
 // Products API
 // ============================================================================
