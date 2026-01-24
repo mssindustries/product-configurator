@@ -1,5 +1,14 @@
 """
 Tests for Products API endpoints.
+
+NOTE: These tests use random UUIDs for client_id. This works because:
+1. SQLite (used in tests) does not enforce foreign key constraints by default.
+2. The Product model does not have an explicit FK constraint to Client.
+
+On PostgreSQL (production), if FK constraints were enforced, using random UUIDs
+would fail. For production-like tests, create a valid Client first and use its ID.
+
+Future improvement: Update fixtures to create valid clients before products.
 """
 
 import uuid
@@ -10,7 +19,10 @@ from httpx import AsyncClient
 
 @pytest.fixture
 def sample_product_data():
-    """Sample product data for tests."""
+    """Sample product data for tests.
+
+    NOTE: Uses a random UUID for client_id. See module docstring for FK note.
+    """
     return {
         "client_id": str(uuid.uuid4()),
         "name": "Test Cabinet",
