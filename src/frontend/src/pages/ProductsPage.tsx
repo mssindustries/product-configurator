@@ -1,0 +1,245 @@
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { getProducts, getClients, ApiClientError } from '../services/api';
+import type { Product, Client } from '../types/api';
+import { Button, Card, Alert } from '../components/ui';
+
+/**
+ * Format a date string to a human-readable format.
+ */
+function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+}
+
+/**
+ * Loading skeleton for product list.
+ */
+function LoadingSkeleton() {
+  return (
+    <Card>
+      <div className="divide-y divide-neutral-200">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="p-4 animate-pulse">
+            <div className="h-5 bg-neutral-200 rounded w-1/3 mb-2" />
+            <div className="h-4 bg-neutral-200 rounded w-1/4 mb-1" />
+            <div className="h-4 bg-neutral-200 rounded w-1/5" />
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+/**
+ * Empty state when no products exist.
+ */
+function EmptyState({ onAddClick }: { onAddClick: () => void }) {
+  return (
+    <Card padding="lg" className="text-center">
+      <svg
+        className="mx-auto h-16 w-16 text-neutral-400 mb-4"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        aria-hidden="true"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={1.5}
+          d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+        />
+      </svg>
+      <h3 className="text-lg font-medium text-neutral-900 mb-2">
+        No products yet
+      </h3>
+      <p className="text-neutral-500 mb-6">
+        Get started by adding your first product.
+      </p>
+      <Button intent="primary" onClick={onAddClick}>
+        Add Product
+      </Button>
+    </Card>
+  );
+}
+
+/**
+ * Error state with retry button.
+ */
+function ErrorState({
+  message,
+  onRetry,
+}: {
+  message: string;
+  onRetry: () => void;
+}) {
+  return (
+    <div className="text-center">
+      <Alert intent="danger" className="mb-6">
+        <div className="flex flex-col items-center py-4">
+          <svg
+            className="h-12 w-12 text-danger-500 mb-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+            />
+          </svg>
+          <h3 className="text-lg font-medium mb-2">Failed to load products</h3>
+          <p className="mb-4">{message}</p>
+          <Button intent="danger" onClick={onRetry}>
+            Try Again
+          </Button>
+        </div>
+      </Alert>
+    </div>
+  );
+}
+
+/**
+ * Product row component.
+ */
+function ProductRow({
+  product,
+  clientName,
+}: {
+  product: Product;
+  clientName: string;
+}) {
+  return (
+    <div className="p-4 hover:bg-neutral-50 transition-colors">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-lg font-medium text-neutral-900">{product.name}</h3>
+          <p className="text-sm text-neutral-600">{clientName}</p>
+          <p className="text-sm text-neutral-500">
+            Created {formatDate(product.created_at)}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * ProductsPage - View and manage products.
+ */
+export default function ProductsPage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Create client lookup map for O(1) name resolution
+  const clientsMap = useMemo(
+    () => new Map(clients.map((c) => [c.id, c])),
+    [clients]
+  );
+
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Fetch both products and clients in parallel
+      const [productsResponse, clientsResponse] = await Promise.all([
+        getProducts(),
+        getClients(),
+      ]);
+      setProducts(productsResponse.items);
+      setClients(clientsResponse.items);
+    } catch (err) {
+      if (err instanceof ApiClientError) {
+        setError(err.detail || err.message);
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unexpected error occurred');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const handleAddProduct = () => {
+    // TODO: Open create product modal (Task 3)
+    console.log('Add product clicked');
+  };
+
+  /**
+   * Get client name from lookup map, with fallback for deleted clients.
+   */
+  const getClientName = (clientId: string): string => {
+    const client = clientsMap.get(clientId);
+    return client?.name ?? 'Unknown Client';
+  };
+
+  return (
+    <div className="min-h-screen bg-neutral-100 p-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-3xl font-bold text-neutral-900">Products</h1>
+            <p className="text-neutral-600">Manage your product catalog.</p>
+          </div>
+          {!isLoading && !error && products.length > 0 && (
+            <Button intent="primary" onClick={handleAddProduct}>
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+              Add Product
+            </Button>
+          )}
+        </div>
+
+        {isLoading && <LoadingSkeleton />}
+
+        {!isLoading && error && (
+          <ErrorState message={error} onRetry={fetchData} />
+        )}
+
+        {!isLoading && !error && products.length === 0 && (
+          <EmptyState onAddClick={handleAddProduct} />
+        )}
+
+        {!isLoading && !error && products.length > 0 && (
+          <Card>
+            <div className="divide-y divide-neutral-200">
+              {products.map((product) => (
+                <ProductRow
+                  key={product.id}
+                  product={product}
+                  clientName={getClientName(product.client_id)}
+                />
+              ))}
+            </div>
+          </Card>
+        )}
+      </div>
+    </div>
+  );
+}
