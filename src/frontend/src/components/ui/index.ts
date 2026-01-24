@@ -15,5 +15,6 @@ export { FormField, type FormFieldProps } from './FormField';
 export { Input, inputVariants, type InputProps } from './Input';
 export { Modal, type ModalProps } from './Modal';
 export { Select, selectVariants, type SelectProps, type SelectOption } from './Select';
+export { Tabs } from './Tabs';
 export { Textarea, textareaVariants, type TextareaProps } from './Textarea';
 export { ToastProvider, useToast, toastVariants, type ToastIntent } from './Toast';

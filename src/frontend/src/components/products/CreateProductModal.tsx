@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getClients, createProduct, ApiClientError } from '../../services/api';
 import type { Client } from '../../types/api';
-import { Button, Input, Modal, Alert, Select, Textarea, FormField, useToast } from '../ui';
+import { Button, Input, Modal, Alert, Select, Textarea, FormField, useToast, Tabs } from '../ui';
 
 /**
  * Form data for creating a product.
@@ -266,54 +266,64 @@ export function CreateProductModal({
           </h2>
         </Modal.Header>
 
-        <Modal.Body className="max-h-[60vh] overflow-y-auto">
-          <div className="space-y-4">
-            {/* Client Loading State */}
-            {isLoadingClients && (
-              <div className="flex items-center gap-2 text-neutral-500 py-2">
-                <svg
-                  className="h-5 w-5 animate-spin"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  />
-                </svg>
-                <span>Loading clients...</span>
-              </div>
-            )}
+        <Modal.Body className="p-0">
+          {/* Client Loading State */}
+          {isLoadingClients && (
+            <div className="flex items-center gap-2 text-neutral-500 py-6 px-6">
+              <svg
+                className="h-5 w-5 animate-spin"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                />
+              </svg>
+              <span>Loading clients...</span>
+            </div>
+          )}
 
-            {/* Client Error State */}
-            {!isLoadingClients && clientsError && (
+          {/* Client Error State */}
+          {!isLoadingClients && clientsError && (
+            <div className="px-6 py-4">
               <Alert intent="danger">
                 <p className="text-sm">Failed to load clients: {clientsError}</p>
               </Alert>
-            )}
+            </div>
+          )}
 
-            {/* No Clients Warning */}
-            {!isLoadingClients && !clientsError && clients.length === 0 && (
+          {/* No Clients Warning */}
+          {!isLoadingClients && !clientsError && clients.length === 0 && (
+            <div className="px-6 py-4">
               <Alert intent="warning">
                 <p className="text-sm">
                   No clients available. Please create a client first.
                 </p>
               </Alert>
-            )}
+            </div>
+          )}
 
-            {/* Form Fields - Only show when clients loaded successfully */}
-            {!isLoadingClients && !clientsError && clients.length > 0 && (
-              <>
+          {/* Tabbed Form - Only show when clients loaded successfully */}
+          {!isLoadingClients && !clientsError && clients.length > 0 && (
+            <Tabs defaultTab="basic">
+              <Tabs.List>
+                <Tabs.Tab value="basic">Basic Information</Tabs.Tab>
+                <Tabs.Tab value="schema">Configuration Schema</Tabs.Tab>
+              </Tabs.List>
+
+              {/* Basic Info Tab */}
+              <Tabs.Panel value="basic" className="p-6 space-y-4 max-h-[50vh] overflow-y-auto">
                 {/* Basic Info - Two columns on md+ screens */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Client Dropdown */}
@@ -367,63 +377,60 @@ export function CreateProductModal({
                   />
                 </FormField>
 
-                {/* Technical Fields Section */}
-                <div className="pt-2 border-t border-neutral-200">
-                  <h3 className="text-sm font-medium text-neutral-500 mb-3">
-                    Technical Configuration
-                  </h3>
-
-                  {/* Template Path - Full width */}
-                  <FormField
-                    label="Template Path"
-                    required
-                    error={errors.templateBlobPath}
-                    hint="Path to the Blender template file (file upload coming soon)"
+                {/* Template Path - Full width */}
+                <FormField
+                  label="Template Path"
+                  required
+                  error={errors.templateBlobPath}
+                  hint="Path to the Blender template file (file upload coming soon)"
+                  id="product-template-path"
+                >
+                  <Input
                     id="product-template-path"
-                  >
-                    <Input
-                      id="product-template-path"
-                      type="text"
-                      value={formData.templateBlobPath}
-                      onChange={(e) => updateField('templateBlobPath', e.target.value)}
-                      placeholder="e.g., templates/product.blend"
-                      error={!!errors.templateBlobPath}
-                      disabled={isSubmitting}
-                      maxLength={500}
-                    />
-                  </FormField>
+                    type="text"
+                    value={formData.templateBlobPath}
+                    onChange={(e) => updateField('templateBlobPath', e.target.value)}
+                    placeholder="e.g., templates/product.blend"
+                    error={!!errors.templateBlobPath}
+                    disabled={isSubmitting}
+                    maxLength={500}
+                  />
+                </FormField>
+              </Tabs.Panel>
 
-                  {/* Config Schema - Full width with more rows */}
-                  <FormField
-                    label="Configuration Schema (JSON)"
-                    required
-                    error={errors.configSchema}
+              {/* Configuration Schema Tab */}
+              <Tabs.Panel value="schema" className="p-6 h-[50vh] flex flex-col">
+                <FormField
+                  label="Configuration Schema (JSON)"
+                  required
+                  error={errors.configSchema}
+                  hint="Define the JSON Schema for valid product configurations"
+                  id="product-config-schema"
+                  className="flex-1 flex flex-col"
+                >
+                  <Textarea
                     id="product-config-schema"
-                    className="mt-4"
-                  >
-                    <Textarea
-                      id="product-config-schema"
-                      value={formData.configSchema}
-                      onChange={(e) => updateField('configSchema', e.target.value)}
-                      onBlur={handleConfigSchemaBlur}
-                      placeholder='{"type": "object", "properties": {...}}'
-                      error={!!errors.configSchema}
-                      disabled={isSubmitting}
-                      rows={8}
-                      className="font-mono text-sm"
-                    />
-                  </FormField>
-                </div>
-              </>
-            )}
+                    value={formData.configSchema}
+                    onChange={(e) => updateField('configSchema', e.target.value)}
+                    onBlur={handleConfigSchemaBlur}
+                    placeholder='{"type": "object", "properties": {...}}'
+                    error={!!errors.configSchema}
+                    disabled={isSubmitting}
+                    className="font-mono text-sm flex-1 min-h-0"
+                  />
+                </FormField>
+              </Tabs.Panel>
+            </Tabs>
+          )}
 
-            {/* Submit Error */}
-            {submitError && (
+          {/* Submit Error */}
+          {submitError && (
+            <div className="px-6 pb-4">
               <Alert intent="danger">
                 <p className="text-sm">{submitError}</p>
               </Alert>
-            )}
-          </div>
+            </div>
+          )}
         </Modal.Body>
 
         <Modal.Footer>
