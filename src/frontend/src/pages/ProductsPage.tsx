@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getProducts, getClients, ApiClientError } from '../services/api';
 import type { Product, Client } from '../types/api';
 import { Button, Card, Alert } from '../components/ui';
+import { CreateProductModal } from '../components/products';
 
 /**
  * Format a date string to a human-readable format.
@@ -139,6 +140,7 @@ export default function ProductsPage() {
   const [clients, setClients] = useState<Client[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Create client lookup map for O(1) name resolution
   const clientsMap = useMemo(
@@ -176,8 +178,16 @@ export default function ProductsPage() {
   }, [fetchData]);
 
   const handleAddProduct = () => {
-    // TODO: Open create product modal (Task 3)
-    console.log('Add product clicked');
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleProductCreated = () => {
+    // Refresh the product list after successful creation
+    fetchData();
   };
 
   /**
@@ -239,6 +249,12 @@ export default function ProductsPage() {
             </div>
           </Card>
         )}
+
+        <CreateProductModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          onSuccess={handleProductCreated}
+        />
       </div>
     </div>
   );
