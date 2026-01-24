@@ -5,7 +5,8 @@ Pydantic schemas for Product entity.
 from datetime import datetime
 from typing import Any
 
-from pydantic import Field
+from jsonschema import Draft7Validator, SchemaError
+from pydantic import Field, field_validator
 
 from app.schemas.base import BaseSchema
 
@@ -31,6 +32,18 @@ class ProductCreate(ProductBase):
     """
 
     client_id: str = Field(..., description="Client ID (required until auth is implemented)")
+
+    @field_validator("config_schema")
+    @classmethod
+    def validate_json_schema(cls, v: dict[str, Any]) -> dict[str, Any]:
+        """Validate that config_schema is a valid JSON Schema."""
+        try:
+            Draft7Validator.check_schema(v)
+        except SchemaError as e:
+            # Don't chain exception to avoid serialization issues in error handler
+            msg = f"Invalid JSON Schema: {e.message}"
+            raise ValueError(msg)
+        return v
 
 
 class ProductUpdate(BaseSchema):

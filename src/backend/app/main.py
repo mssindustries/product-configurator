@@ -164,6 +164,25 @@ async def configurator_error_handler(
     )
 
 
+def _sanitize_error_details(errors: list[dict]) -> list[dict]:
+    """Sanitize Pydantic validation errors for JSON serialization.
+
+    Pydantic may include non-serializable objects (like ValueError instances)
+    in the 'ctx' field. This function converts them to strings.
+    """
+    sanitized = []
+    for error in errors:
+        sanitized_error = error.copy()
+        if "ctx" in sanitized_error:
+            # Convert any non-serializable objects in ctx to strings
+            sanitized_error["ctx"] = {
+                k: str(v) if not isinstance(v, (str, int, float, bool, type(None))) else v
+                for k, v in error["ctx"].items()
+            }
+        sanitized.append(sanitized_error)
+    return sanitized
+
+
 @app.exception_handler(RequestValidationError)
 async def request_validation_error_handler(
     request: Request, exc: RequestValidationError
@@ -183,7 +202,7 @@ async def request_validation_error_handler(
         content={
             "error": "validation_error",
             "message": "Request validation failed",
-            "details": exc.errors(),
+            "details": _sanitize_error_details(exc.errors()),
         },
     )
 

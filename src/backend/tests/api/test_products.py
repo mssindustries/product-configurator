@@ -110,6 +110,29 @@ async def test_create_product_defaults_template_version(client: AsyncClient, sam
     assert response_data["template_version"] == "1.0.0"
 
 
+async def test_create_product_invalid_json_schema(client: AsyncClient, sample_product_data: dict):
+    """Returns 422 when config_schema is not a valid JSON Schema."""
+    data = sample_product_data.copy()
+    # Invalid JSON Schema - uses unknown type
+    data["config_schema"] = {"type": "invalid_type"}
+
+    response = await client.post("/api/v1/products", json=data)
+    assert response.status_code == 422
+    response_data = response.json()
+    # Verify error message mentions JSON Schema validation
+    assert "Invalid JSON Schema" in str(response_data)
+
+
+async def test_create_product_valid_empty_object_schema(client: AsyncClient, sample_product_data: dict):
+    """Empty object is a valid JSON Schema (matches any value)."""
+    data = sample_product_data.copy()
+    # Empty object is valid - it's the most permissive schema
+    data["config_schema"] = {}
+
+    response = await client.post("/api/v1/products", json=data)
+    assert response.status_code == 201
+
+
 async def test_list_products_pagination(client: AsyncClient, sample_product_data: dict):
     """Pagination works correctly."""
     # Create 3 products
