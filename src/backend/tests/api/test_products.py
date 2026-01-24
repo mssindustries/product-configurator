@@ -82,6 +82,7 @@ async def test_create_product_success(client: AsyncClient, sample_product_data: 
     assert data["description"] == sample_product_data["description"]
     assert data["template_blob_path"] == sample_product_data["template_blob_path"]
     assert data["config_schema"] == sample_product_data["config_schema"]
+    assert data["template_version"] == "1.0.0"
     assert "created_at" in data
     assert "updated_at" in data
 
@@ -95,6 +96,18 @@ async def test_create_product_validation_error(client: AsyncClient):
     }
     response = await client.post("/api/v1/products", json=invalid_data)
     assert response.status_code == 422
+
+
+async def test_create_product_defaults_template_version(client: AsyncClient, sample_product_data: dict):
+    """template_version defaults to 1.0.0 when not provided."""
+    # Remove template_version from request data
+    data = sample_product_data.copy()
+    del data["template_version"]
+
+    response = await client.post("/api/v1/products", json=data)
+    assert response.status_code == 201
+    response_data = response.json()
+    assert response_data["template_version"] == "1.0.0"
 
 
 async def test_list_products_pagination(client: AsyncClient, sample_product_data: dict):
