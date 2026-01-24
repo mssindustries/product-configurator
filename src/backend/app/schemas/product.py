@@ -55,6 +55,20 @@ class ProductUpdate(BaseSchema):
     template_version: str | None = Field(default=None, max_length=50)
     config_schema: dict[str, Any] | None = Field(default=None)
 
+    @field_validator("config_schema")
+    @classmethod
+    def validate_json_schema(cls, v: dict[str, Any] | None) -> dict[str, Any] | None:
+        """Validate that config_schema is a valid JSON Schema (if provided)."""
+        if v is None:
+            return v
+        try:
+            Draft7Validator.check_schema(v)
+        except SchemaError as e:
+            # Don't chain exception to avoid serialization issues in error handler
+            msg = f"Invalid JSON Schema: {e.message}"
+            raise ValueError(msg)
+        return v
+
 
 class ProductResponse(ProductBase):
     """Schema for product response."""

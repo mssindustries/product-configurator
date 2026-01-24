@@ -5,6 +5,7 @@ Provides CRUD operations for product templates:
 - GET /api/v1/products - List all products
 - GET /api/v1/products/{id} - Get product details
 - POST /api/v1/products - Create new product
+- PATCH /api/v1/products/{id} - Update product
 
 NOTE: Authentication is not yet implemented. These endpoints are currently
 public. When authentication is added, endpoints will be scoped to the
@@ -19,7 +20,12 @@ from sqlalchemy import func, select
 
 from app.api.deps import DbSession
 from app.db.models import Product
-from app.schemas.product import ProductCreate, ProductListResponse, ProductResponse
+from app.schemas.product import (
+    ProductCreate,
+    ProductListResponse,
+    ProductResponse,
+    ProductUpdate,
+)
 
 router = APIRouter()
 
@@ -146,6 +152,61 @@ async def create_product(
     )
 
     db.add(product)
+    await db.commit()
+    await db.refresh(product)
+
+    return ProductResponse(
+        id=str(product.id),
+        client_id=str(product.client_id),
+        name=product.name,
+        description=product.description,
+        template_blob_path=product.template_blob_path,
+        template_version=product.template_version,
+        config_schema=product.config_schema,
+        created_at=product.created_at,
+        updated_at=product.updated_at,
+    )
+
+
+@router.patch("/{product_id}", response_model=ProductResponse)
+async def update_product(
+    product_id: UUID,
+    product_data: ProductUpdate,
+    db: DbSession,
+) -> ProductResponse:
+    """
+    Update an existing product.
+
+    Only fields provided in the request body will be updated.
+    Fields not included (or set to null) remain unchanged.
+
+    Args:
+        product_id: UUID of the product to update
+        product_data: Partial product data to update
+
+    Returns:
+        ProductResponse with the updated product details.
+
+    Raises:
+        HTTPException 404: Product not found.
+        HTTPException 422: Validation error (handled by FastAPI).
+    """
+    # Get existing product
+    stmt = select(Product).where(Product.id == str(product_id))
+    result = await db.execute(stmt)
+    product = result.scalar_one_or_none()
+
+    if not product:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Product {product_id} not found",
+        )
+
+    # Update only fields that are provided (not None)
+    update_data = product_data.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(product, field, value)
+
     await db.commit()
     await db.refresh(product)
 
