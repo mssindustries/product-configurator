@@ -258,7 +258,7 @@ export function CreateProductModal({
   }));
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} className="max-w-2xl">
+    <Modal isOpen={isOpen} onClose={handleClose} className="max-w-4xl">
       <form onSubmit={handleSubmit}>
         <Modal.Header>
           <h2 className="text-xl font-semibold text-neutral-900">

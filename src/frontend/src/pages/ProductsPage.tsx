@@ -45,44 +45,50 @@ function LoadingSkeleton() {
  */
 function EmptyState({ onAddClick }: { onAddClick: () => void }) {
   return (
-    <Card padding="lg" className="text-center">
-      <svg
-        className="mx-auto h-16 w-16 text-neutral-400 mb-4"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        aria-hidden="true"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={1.5}
-          d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-        />
-      </svg>
-      <h3 className="text-lg font-medium text-neutral-900 mb-2">
-        No products yet
-      </h3>
-      <p className="text-neutral-500 mb-6 max-w-sm mx-auto">
-        Get started by adding your first product. Products define the 3D configurator
-        templates that your clients can customize.
-      </p>
-      <Button intent="primary" onClick={onAddClick}>
-        <svg
-          className="w-5 h-5 mr-1"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 4v16m8-8H4"
-          />
-        </svg>
-        Add Your First Product
-      </Button>
+    <Card padding="lg">
+      <div className="flex items-start gap-6">
+        <div className="flex-shrink-0">
+          <svg
+            className="h-16 w-16 text-neutral-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+            />
+          </svg>
+        </div>
+        <div className="flex-1">
+          <h3 className="text-lg font-medium text-neutral-900 mb-2">
+            No products yet
+          </h3>
+          <p className="text-neutral-500 mb-6">
+            Get started by adding your first product. Products define the 3D configurator
+            templates that your clients can customize.
+          </p>
+          <Button intent="primary" onClick={onAddClick}>
+            <svg
+              className="w-5 h-5 mr-1"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            Add Your First Product
+          </Button>
+        </div>
+      </div>
     </Card>
   );
 }
