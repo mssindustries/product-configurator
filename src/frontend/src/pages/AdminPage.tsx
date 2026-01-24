@@ -39,6 +39,34 @@ export default function AdminPage() {
               </div>
             </Card>
           </Link>
+
+          <Link to="/products">
+            <Card className="p-6 hover:shadow-lg transition-shadow group">
+              <div className="flex items-center gap-4">
+                <div className="bg-primary-100 p-3 rounded-lg group-hover:bg-primary-200 transition-colors">
+                  <svg
+                    className="w-8 h-8 text-primary-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-neutral-900 group-hover:text-primary-600 transition-colors">
+                    Products
+                  </h2>
+                  <p className="text-sm text-neutral-500">Manage product catalog</p>
+                </div>
+              </div>
+            </Card>
+          </Link>
         </div>
       </div>
     </div>
