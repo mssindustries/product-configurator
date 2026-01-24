@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getClients, createProduct, ApiClientError } from '../../services/api';
 import type { Client } from '../../types/api';
-import { Button, Input, Modal, Alert, Select, Textarea, FormField } from '../ui';
+import { Button, Input, Modal, Alert, Select, Textarea, FormField, useToast } from '../ui';
 
 /**
  * Form data for creating a product.
@@ -77,6 +77,9 @@ export function CreateProductModal({
   onClose,
   onSuccess,
 }: CreateProductModalProps) {
+  // Toast for success notifications
+  const { addToast } = useToast();
+
   // Form state
   const [formData, setFormData] = useState<ProductFormData>(initialFormData);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -222,6 +225,8 @@ export function CreateProductModal({
         config_schema: configSchemaObj,
       });
 
+      // Show success toast before closing modal
+      addToast(`Product "${formData.name.trim()}" created successfully!`, 'success');
       onSuccess();
       onClose();
     } catch (err) {

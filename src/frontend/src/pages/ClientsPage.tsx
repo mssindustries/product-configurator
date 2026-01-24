@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getClients, createClient, ApiClientError } from '../services/api';
 import type { Client } from '../types/api';
-import { Button, Card, Input, Modal, Alert } from '../components/ui';
+import { Button, Card, Input, Modal, Alert, useToast } from '../components/ui';
 
 /**
  * Format a date string to a human-readable format.
@@ -215,6 +215,7 @@ function ClientRow({ client }: { client: Client }) {
  * ClientsPage - View and manage clients.
  */
 export default function ClientsPage() {
+  const { addToast } = useToast();
   const [clients, setClients] = useState<Client[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -252,6 +253,7 @@ export default function ClientsPage() {
 
     try {
       await createClient({ name });
+      addToast(`Client "${name}" created successfully!`, 'success');
       setIsModalOpen(false);
       await fetchClients();
     } catch (err) {
