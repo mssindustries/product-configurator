@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getClients, createProduct, ApiClientError } from '../../services/api';
 import type { Client } from '../../types/api';
-import { Button, Input, Modal, Alert, Select, Textarea } from '../ui';
+import { Button, Input, Modal, Alert, Select, Textarea, FormField } from '../ui';
 
 /**
  * Form data for creating a product.
@@ -124,6 +124,24 @@ export function CreateProductModal({
   }, [isOpen, fetchClients]);
 
   /**
+   * Handle keyboard events for accessibility.
+   */
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isOpen) return;
+
+      // Close modal on Escape (unless submitting)
+      if (e.key === 'Escape' && !isSubmitting) {
+        e.preventDefault();
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, isSubmitting, onClose]);
+
+  /**
    * Update a form field.
    */
   const updateField = (field: keyof ProductFormData, value: string) => {
@@ -235,7 +253,7 @@ export function CreateProductModal({
   }));
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} className="max-w-lg">
+    <Modal isOpen={isOpen} onClose={handleClose} className="max-w-2xl">
       <form onSubmit={handleSubmit}>
         <Modal.Header>
           <h2 className="text-xl font-semibold text-neutral-900">
@@ -243,177 +261,164 @@ export function CreateProductModal({
           </h2>
         </Modal.Header>
 
-        <Modal.Body className="space-y-4">
-          {/* Client Loading State */}
-          {isLoadingClients && (
-            <div className="flex items-center gap-2 text-neutral-500 py-2">
-              <svg
-                className="h-5 w-5 animate-spin"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                />
-              </svg>
-              <span>Loading clients...</span>
-            </div>
-          )}
-
-          {/* Client Error State */}
-          {!isLoadingClients && clientsError && (
-            <Alert intent="danger">
-              <p className="text-sm">Failed to load clients: {clientsError}</p>
-            </Alert>
-          )}
-
-          {/* No Clients Warning */}
-          {!isLoadingClients && !clientsError && clients.length === 0 && (
-            <Alert intent="warning">
-              <p className="text-sm">
-                No clients available. Please create a client first.
-              </p>
-            </Alert>
-          )}
-
-          {/* Form Fields - Only show when clients loaded successfully */}
-          {!isLoadingClients && !clientsError && clients.length > 0 && (
-            <>
-              {/* Client Dropdown */}
-              <div>
-                <label
-                  htmlFor="product-client"
-                  className="block text-sm font-medium text-neutral-700 mb-1"
+        <Modal.Body className="max-h-[60vh] overflow-y-auto">
+          <div className="space-y-4">
+            {/* Client Loading State */}
+            {isLoadingClients && (
+              <div className="flex items-center gap-2 text-neutral-500 py-2">
+                <svg
+                  className="h-5 w-5 animate-spin"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
                 >
-                  Client <span className="text-danger-500">*</span>
-                </label>
-                <Select
-                  id="product-client"
-                  value={formData.clientId}
-                  onChange={(e) => updateField('clientId', e.target.value)}
-                  placeholder="Select a client"
-                  options={clientOptions}
-                  error={!!errors.clientId}
-                  disabled={isSubmitting}
-                />
-                {errors.clientId && (
-                  <p className="mt-1 text-sm text-danger-500">{errors.clientId}</p>
-                )}
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
+                </svg>
+                <span>Loading clients...</span>
               </div>
+            )}
 
-              {/* Product Name */}
-              <div>
-                <label
-                  htmlFor="product-name"
-                  className="block text-sm font-medium text-neutral-700 mb-1"
-                >
-                  Product Name <span className="text-danger-500">*</span>
-                </label>
-                <Input
-                  id="product-name"
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => updateField('name', e.target.value)}
-                  placeholder="Enter product name"
-                  error={!!errors.name}
-                  disabled={isSubmitting}
-                  maxLength={255}
-                />
-                {errors.name && (
-                  <p className="mt-1 text-sm text-danger-500">{errors.name}</p>
-                )}
-              </div>
+            {/* Client Error State */}
+            {!isLoadingClients && clientsError && (
+              <Alert intent="danger">
+                <p className="text-sm">Failed to load clients: {clientsError}</p>
+              </Alert>
+            )}
 
-              {/* Description (Optional) */}
-              <div>
-                <label
-                  htmlFor="product-description"
-                  className="block text-sm font-medium text-neutral-700 mb-1"
-                >
-                  Description
-                </label>
-                <Textarea
-                  id="product-description"
-                  value={formData.description}
-                  onChange={(e) => updateField('description', e.target.value)}
-                  placeholder="Enter product description (optional)"
-                  disabled={isSubmitting}
-                  rows={3}
-                  maxLength={5000}
-                />
-              </div>
-
-              {/* Template Blob Path (temporary text input) */}
-              <div>
-                <label
-                  htmlFor="product-template-path"
-                  className="block text-sm font-medium text-neutral-700 mb-1"
-                >
-                  Template Path <span className="text-danger-500">*</span>
-                </label>
-                <Input
-                  id="product-template-path"
-                  type="text"
-                  value={formData.templateBlobPath}
-                  onChange={(e) => updateField('templateBlobPath', e.target.value)}
-                  placeholder="e.g., templates/product.blend"
-                  error={!!errors.templateBlobPath}
-                  disabled={isSubmitting}
-                  maxLength={500}
-                />
-                {errors.templateBlobPath && (
-                  <p className="mt-1 text-sm text-danger-500">
-                    {errors.templateBlobPath}
-                  </p>
-                )}
-                <p className="mt-1 text-xs text-neutral-500">
-                  Path to the Blender template file (file upload coming soon)
+            {/* No Clients Warning */}
+            {!isLoadingClients && !clientsError && clients.length === 0 && (
+              <Alert intent="warning">
+                <p className="text-sm">
+                  No clients available. Please create a client first.
                 </p>
-              </div>
+              </Alert>
+            )}
 
-              {/* Config Schema (JSON) */}
-              <div>
-                <label
-                  htmlFor="product-config-schema"
-                  className="block text-sm font-medium text-neutral-700 mb-1"
-                >
-                  Configuration Schema (JSON) <span className="text-danger-500">*</span>
-                </label>
-                <Textarea
-                  id="product-config-schema"
-                  value={formData.configSchema}
-                  onChange={(e) => updateField('configSchema', e.target.value)}
-                  onBlur={handleConfigSchemaBlur}
-                  placeholder='{"type": "object", "properties": {...}}'
-                  error={!!errors.configSchema}
-                  disabled={isSubmitting}
-                  rows={6}
-                  className="font-mono text-sm"
-                />
-                {errors.configSchema && (
-                  <p className="mt-1 text-sm text-danger-500">{errors.configSchema}</p>
-                )}
-              </div>
-            </>
-          )}
+            {/* Form Fields - Only show when clients loaded successfully */}
+            {!isLoadingClients && !clientsError && clients.length > 0 && (
+              <>
+                {/* Basic Info - Two columns on md+ screens */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Client Dropdown */}
+                  <FormField
+                    label="Client"
+                    required
+                    error={errors.clientId}
+                    id="product-client"
+                  >
+                    <Select
+                      id="product-client"
+                      value={formData.clientId}
+                      onChange={(e) => updateField('clientId', e.target.value)}
+                      placeholder="Select a client"
+                      options={clientOptions}
+                      error={!!errors.clientId}
+                      disabled={isSubmitting}
+                    />
+                  </FormField>
 
-          {/* Submit Error */}
-          {submitError && (
-            <Alert intent="danger">
-              <p className="text-sm">{submitError}</p>
-            </Alert>
-          )}
+                  {/* Product Name */}
+                  <FormField
+                    label="Product Name"
+                    required
+                    error={errors.name}
+                    id="product-name"
+                  >
+                    <Input
+                      id="product-name"
+                      type="text"
+                      value={formData.name}
+                      onChange={(e) => updateField('name', e.target.value)}
+                      placeholder="Enter product name"
+                      error={!!errors.name}
+                      disabled={isSubmitting}
+                      maxLength={255}
+                    />
+                  </FormField>
+                </div>
+
+                {/* Description - Full width */}
+                <FormField label="Description" id="product-description">
+                  <Textarea
+                    id="product-description"
+                    value={formData.description}
+                    onChange={(e) => updateField('description', e.target.value)}
+                    placeholder="Enter product description (optional)"
+                    disabled={isSubmitting}
+                    rows={3}
+                    maxLength={5000}
+                  />
+                </FormField>
+
+                {/* Technical Fields Section */}
+                <div className="pt-2 border-t border-neutral-200">
+                  <h3 className="text-sm font-medium text-neutral-500 mb-3">
+                    Technical Configuration
+                  </h3>
+
+                  {/* Template Path - Full width */}
+                  <FormField
+                    label="Template Path"
+                    required
+                    error={errors.templateBlobPath}
+                    hint="Path to the Blender template file (file upload coming soon)"
+                    id="product-template-path"
+                  >
+                    <Input
+                      id="product-template-path"
+                      type="text"
+                      value={formData.templateBlobPath}
+                      onChange={(e) => updateField('templateBlobPath', e.target.value)}
+                      placeholder="e.g., templates/product.blend"
+                      error={!!errors.templateBlobPath}
+                      disabled={isSubmitting}
+                      maxLength={500}
+                    />
+                  </FormField>
+
+                  {/* Config Schema - Full width with more rows */}
+                  <FormField
+                    label="Configuration Schema (JSON)"
+                    required
+                    error={errors.configSchema}
+                    id="product-config-schema"
+                    className="mt-4"
+                  >
+                    <Textarea
+                      id="product-config-schema"
+                      value={formData.configSchema}
+                      onChange={(e) => updateField('configSchema', e.target.value)}
+                      onBlur={handleConfigSchemaBlur}
+                      placeholder='{"type": "object", "properties": {...}}'
+                      error={!!errors.configSchema}
+                      disabled={isSubmitting}
+                      rows={8}
+                      className="font-mono text-sm"
+                    />
+                  </FormField>
+                </div>
+              </>
+            )}
+
+            {/* Submit Error */}
+            {submitError && (
+              <Alert intent="danger">
+                <p className="text-sm">{submitError}</p>
+              </Alert>
+            )}
+          </div>
         </Modal.Body>
 
         <Modal.Footer>
