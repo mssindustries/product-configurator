@@ -20,7 +20,51 @@ permissions:
   pull-requests: write
 
 jobs:
+  build-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    # Skip tests when PR is closed (only deploy to cleanup)
+    if: github.event.action != 'closed'
+    defaults:
+      run:
+        working-directory: src/frontend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: src/frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Build
+        run: npm run build
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: src/frontend/playwright-report/
+          retention-days: 30
+
   deploy:
+    name: Deploy to Test Environment
+    needs: build-test
+    # Deploy always runs (to cleanup on close), but build-test is skipped on close
+    if: always() && (needs.build-test.result == 'success' || github.event.action == 'closed')
     uses: ./.github/workflows/deploy-frontend-reusable.yml
     with:
       environment: test
