@@ -19,6 +19,8 @@ on:
     secrets:
       AZURE_CREDENTIALS:
         required: true
+      AZURE_STORAGE_CONNECTION_STRING:
+        required: true
 
 jobs:
   deploy:
@@ -59,6 +61,7 @@ jobs:
           imageToDeploy: ${{ inputs.image_tag }}
           environmentVariables: |
             ENVIRONMENT=${{ inputs.environment }}
+            AZURE_STORAGE_CONNECTION_STRING=${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
 
       - name: Health check
         run: |

@@ -78,3 +78,4 @@ jobs:
       image_tag: ${{ needs.build.outputs.image_tag }}
     secrets:
       AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+      AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
