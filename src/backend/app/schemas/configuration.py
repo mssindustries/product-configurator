@@ -28,6 +28,7 @@ class ConfigurationCreate(ConfigurationBase):
     """
 
     product_id: str = Field(..., description="ID of the product to configure")
+    style_id: str = Field(..., description="ID of the style to configure")
     client_id: str = Field(..., description="Client ID (required until auth is implemented)")
 
 
@@ -43,6 +44,7 @@ class ConfigurationResponse(ConfigurationBase):
 
     id: str
     product_id: str
+    style_id: str
     client_id: str
     product_schema_version: str
     created_at: datetime

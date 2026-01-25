@@ -68,9 +68,6 @@ async def list_products(
             client_id=str(product.client_id),
             name=product.name,
             description=product.description,
-            template_blob_path=product.template_blob_path,
-            template_version=product.template_version,
-            config_schema=product.config_schema,
             created_at=product.created_at,
             updated_at=product.updated_at,
         )
@@ -112,9 +109,6 @@ async def get_product(
         client_id=str(product.client_id),
         name=product.name,
         description=product.description,
-        template_blob_path=product.template_blob_path,
-        template_version=product.template_version,
-        config_schema=product.config_schema,
         created_at=product.created_at,
         updated_at=product.updated_at,
     )
@@ -146,9 +140,6 @@ async def create_product(
         client_id=product_data.client_id,
         name=product_data.name,
         description=product_data.description,
-        template_blob_path=product_data.template_blob_path,
-        template_version=product_data.template_version,
-        config_schema=product_data.config_schema,
     )
 
     db.add(product)
@@ -160,9 +151,6 @@ async def create_product(
         client_id=str(product.client_id),
         name=product.name,
         description=product.description,
-        template_blob_path=product.template_blob_path,
-        template_version=product.template_version,
-        config_schema=product.config_schema,
         created_at=product.created_at,
         updated_at=product.updated_at,
     )
@@ -215,9 +203,6 @@ async def update_product(
         client_id=str(product.client_id),
         name=product.name,
         description=product.description,
-        template_blob_path=product.template_blob_path,
-        template_version=product.template_version,
-        config_schema=product.config_schema,
         created_at=product.created_at,
         updated_at=product.updated_at,
     )

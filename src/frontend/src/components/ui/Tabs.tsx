@@ -83,6 +83,7 @@ function Tab({ value, children }: TabProps) {
 
   return (
     <button
+      type="button"
       role="tab"
       aria-selected={isActive}
       aria-controls={`panel-${value}`}

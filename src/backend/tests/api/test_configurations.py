@@ -2,7 +2,9 @@
 Tests for Configurations API endpoints.
 """
 
+import json
 import uuid
+from unittest.mock import patch
 
 import pytest
 from httpx import AsyncClient
@@ -15,16 +17,19 @@ def sample_product_data():
         "client_id": str(uuid.uuid4()),
         "name": "Test Cabinet",
         "description": "A test cabinet product",
-        "template_blob_path": "/templates/cabinet.glb",
-        "template_version": "1.0.0",
-        "config_schema": {
-            "type": "object",
-            "properties": {
-                "width": {"type": "number", "minimum": 10, "maximum": 100},
-                "color": {"type": "string", "enum": ["white", "black", "oak"]},
-            },
-            "required": ["width", "color"],
+    }
+
+
+@pytest.fixture
+def sample_style_schema():
+    """Sample customization schema for styles."""
+    return {
+        "type": "object",
+        "properties": {
+            "width": {"type": "number", "minimum": 10, "maximum": 100},
+            "color": {"type": "string", "enum": ["white", "black", "oak"]},
         },
+        "required": ["width", "color"],
     }
 
 
@@ -33,6 +38,29 @@ async def created_product(client: AsyncClient, sample_product_data: dict) -> dic
     """Create a product and return its data."""
     response = await client.post("/api/v1/products", json=sample_product_data)
     return response.json()
+
+
+@pytest.fixture
+async def created_style(
+    client: AsyncClient,
+    created_product: dict,
+    sample_style_schema: dict,
+) -> dict:
+    """Create a style for the product and return its data."""
+    with patch("app.services.blob_storage.BlobStorageService.upload_file") as mock_upload:
+        mock_upload.return_value = "blender-templates/test-style-id.blend"
+
+        files = {"file": ("template.blend", b"BLENDER-v300" + b"\x00" * 100, "application/octet-stream")}
+        data = {
+            "name": "Default Style",
+            "customization_schema": json.dumps(sample_style_schema),
+        }
+        response = await client.post(
+            f"/api/v1/products/{created_product['id']}/styles",
+            files=files,
+            data=data,
+        )
+        return response.json()
 
 
 async def test_list_configurations_empty(client: AsyncClient):
@@ -44,10 +72,15 @@ async def test_list_configurations_empty(client: AsyncClient):
     assert data["total"] == 0
 
 
-async def test_create_configuration_success(client: AsyncClient, created_product: dict):
+async def test_create_configuration_success(
+    client: AsyncClient,
+    created_product: dict,
+    created_style: dict,
+):
     """Creates and returns configuration."""
     config_data = {
         "product_id": created_product["id"],
+        "style_id": created_style["id"],
         "client_id": created_product["client_id"],
         "name": "My Custom Cabinet",
         "config_data": {"width": 50, "color": "oak"},
@@ -59,15 +92,17 @@ async def test_create_configuration_success(client: AsyncClient, created_product
     assert "id" in data
     assert data["name"] == config_data["name"]
     assert data["product_id"] == created_product["id"]
+    assert data["style_id"] == created_style["id"]
     assert data["config_data"] == config_data["config_data"]
-    assert data["product_schema_version"] == created_product["template_version"]
 
 
 async def test_create_configuration_invalid_product(client: AsyncClient):
     """Returns 404 when product does not exist."""
     fake_product_id = str(uuid.uuid4())
+    fake_style_id = str(uuid.uuid4())
     config_data = {
         "product_id": fake_product_id,
+        "style_id": fake_style_id,
         "client_id": str(uuid.uuid4()),
         "name": "My Config",
         "config_data": {"width": 50, "color": "oak"},
@@ -78,12 +113,34 @@ async def test_create_configuration_invalid_product(client: AsyncClient):
     assert "not found" in response.json()["detail"].lower()
 
 
+async def test_create_configuration_invalid_style(
+    client: AsyncClient,
+    created_product: dict,
+):
+    """Returns 404 when style does not exist."""
+    fake_style_id = str(uuid.uuid4())
+    config_data = {
+        "product_id": created_product["id"],
+        "style_id": fake_style_id,
+        "client_id": created_product["client_id"],
+        "name": "My Config",
+        "config_data": {"width": 50, "color": "oak"},
+    }
+
+    response = await client.post("/api/v1/configurations", json=config_data)
+    assert response.status_code == 404
+    assert "style" in response.json()["detail"].lower()
+
+
 async def test_create_configuration_invalid_config_data(
-    client: AsyncClient, created_product: dict
+    client: AsyncClient,
+    created_product: dict,
+    created_style: dict,
 ):
     """Returns 422 when config_data fails schema validation."""
     config_data = {
         "product_id": created_product["id"],
+        "style_id": created_style["id"],
         "client_id": created_product["client_id"],
         "name": "Invalid Config",
         "config_data": {
@@ -104,11 +161,16 @@ async def test_get_configuration_not_found(client: AsyncClient):
     assert "not found" in response.json()["detail"].lower()
 
 
-async def test_get_configuration_success(client: AsyncClient, created_product: dict):
+async def test_get_configuration_success(
+    client: AsyncClient,
+    created_product: dict,
+    created_style: dict,
+):
     """Returns configuration by ID."""
     # Create a configuration first
     config_data = {
         "product_id": created_product["id"],
+        "style_id": created_style["id"],
         "client_id": created_product["client_id"],
         "name": "My Config",
         "config_data": {"width": 30, "color": "white"},
@@ -122,13 +184,19 @@ async def test_get_configuration_success(client: AsyncClient, created_product: d
     assert data["id"] == config_id
     assert data["name"] == config_data["name"]
     assert data["config_data"] == config_data["config_data"]
+    assert data["style_id"] == created_style["id"]
 
 
-async def test_delete_configuration_success(client: AsyncClient, created_product: dict):
+async def test_delete_configuration_success(
+    client: AsyncClient,
+    created_product: dict,
+    created_style: dict,
+):
     """Deletes configuration and returns 204."""
     # Create a configuration first
     config_data = {
         "product_id": created_product["id"],
+        "style_id": created_style["id"],
         "client_id": created_product["client_id"],
         "name": "Config to Delete",
         "config_data": {"width": 25, "color": "black"},
@@ -152,11 +220,16 @@ async def test_delete_configuration_not_found(client: AsyncClient):
     assert response.status_code == 404
 
 
-async def test_list_configurations_with_data(client: AsyncClient, created_product: dict):
+async def test_list_configurations_with_data(
+    client: AsyncClient,
+    created_product: dict,
+    created_style: dict,
+):
     """Returns configurations after creation."""
     # Create a configuration
     config_data = {
         "product_id": created_product["id"],
+        "style_id": created_style["id"],
         "client_id": created_product["client_id"],
         "name": "Listed Config",
         "config_data": {"width": 40, "color": "oak"},
@@ -169,3 +242,4 @@ async def test_list_configurations_with_data(client: AsyncClient, created_produc
     assert data["total"] == 1
     assert len(data["items"]) == 1
     assert data["items"][0]["name"] == config_data["name"]
+    assert data["items"][0]["style_id"] == created_style["id"]

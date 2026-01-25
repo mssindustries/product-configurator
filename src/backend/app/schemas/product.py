@@ -3,10 +3,8 @@ Pydantic schemas for Product entity.
 """
 
 from datetime import datetime
-from typing import Any
 
-from jsonschema import Draft7Validator, SchemaError
-from pydantic import Field, field_validator
+from pydantic import Field
 
 from app.schemas.base import BaseSchema
 
@@ -16,12 +14,6 @@ class ProductBase(BaseSchema):
 
     name: str = Field(..., min_length=1, max_length=255)
     description: str | None = Field(default=None, max_length=5000)
-    template_blob_path: str = Field(..., max_length=500)
-    template_version: str = Field(default="1.0.0", max_length=50)
-    config_schema: dict[str, Any] = Field(
-        ...,
-        description="JSON Schema defining valid configuration options",
-    )
 
 
 class ProductCreate(ProductBase):
@@ -33,41 +25,12 @@ class ProductCreate(ProductBase):
 
     client_id: str = Field(..., description="Client ID (required until auth is implemented)")
 
-    @field_validator("config_schema")
-    @classmethod
-    def validate_json_schema(cls, v: dict[str, Any]) -> dict[str, Any]:
-        """Validate that config_schema is a valid JSON Schema."""
-        try:
-            Draft7Validator.check_schema(v)
-        except SchemaError as e:
-            # Don't chain exception to avoid serialization issues in error handler
-            msg = f"Invalid JSON Schema: {e.message}"
-            raise ValueError(msg)
-        return v
-
 
 class ProductUpdate(BaseSchema):
     """Schema for updating a product (all fields optional)."""
 
     name: str | None = Field(default=None, min_length=1, max_length=255)
     description: str | None = Field(default=None, max_length=5000)
-    template_blob_path: str | None = Field(default=None, max_length=500)
-    template_version: str | None = Field(default=None, max_length=50)
-    config_schema: dict[str, Any] | None = Field(default=None)
-
-    @field_validator("config_schema")
-    @classmethod
-    def validate_json_schema(cls, v: dict[str, Any] | None) -> dict[str, Any] | None:
-        """Validate that config_schema is a valid JSON Schema (if provided)."""
-        if v is None:
-            return v
-        try:
-            Draft7Validator.check_schema(v)
-        except SchemaError as e:
-            # Don't chain exception to avoid serialization issues in error handler
-            msg = f"Invalid JSON Schema: {e.message}"
-            raise ValueError(msg)
-        return v
 
 
 class ProductResponse(ProductBase):

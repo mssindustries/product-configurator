@@ -34,20 +34,20 @@ export interface Product {
   client_id: string;
   name: string;
   description: string | null;
-  template_blob_path: string;
-  template_version: string;
-  config_schema: Record<string, unknown>;
   created_at: string;
   updated_at: string;
+  // Note: styles are fetched separately via getStyles(productId)
 }
 
 export interface ProductCreate {
   client_id: string;
   name: string;
   description?: string | null;
-  template_blob_path: string;
-  template_version?: string;
-  config_schema: Record<string, unknown>;
+}
+
+export interface ProductUpdate {
+  name?: string;
+  description?: string | null;
 }
 
 export interface ProductListResponse {
@@ -55,10 +55,47 @@ export interface ProductListResponse {
   total: number;
 }
 
+// Style types
+export interface Style {
+  id: string;
+  product_id: string;
+  name: string;
+  description: string | null;
+  template_blob_path: string;
+  customization_schema: Record<string, unknown>;
+  default_glb_path: string | null;
+  is_default: boolean;
+  display_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StyleCreate {
+  name: string;
+  description?: string | null;
+  file: File; // .blend file
+  customization_schema: Record<string, unknown>;
+  is_default?: boolean;
+}
+
+export interface StyleUpdate {
+  name?: string;
+  description?: string | null;
+  file?: File; // .blend file (optional for updates)
+  customization_schema?: Record<string, unknown>;
+  is_default?: boolean;
+}
+
+export interface StyleListResponse {
+  items: Style[];
+  total: number;
+}
+
 // Configuration types
 export interface Configuration {
   id: string;
   product_id: string;
+  style_id: string; // Reference to Style
   client_id: string;
   name: string;
   config_data: Record<string, unknown>;
@@ -69,6 +106,7 @@ export interface Configuration {
 
 export interface ConfigurationCreate {
   product_id: string;
+  style_id: string; // Reference to Style (required)
   client_id: string;
   name: string;
   config_data: Record<string, unknown>;

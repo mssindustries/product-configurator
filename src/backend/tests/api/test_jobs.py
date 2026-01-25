@@ -2,7 +2,9 @@
 Tests for Jobs API endpoints.
 """
 
+import json
 import uuid
+from unittest.mock import patch
 
 import pytest
 from httpx import AsyncClient
@@ -17,16 +19,19 @@ def sample_product_data():
         "client_id": str(uuid.uuid4()),
         "name": "Test Cabinet",
         "description": "A test cabinet product",
-        "template_blob_path": "/templates/cabinet.glb",
-        "template_version": "1.0.0",
-        "config_schema": {
-            "type": "object",
-            "properties": {
-                "width": {"type": "number", "minimum": 10, "maximum": 100},
-                "color": {"type": "string", "enum": ["white", "black", "oak"]},
-            },
-            "required": ["width", "color"],
+    }
+
+
+@pytest.fixture
+def sample_style_schema():
+    """Sample customization schema for styles."""
+    return {
+        "type": "object",
+        "properties": {
+            "width": {"type": "number", "minimum": 10, "maximum": 100},
+            "color": {"type": "string", "enum": ["white", "black", "oak"]},
         },
+        "required": ["width", "color"],
     }
 
 
@@ -38,10 +43,38 @@ async def created_product(client: AsyncClient, sample_product_data: dict) -> dic
 
 
 @pytest.fixture
-async def created_configuration(client: AsyncClient, created_product: dict) -> dict:
+async def created_style(
+    client: AsyncClient,
+    created_product: dict,
+    sample_style_schema: dict,
+) -> dict:
+    """Create a style for the product and return its data."""
+    with patch("app.services.blob_storage.BlobStorageService.upload_file") as mock_upload:
+        mock_upload.return_value = "blender-templates/test-style-id.blend"
+
+        files = {"file": ("template.blend", b"BLENDER-v300" + b"\x00" * 100, "application/octet-stream")}
+        data = {
+            "name": "Default Style",
+            "customization_schema": json.dumps(sample_style_schema),
+        }
+        response = await client.post(
+            f"/api/v1/products/{created_product['id']}/styles",
+            files=files,
+            data=data,
+        )
+        return response.json()
+
+
+@pytest.fixture
+async def created_configuration(
+    client: AsyncClient,
+    created_product: dict,
+    created_style: dict,
+) -> dict:
     """Create a configuration and return its data."""
     config_data = {
         "product_id": created_product["id"],
+        "style_id": created_style["id"],
         "client_id": created_product["client_id"],
         "name": "Test Configuration",
         "config_data": {"width": 50, "color": "oak"},

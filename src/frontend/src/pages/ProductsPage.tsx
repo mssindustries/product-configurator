@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getProducts, getClients, ApiClientError } from '../services/api';
 import type { Product, Client } from '../types/api';
 import { Button, Card, Alert } from '../components/ui';
-import { CreateProductModal } from '../components/products';
+import { ProductFormModal } from '../components/products';
 
 /**
  * Format a date string to a human-readable format.
@@ -140,9 +140,11 @@ function ErrorState({
 function ProductRow({
   product,
   clientName,
+  onEdit,
 }: {
   product: Product;
   clientName: string;
+  onEdit: (product: Product) => void;
 }) {
   return (
     <div className="p-4 hover:bg-neutral-50 transition-colors">
@@ -179,10 +181,27 @@ function ProductRow({
             </span>
           </div>
         </div>
-        <div className="flex-shrink-0">
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-50 text-primary-700">
-            v{product.template_version}
-          </span>
+        <div className="flex-shrink-0 flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => onEdit(product)}
+            className="p-1.5 text-neutral-400 hover:text-primary-600 hover:bg-primary-50 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+            aria-label={`Edit ${product.name}`}
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+              />
+            </svg>
+          </button>
         </div>
       </div>
     </div>
@@ -198,6 +217,7 @@ export default function ProductsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | undefined>(undefined);
 
   // Create client lookup map for O(1) name resolution
   const clientsMap = useMemo(
@@ -235,15 +255,22 @@ export default function ProductsPage() {
   }, [fetchData]);
 
   const handleAddProduct = () => {
+    setSelectedProduct(undefined);
+    setIsModalOpen(true);
+  };
+
+  const handleEditProduct = (product: Product) => {
+    setSelectedProduct(product);
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+    setSelectedProduct(undefined);
   };
 
-  const handleProductCreated = () => {
-    // Refresh the product list after successful creation
+  const handleProductSaved = () => {
+    // Refresh the product list after successful creation or update
     fetchData();
   };
 
@@ -303,16 +330,18 @@ export default function ProductsPage() {
                   key={product.id}
                   product={product}
                   clientName={getClientName(product.client_id)}
+                  onEdit={handleEditProduct}
                 />
               ))}
             </div>
           </Card>
         )}
 
-        <CreateProductModal
+        <ProductFormModal
           isOpen={isModalOpen}
           onClose={handleCloseModal}
-          onSuccess={handleProductCreated}
+          onSuccess={handleProductSaved}
+          product={selectedProduct}
         />
       </div>
     </div>
