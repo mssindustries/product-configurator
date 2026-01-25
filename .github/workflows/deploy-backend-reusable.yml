@@ -62,6 +62,7 @@ jobs:
           environmentVariables: |
             ENVIRONMENT=${{ inputs.environment }}
             AZURE_STORAGE_CONNECTION_STRING=${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+            DATABASE_URL=secretref:database-url
 
       - name: Health check
         run: |
