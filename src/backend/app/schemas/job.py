@@ -2,6 +2,7 @@
 Pydantic schemas for Job entity.
 """
 
+from collections.abc import Sequence
 from datetime import datetime
 from typing import TYPE_CHECKING
 from uuid import UUID
@@ -61,8 +62,8 @@ class JobResponse(BaseSchema):
         )
 
     @classmethod
-    def from_models(cls, jobs: list["Job"]) -> list["JobResponse"]:
-        """Create responses from list of ORM models."""
+    def from_models(cls, jobs: Sequence["Job"]) -> list["JobResponse"]:
+        """Create responses from sequence of ORM models."""
         return [cls.from_model(j) for j in jobs]
 
 

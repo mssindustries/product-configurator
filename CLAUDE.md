@@ -441,6 +441,7 @@ When building UI:
 - SQLAlchemy 2.0 async ORM
 - Pydantic v2 for validation
 - Repository pattern for data access (eliminates "get or 404" duplication)
+- Response schema factory methods (eliminates manual field mapping)
 
 **Repository Pattern:**
 The codebase uses a repository pattern to eliminate duplicated data access logic:
@@ -448,6 +449,13 @@ The codebase uses a repository pattern to eliminate duplicated data access logic
 - Raises `EntityNotFoundError` which is caught by global exception handler
 - Example: `product = await ProductRepository(db).ensure_exists(product_id)`
 - Repositories are in `app/repositories/` - check there for available entity repositories
+
+**Response Schema Factory Methods:**
+All response schemas have `from_model()` and `from_models()` class methods for ORM-to-schema conversion:
+- Use `ResponseSchema.from_model(orm_instance)` for single objects
+- Use `ResponseSchema.from_models(orm_sequence)` for collections (accepts `Sequence[T]` from SQLAlchemy)
+- Example: `return ProductResponse.from_model(product)` instead of manual field mapping
+- Benefits: single source of truth, eliminates typos, easier maintenance when schemas change
 
 #### Multi-Domain (e.g., frontend + backend)
 

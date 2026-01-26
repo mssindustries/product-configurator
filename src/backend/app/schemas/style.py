@@ -2,6 +2,7 @@
 Pydantic schemas for Style entity.
 """
 
+from collections.abc import Sequence
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
@@ -106,8 +107,8 @@ class StyleResponse(StyleBase):
         )
 
     @classmethod
-    def from_models(cls, styles: list["Style"]) -> list["StyleResponse"]:
-        """Create responses from list of ORM models."""
+    def from_models(cls, styles: Sequence["Style"]) -> list["StyleResponse"]:
+        """Create responses from sequence of ORM models."""
         return [cls.from_model(s) for s in styles]
 
 

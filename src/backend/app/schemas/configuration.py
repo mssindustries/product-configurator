@@ -2,6 +2,7 @@
 Pydantic schemas for Configuration entity.
 """
 
+from collections.abc import Sequence
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
@@ -69,8 +70,8 @@ class ConfigurationResponse(ConfigurationBase):
         )
 
     @classmethod
-    def from_models(cls, configs: list["Configuration"]) -> list["ConfigurationResponse"]:
-        """Create responses from list of ORM models."""
+    def from_models(cls, configs: Sequence["Configuration"]) -> list["ConfigurationResponse"]:
+        """Create responses from sequence of ORM models."""
         return [cls.from_model(c) for c in configs]
 
 

@@ -2,6 +2,7 @@
 Pydantic schemas for Client entity.
 """
 
+from collections.abc import Sequence
 from datetime import datetime
 from typing import TYPE_CHECKING
 
@@ -43,8 +44,8 @@ class ClientResponse(ClientBase):
         )
 
     @classmethod
-    def from_models(cls, clients: list["Client"]) -> list["ClientResponse"]:
-        """Create responses from list of ORM models."""
+    def from_models(cls, clients: Sequence["Client"]) -> list["ClientResponse"]:
+        """Create responses from sequence of ORM models."""
         return [cls.from_model(c) for c in clients]
 
 
