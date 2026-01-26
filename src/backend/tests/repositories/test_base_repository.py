@@ -8,7 +8,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.exceptions import EntityAlreadyExistsError
 from app.db.models import Client, Product, Style
 from app.repositories.client import ClientRepository
-from app.repositories.product import ProductRepository
 from app.repositories.style import StyleRepository
 
 
