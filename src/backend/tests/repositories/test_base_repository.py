@@ -80,9 +80,15 @@ async def test_ensure_unique_with_exclude_id_still_detects_other_duplicates(
 @pytest.mark.asyncio
 async def test_ensure_unique_with_scope_filters(db_session: AsyncSession) -> None:
     """Test ensure_unique with scope_filters for scoped uniqueness."""
+    # Create a client first
+    client = Client(name="Test Client")
+    db_session.add(client)
+    await db_session.commit()
+    await db_session.refresh(client)
+
     # Create two products
-    product1 = Product(name="Product 1")
-    product2 = Product(name="Product 2")
+    product1 = Product(name="Product 1", client_id=str(client.id))
+    product2 = Product(name="Product 2", client_id=str(client.id))
     db_session.add_all([product1, product2])
     await db_session.commit()
     await db_session.refresh(product1)
@@ -112,8 +118,14 @@ async def test_ensure_unique_with_scope_filters_detects_duplicates_in_scope(
     db_session: AsyncSession,
 ) -> None:
     """Test ensure_unique with scope_filters detects duplicates within the scope."""
+    # Create a client first
+    client = Client(name="Test Client")
+    db_session.add(client)
+    await db_session.commit()
+    await db_session.refresh(client)
+
     # Create a product
-    product = Product(name="Product 1")
+    product = Product(name="Product 1", client_id=str(client.id))
     db_session.add(product)
     await db_session.commit()
     await db_session.refresh(product)
@@ -147,8 +159,14 @@ async def test_ensure_unique_with_scope_filters_and_exclude_id(
     db_session: AsyncSession,
 ) -> None:
     """Test ensure_unique with both scope_filters and exclude_id."""
+    # Create a client first
+    client = Client(name="Test Client")
+    db_session.add(client)
+    await db_session.commit()
+    await db_session.refresh(client)
+
     # Create a product
-    product = Product(name="Product 1")
+    product = Product(name="Product 1", client_id=str(client.id))
     db_session.add(product)
     await db_session.commit()
     await db_session.refresh(product)
