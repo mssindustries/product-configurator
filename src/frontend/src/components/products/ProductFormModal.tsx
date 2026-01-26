@@ -22,6 +22,7 @@ import {
 } from '../ui';
 import { StyleFormModal } from './StyleFormModal';
 import { useList } from '../../hooks';
+import { formatDate } from '../../lib/format';
 
 /**
  * Form data for creating/editing a product.
@@ -64,18 +65,6 @@ export interface ProductFormModalProps {
 }
 
 /**
- * Format a date string to a human-readable format.
- */
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
-}
-
-/**
  * Style card component for displaying a style in the list.
  */
 function StyleCard({
@@ -112,7 +101,7 @@ function StyleCard({
           </p>
         )}
         <p className="mt-1 text-xs text-neutral-400">
-          Created {formatDate(style.created_at)}
+          Created {formatDate(style.created_at, "short")}
         </p>
       </div>
       <div className="flex items-center gap-1 ml-4">
