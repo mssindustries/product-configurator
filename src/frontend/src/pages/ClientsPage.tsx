@@ -13,6 +13,7 @@ import {
   EmptyState,
   ErrorState,
 } from '../components/ui';
+import { PageLayout } from '../components/layout';
 import { useList } from '../hooks';
 import { formatDate } from '../lib/format';
 
@@ -169,58 +170,53 @@ export default function ClientsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-100 p-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-neutral-900">Clients</h1>
-            <p className="text-neutral-600">Manage your client accounts.</p>
-          </div>
-          {!isLoading && !error && clients.length > 0 && (
-            <Button intent="primary" onClick={handleOpenModal}>
-              <Icon name="plus" size="md" />
-              Add Client
-            </Button>
-          )}
-        </div>
-
-        {isLoading && <ListSkeleton />}
-
-        {!isLoading && error && (
-          <ErrorState
-            title="Failed to load clients"
-            message={error}
-            onRetry={refetch}
-          />
-        )}
-
-        {!isLoading && !error && clients.length === 0 && (
-          <EmptyState
-            icon="building"
-            title="No clients yet"
-            description="Get started by adding your first client."
-            action={{ label: 'Add Client', onClick: handleOpenModal }}
-          />
-        )}
-
+    <PageLayout title="Clients" description="Manage your client accounts.">
+      <div className="flex items-center justify-between mb-6">
+        <div />
         {!isLoading && !error && clients.length > 0 && (
-          <Card>
-            <div className="divide-y divide-neutral-200">
-              {clients.map((client) => (
-                <ClientRow key={client.id} client={client} />
-              ))}
-            </div>
-          </Card>
+          <Button intent="primary" onClick={handleOpenModal}>
+            <Icon name="plus" size="md" />
+            Add Client
+          </Button>
         )}
-
-        <AddClientModal
-          isOpen={isModalOpen}
-          onClose={handleCloseModal}
-          onSubmit={handleAddClient}
-          isSubmitting={isSubmitting}
-          error={submitError}
-        />
       </div>
-    </div>
+
+      {isLoading && <ListSkeleton />}
+
+      {!isLoading && error && (
+        <ErrorState
+          title="Failed to load clients"
+          message={error}
+          onRetry={refetch}
+        />
+      )}
+
+      {!isLoading && !error && clients.length === 0 && (
+        <EmptyState
+          icon="building"
+          title="No clients yet"
+          description="Get started by adding your first client."
+          action={{ label: 'Add Client', onClick: handleOpenModal }}
+        />
+      )}
+
+      {!isLoading && !error && clients.length > 0 && (
+        <Card>
+          <div className="divide-y divide-neutral-200">
+            {clients.map((client) => (
+              <ClientRow key={client.id} client={client} />
+            ))}
+          </div>
+        </Card>
+      )}
+
+      <AddClientModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSubmit={handleAddClient}
+        isSubmitting={isSubmitting}
+        error={submitError}
+      />
+    </PageLayout>
   );
 }
