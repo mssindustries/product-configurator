@@ -21,6 +21,8 @@ on:
         required: true
       AZURE_STORAGE_CONNECTION_STRING:
         required: true
+      DATABASE_URL:
+        required: true
 
 jobs:
   deploy:
@@ -54,14 +56,15 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Deploy to Azure Container Apps
-        uses: azure/container-apps-deploy-action@v1
-        with:
-          containerAppName: ${{ steps.resources.outputs.container-app }}
-          resourceGroup: ${{ steps.resources.outputs.resource-group }}
-          imageToDeploy: ${{ inputs.image_tag }}
-          environmentVariables: |
-            ENVIRONMENT=${{ inputs.environment }}
-            AZURE_STORAGE_CONNECTION_STRING=${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+        run: |
+          az containerapp update \
+            --name ${{ steps.resources.outputs.container-app }} \
+            --resource-group ${{ steps.resources.outputs.resource-group }} \
+            --image ${{ inputs.image_tag }} \
+            --set-env-vars \
+              ENVIRONMENT=${{ inputs.environment }} \
+              AZURE_STORAGE_CONNECTION_STRING="${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}" \
+              DATABASE_URL="${{ secrets.DATABASE_URL }}"
 
       - name: Health check
         run: |

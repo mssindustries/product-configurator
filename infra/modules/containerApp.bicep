@@ -14,30 +14,10 @@ param containerRegistryLoginServer string
 @description('Resource ID of the user-assigned managed identity')
 param userAssignedIdentityId string
 
-@description('FQDN of the PostgreSQL Flexible Server')
-param postgresHost string
-
-@description('PostgreSQL administrator login name')
-param postgresUser string
-
-@secure()
-@description('PostgreSQL administrator password')
-param postgresPassword string
-
-@description('Name of the Azure Storage Account')
-param storageAccountName string
-
-@description('Blob endpoint URL of the Azure Storage Account')
-param storageBlobEndpoint string
-
 // Container App names: max 32 chars, per naming-conventions.md ca- prefix, no region suffix
 var name = 'ca-msscfg-${environment}'
 // Use actual backend image from shared ACR
 var imageName = '${containerRegistryLoginServer}/msscfg-backend:latest'
-var databaseName = 'configurator'
-
-// Construct PostgreSQL connection string for SQLAlchemy async driver
-var databaseUrl = 'postgresql+asyncpg://${postgresUser}:${postgresPassword}@${postgresHost}:5432/${databaseName}'
 
 resource containerApp 'Microsoft.App/containerApps@2026-01-01' = {
   name: name
@@ -45,12 +25,6 @@ resource containerApp 'Microsoft.App/containerApps@2026-01-01' = {
   properties: {
     managedEnvironmentId: containerAppsEnvironmentId
     configuration: {
-      secrets: [
-        {
-          name: 'database-url'
-          value: databaseUrl
-        }
-      ]
       ingress: {
         external: true
         targetPort: 8000
@@ -75,20 +49,6 @@ resource containerApp 'Microsoft.App/containerApps@2026-01-01' = {
             cpu: json('2.0')
             memory: '4Gi'
           }
-          env: [
-            {
-              name: 'DATABASE_URL'
-              secretRef: 'database-url'
-            }
-            {
-              name: 'AZURE_STORAGE_ACCOUNT_NAME'
-              value: storageAccountName
-            }
-            {
-              name: 'AZURE_STORAGE_BLOB_ENDPOINT'
-              value: storageBlobEndpoint
-            }
-          ]
         }
       ]
       scale: {

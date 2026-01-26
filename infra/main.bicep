@@ -166,11 +166,6 @@ module containerApp 'modules/containerApp.bicep' = {
     containerAppsEnvironmentId: containerAppsEnvironment.outputs.id
     containerRegistryLoginServer: sharedContainerRegistry.outputs.loginServer
     userAssignedIdentityId: managedIdentity.outputs.id
-    postgresHost: postgresFlexible.outputs.fqdn
-    postgresUser: postgresAdminLogin
-    postgresPassword: postgresAdminPassword
-    storageAccountName: storageAccount.outputs.name
-    storageBlobEndpoint: storageAccount.outputs.primaryBlobEndpoint
   }
 }
 
