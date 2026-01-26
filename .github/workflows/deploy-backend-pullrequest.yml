@@ -25,7 +25,7 @@ jobs:
     uses: ./.github/workflows/test-backend-reusable.yml
 
   build:
-    name: Build
+    name: Build Docker
     needs: test
     uses: ./.github/workflows/build-backend-reusable.yml
     with:

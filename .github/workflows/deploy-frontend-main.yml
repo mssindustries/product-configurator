@@ -6,7 +6,7 @@
 #
 # Related workflow: deploy-frontend-pullrequest.yml (PR previews)
 
-name: Deploy Frontend (Main)
+name: Frontend (Main)
 
 on:
   push:

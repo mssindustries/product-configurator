@@ -6,7 +6,7 @@
 #
 # Related workflow: deploy-backend-pullrequest.yml (PR previews)
 
-name: Deploy Backend (Main)
+name: Backend (Main)
 
 on:
   push:

@@ -6,7 +6,7 @@
 # Deploys to: Test environment only (creates PR preview environments)
 # Related workflow: deploy-frontend-main.yml (main branch deploys)
 
-name: Deploy Frontend (Pull Request)
+name: Frontend (Pull Request)
 
 on:
   pull_request:
