@@ -19,6 +19,7 @@ import {
   Textarea,
   FormField,
   useToast,
+  Tabs,
 } from '../ui';
 import { StyleFormModal } from './StyleFormModal';
 import { useList } from '../../hooks';
@@ -494,49 +495,25 @@ export function ProductFormModal({
 
             {/* Tabbed Form - Only show when clients loaded successfully */}
             {!isLoadingClients && !clientsError && clients.length > 0 && (
-              <div>
-                <div
-                  role="tablist"
-                  className="flex border-b border-neutral-200"
-                >
-                  <button
-                    type="button"
-                    role="tab"
-                    aria-selected={activeTab === 'basic'}
-                    onClick={() => setActiveTab('basic')}
-                    className={`px-4 py-2 font-medium text-sm transition-colors border-b-2 -mb-px focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${
-                      activeTab === 'basic'
-                        ? 'border-primary-500 text-primary-600'
-                        : 'border-transparent text-neutral-600 hover:text-neutral-900 hover:border-neutral-300'
-                    }`}
-                  >
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <Tabs.List>
+                  <Tabs.Tab value="basic">
                     Basic Information
-                  </button>
+                  </Tabs.Tab>
                   {isEditMode && (
-                    <button
-                      type="button"
-                      role="tab"
-                      aria-selected={activeTab === 'styles'}
-                      onClick={() => setActiveTab('styles')}
-                      className={`px-4 py-2 font-medium text-sm transition-colors border-b-2 -mb-px focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${
-                        activeTab === 'styles'
-                          ? 'border-primary-500 text-primary-600'
-                          : 'border-transparent text-neutral-600 hover:text-neutral-900 hover:border-neutral-300'
-                      }`}
-                    >
+                    <Tabs.Tab value="styles">
                       Styles
                       {styles.length > 0 && (
                         <span className="ml-2 inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-medium bg-neutral-100 text-neutral-600">
                           {styles.length}
                         </span>
                       )}
-                    </button>
+                    </Tabs.Tab>
                   )}
-                </div>
+                </Tabs.List>
 
                 {/* Basic Info Tab */}
-                {activeTab === 'basic' && (
-                  <div className="p-6 space-y-4 max-h-[50vh] overflow-y-auto">
+                <Tabs.Panel value="basic" className="p-6 space-y-4 max-h-[50vh] overflow-y-auto">
                     {/* Basic Info - Two columns on md+ screens */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {/* Client Dropdown */}
@@ -599,12 +576,11 @@ export function ProductFormModal({
                         </p>
                       </Alert>
                     )}
-                  </div>
-                )}
+                </Tabs.Panel>
 
                 {/* Styles Tab (Edit mode only) */}
-                {activeTab === 'styles' && isEditMode && (
-                  <div className="p-6 max-h-[50vh] overflow-y-auto">
+                {isEditMode && (
+                  <Tabs.Panel value="styles" className="p-6 max-h-[50vh] overflow-y-auto">
                     {/* Styles Header */}
                     <div className="flex items-center justify-between mb-4">
                       <div>
@@ -688,9 +664,9 @@ export function ProductFormModal({
                         ))}
                       </div>
                     )}
-                  </div>
+                  </Tabs.Panel>
                 )}
-              </div>
+              </Tabs>
             )}
 
             {/* Submit Error */}
