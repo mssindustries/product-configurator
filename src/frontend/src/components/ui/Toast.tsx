@@ -6,7 +6,7 @@ import { cn } from '../../lib/utils';
  * Toast variants using CVA.
  */
 const toastVariants = cva(
-  'flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg pointer-events-auto max-w-sm',
+  'flex items-center gap-3 px-4 py-4 min-h-[56px] rounded-lg shadow-lg pointer-events-auto max-w-sm',
   {
     variants: {
       intent: {
