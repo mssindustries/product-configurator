@@ -1,90 +1,17 @@
 import { useState, useMemo } from 'react';
 import { getProducts, getClients } from '../services/api';
 import type { Product } from '../types/api';
-import { Button, Card, Alert, Icon } from '../components/ui';
+import {
+  Button,
+  Card,
+  Icon,
+  ListSkeleton,
+  EmptyState,
+  ErrorState,
+} from '../components/ui';
 import { ProductFormModal } from '../components/products';
 import { useList } from '../hooks';
 import { formatDate } from '../lib/format';
-
-/**
- * Loading skeleton for product list.
- */
-function LoadingSkeleton() {
-  return (
-    <Card>
-      <div className="divide-y divide-neutral-200">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="p-4 animate-pulse">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="h-5 bg-neutral-200 rounded w-1/3 mb-2" />
-                <div className="h-4 bg-neutral-200 rounded w-1/4 mb-1" />
-                <div className="h-4 bg-neutral-200 rounded w-1/5" />
-              </div>
-              <div className="h-6 bg-neutral-200 rounded w-16" />
-            </div>
-          </div>
-        ))}
-      </div>
-    </Card>
-  );
-}
-
-/**
- * Empty state when no products exist.
- */
-function EmptyState({ onAddClick }: { onAddClick: () => void }) {
-  return (
-    <Card padding="lg">
-      <div className="flex items-start gap-6">
-        <div className="flex-shrink-0">
-          <Icon name="cube" size="3xl" className="text-neutral-400" />
-        </div>
-        <div className="flex-1">
-          <h3 className="text-lg font-medium text-neutral-900 mb-2">
-            No products yet
-          </h3>
-          <p className="text-neutral-500 mb-6">
-            Get started by adding your first product. Products define the 3D configurator
-            templates that your clients can customize.
-          </p>
-          <Button intent="primary" onClick={onAddClick}>
-            <Icon name="plus" size="md" className="mr-1" />
-            Add Your First Product
-          </Button>
-        </div>
-      </div>
-    </Card>
-  );
-}
-
-/**
- * Error state with retry button.
- */
-function ErrorState({
-  message,
-  onRetry,
-}: {
-  message: string;
-  onRetry: () => void;
-}) {
-  return (
-    <div className="text-center">
-      <Alert intent="danger" className="mb-6">
-        <div className="flex flex-col items-center py-4">
-          <Icon name="warning" size="2xl" className="text-danger-500 mb-4" />
-          <h3 className="text-lg font-medium text-neutral-800 mb-2">
-            Failed to load products
-          </h3>
-          <p className="text-neutral-600 mb-4">{message}</p>
-          <Button intent="danger" onClick={onRetry}>
-            Try Again
-          </Button>
-        </div>
-      </Alert>
-    </div>
-  );
-}
 
 /**
  * Product row component with enhanced display.
@@ -201,14 +128,26 @@ export default function ProductsPage() {
           )}
         </div>
 
-        {isLoading && <LoadingSkeleton />}
+        {isLoading && (
+          <ListSkeleton rows={3} config={{ lines: 3, widths: ['w-1/3', 'w-1/4', 'w-1/5'] }} />
+        )}
 
         {!isLoading && error && (
-          <ErrorState message={error} onRetry={refetchProducts} />
+          <ErrorState
+            title="Failed to load products"
+            message={error}
+            onRetry={refetchProducts}
+          />
         )}
 
         {!isLoading && !error && products.length === 0 && (
-          <EmptyState onAddClick={handleAddProduct} />
+          <EmptyState
+            icon="cube"
+            title="No products yet"
+            description="Get started by adding your first product. Products define the 3D configurator templates that your clients can customize."
+            action={{ label: 'Add Your First Product', onClick: handleAddProduct }}
+            layout="horizontal"
+          />
         )}
 
         {!isLoading && !error && products.length > 0 && (
