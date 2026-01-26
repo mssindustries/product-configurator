@@ -490,3 +490,15 @@ az provider show --namespace Microsoft.ManagedIdentity --query "resourceTypes[?r
 - `Microsoft.Web` - Static Web Apps
 
 **Reference:** https://learn.microsoft.com/en-us/azure/templates/
+
+## Branch Naming Guidelines
+
+See the [Branch Naming Guidelines in README.md](README.md#branch-naming-guidelines) for the current branch naming conventions.
+
+**Quick summary:**
+- `issue/{number}-description` - issue-based work
+- `test/description` - experiments and testing
+- `fix/description` - hotfixes
+- `chore/description` - non-feature work
+
+**Note:** Claude GitHub Action branches use the format: `claude/issue-{number}-{timestamp}`
