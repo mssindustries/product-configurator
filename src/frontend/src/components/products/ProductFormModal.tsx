@@ -11,6 +11,7 @@ import {
 import type { Client, Product, Style } from '../../types/api';
 import {
   Button,
+  Icon,
   Input,
   Modal,
   Alert,
@@ -121,14 +122,7 @@ function StyleCard({
           className="p-1.5 text-neutral-400 hover:text-primary-600 hover:bg-primary-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           title="Edit style"
         >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-            />
-          </svg>
+          <Icon name="edit" size="sm" />
         </button>
         {!style.is_default && (
           <>
@@ -140,19 +134,9 @@ function StyleCard({
               title="Set as default"
             >
               {isSettingDefault ? (
-                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                </svg>
+                <Icon name="spinner" size="sm" className="animate-spin" />
               ) : (
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
-                  />
-                </svg>
+                <Icon name="star" size="sm" />
               )}
             </button>
             <button
@@ -163,19 +147,9 @@ function StyleCard({
               title="Delete style"
             >
               {isDeleting ? (
-                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                </svg>
+                <Icon name="spinner" size="sm" className="animate-spin" />
               ) : (
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                  />
-                </svg>
+                <Icon name="trash" size="sm" />
               )}
             </button>
           </>
@@ -541,26 +515,7 @@ export function ProductFormModal({
             {/* Client Loading State */}
             {isLoadingClients && (
               <div className="flex items-center gap-2 text-neutral-500 py-6 px-6">
-                <svg
-                  className="h-5 w-5 animate-spin"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  />
-                </svg>
+                <Icon name="spinner" size="md" className="animate-spin" />
                 <span>Loading clients...</span>
               </div>
             )}
@@ -715,19 +670,7 @@ export function ProductFormModal({
                         onClick={handleAddStyle}
                         disabled={isLoadingStyles}
                       >
-                        <svg
-                          className="w-4 h-4 mr-1"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 4v16m8-8H4"
-                          />
-                        </svg>
+                        <Icon name="plus" size="sm" className="mr-1" />
                         Add Style
                       </Button>
                     </div>
@@ -735,25 +678,7 @@ export function ProductFormModal({
                     {/* Styles Loading State */}
                     {isLoadingStyles && (
                       <div className="flex items-center justify-center py-8">
-                        <svg
-                          className="h-6 w-6 animate-spin text-neutral-400"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          />
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                          />
-                        </svg>
+                        <Icon name="spinner" size="lg" className="animate-spin text-neutral-400" />
                         <span className="ml-2 text-neutral-500">Loading styles...</span>
                       </div>
                     )}
@@ -775,19 +700,7 @@ export function ProductFormModal({
                     {/* Styles Empty State */}
                     {!isLoadingStyles && !stylesError && styles.length === 0 && (
                       <div className="text-center py-8 bg-neutral-50 rounded-lg border-2 border-dashed border-neutral-200">
-                        <svg
-                          className="mx-auto h-12 w-12 text-neutral-400"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={1.5}
-                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                          />
-                        </svg>
+                        <Icon name="styles" size="2xl" className="mx-auto text-neutral-400" />
                         <h4 className="mt-2 text-sm font-medium text-neutral-900">
                           No styles yet
                         </h4>
@@ -801,19 +714,7 @@ export function ProductFormModal({
                           onClick={handleAddStyle}
                           className="mt-4"
                         >
-                          <svg
-                            className="w-4 h-4 mr-1"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M12 4v16m8-8H4"
-                            />
-                          </svg>
+                          <Icon name="plus" size="sm" className="mr-1" />
                           Add First Style
                         </Button>
                       </div>

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getProducts, getClients, ApiClientError } from '../services/api';
 import type { Product, Client } from '../types/api';
-import { Button, Card, Alert } from '../components/ui';
+import { Button, Card, Alert, Icon } from '../components/ui';
 import { ProductFormModal } from '../components/products';
 
 /**
@@ -48,20 +48,7 @@ function EmptyState({ onAddClick }: { onAddClick: () => void }) {
     <Card padding="lg">
       <div className="flex items-start gap-6">
         <div className="flex-shrink-0">
-          <svg
-            className="h-16 w-16 text-neutral-400"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            aria-hidden="true"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.5}
-              d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-            />
-          </svg>
+          <Icon name="cube" size="3xl" className="text-neutral-400" />
         </div>
         <div className="flex-1">
           <h3 className="text-lg font-medium text-neutral-900 mb-2">
@@ -72,19 +59,7 @@ function EmptyState({ onAddClick }: { onAddClick: () => void }) {
             templates that your clients can customize.
           </p>
           <Button intent="primary" onClick={onAddClick}>
-            <svg
-              className="w-5 h-5 mr-1"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
+            <Icon name="plus" size="md" className="mr-1" />
             Add Your First Product
           </Button>
         </div>
@@ -107,20 +82,7 @@ function ErrorState({
     <div className="text-center">
       <Alert intent="danger" className="mb-6">
         <div className="flex flex-col items-center py-4">
-          <svg
-            className="h-12 w-12 text-danger-500 mb-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            aria-hidden="true"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-            />
-          </svg>
+          <Icon name="warning" size="2xl" className="text-danger-500 mb-4" />
           <h3 className="text-lg font-medium text-neutral-800 mb-2">
             Failed to load products
           </h3>
@@ -160,19 +122,7 @@ function ProductRow({
           )}
           <div className="flex items-center gap-3 mt-1">
             <span className="inline-flex items-center text-sm text-neutral-500">
-              <svg
-                className="w-4 h-4 mr-1 text-neutral-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                />
-              </svg>
+              <Icon name="building" size="sm" className="mr-1 text-neutral-400" />
               {clientName}
             </span>
             <span className="text-neutral-300">|</span>
@@ -188,19 +138,7 @@ function ProductRow({
             className="p-1.5 text-neutral-400 hover:text-primary-600 hover:bg-primary-50 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
             aria-label={`Edit ${product.name}`}
           >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-              />
-            </svg>
+            <Icon name="edit" size="md" />
           </button>
         </div>
       </div>
@@ -294,19 +232,7 @@ export default function ProductsPage() {
           </div>
           {!isLoading && !error && products.length > 0 && (
             <Button intent="primary" onClick={handleAddProduct}>
-              <svg
-                className="w-5 h-5 mr-1"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
+              <Icon name="plus" size="md" className="mr-1" />
               Add Product
             </Button>
           )}

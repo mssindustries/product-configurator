@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getClients, createClient, ApiClientError } from '../services/api';
 import type { Client } from '../types/api';
-import { Button, Card, Input, Modal, Alert, useToast } from '../components/ui';
+import { Button, Card, Input, Modal, Alert, Icon, useToast } from '../components/ui';
 
 /**
  * Format a date string to a human-readable format.
@@ -39,20 +39,7 @@ function LoadingSkeleton() {
 function EmptyState({ onAddClick }: { onAddClick: () => void }) {
   return (
     <Card padding="lg" className="text-center">
-      <svg
-        className="mx-auto h-16 w-16 text-neutral-400 mb-4"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        aria-hidden="true"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={1.5}
-          d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-        />
-      </svg>
+      <Icon name="building" size="3xl" className="mx-auto text-neutral-400 mb-4" />
       <h3 className="text-lg font-medium text-neutral-900 mb-2">
         No clients yet
       </h3>
@@ -80,20 +67,7 @@ function ErrorState({
     <div className="text-center">
       <Alert intent="danger" className="mb-6">
         <div className="flex flex-col items-center py-4">
-          <svg
-            className="h-12 w-12 text-danger-500 mb-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            aria-hidden="true"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-            />
-          </svg>
+          <Icon name="warning" size="2xl" className="text-danger-500 mb-4" />
           <h3 className="text-lg font-medium mb-2">Failed to load clients</h3>
           <p className="mb-4">{message}</p>
           <Button intent="danger" onClick={onRetry}>
@@ -293,19 +267,7 @@ export default function ClientsPage() {
           </div>
           {!isLoading && !error && clients.length > 0 && (
             <Button intent="primary" onClick={handleOpenModal}>
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
+              <Icon name="plus" size="md" />
               Add Client
             </Button>
           )}

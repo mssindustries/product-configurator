@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth, type UserRole } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
+import { Icon } from '@/components/ui';
 
 const roleLabels: Record<UserRole, string> = {
   client: 'Client',
@@ -72,14 +73,11 @@ export function RoleSwitcher() {
           )}
         />
         <span>{roleLabels[role]}</span>
-        <svg
-          className={cn('w-4 h-4 transition-transform', isOpen && 'rotate-180')}
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
+        <Icon
+          name="chevronDown"
+          size="sm"
+          className={cn('transition-transform', isOpen && 'rotate-180')}
+        />
       </button>
 
       {isOpen && (
@@ -116,19 +114,7 @@ export function RoleSwitcher() {
                   <div className="text-xs text-neutral-500">{roleDescriptions[roleOption]}</div>
                 </div>
                 {roleOption === role && (
-                  <svg
-                    className="ml-auto w-5 h-5 text-primary-500"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
+                  <Icon name="check" size="md" className="ml-auto text-primary-500" />
                 )}
               </div>
             </button>

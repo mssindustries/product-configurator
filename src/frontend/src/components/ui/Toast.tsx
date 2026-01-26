@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import { cva } from 'class-variance-authority';
 import { cn } from '../../lib/utils';
+import { Icon } from './Icon';
 
 /**
  * Toast variants using CVA.
@@ -95,26 +96,10 @@ function ToastItem({
   }, [toast.id, onDismiss]);
 
   const iconMap: Record<ToastIntent, ReactNode> = {
-    success: (
-      <svg className="w-5 h-5 text-success-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-      </svg>
-    ),
-    danger: (
-      <svg className="w-5 h-5 text-danger-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-      </svg>
-    ),
-    warning: (
-      <svg className="w-5 h-5 text-warning-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-      </svg>
-    ),
-    info: (
-      <svg className="w-5 h-5 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ),
+    success: <Icon name="check" size="md" className="text-success-500" />,
+    danger: <Icon name="x" size="md" className="text-danger-500" />,
+    warning: <Icon name="warning" size="md" className="text-warning-500" />,
+    info: <Icon name="info" size="md" className="text-primary-500" />,
   };
 
   return (
@@ -133,9 +118,7 @@ function ToastItem({
         className="p-1 rounded hover:bg-black/5 transition-colors"
         aria-label="Dismiss"
       >
-        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-        </svg>
+        <Icon name="x" size="sm" />
       </button>
     </div>
   );

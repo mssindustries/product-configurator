@@ -2,7 +2,7 @@
 
 This document tracks systematic patterns in the codebase that make AI-assisted coding difficult, along with their proposed solutions and implementation status.
 
-**Last Updated:** 2026-01-26
+**Last Updated:** 2026-01-25
 
 ---
 
@@ -488,18 +488,21 @@ export function ErrorState({ title, message, onRetry }: ErrorStateProps)
 
 ---
 
-### Pattern 4: Inline SVG Icons Throughout Codebase
+### Pattern 4: Inline SVG Icons Throughout Codebase ✅ COMPLETED
 
-**Status:** 📋 Not Started
+**Status:** ✅ Completed - 2026-01-25
 
 **Problem:** SVG icons copied inline throughout codebase (36 occurrences across 11 files).
 
 **Solution:** Icon Component Library
 
-**Proposed Implementation:**
+**Implementation:**
 ```typescript
 // components/ui/Icon.tsx
-export type IconName = 'plus' | 'edit' | 'delete' | 'warning' | ...;
+export type IconName =
+  | 'building' | 'check' | 'checkCircle' | 'chevronDown' | 'cube'
+  | 'document' | 'edit' | 'home' | 'info' | 'plus' | 'spinner'
+  | 'star' | 'styles' | 'trash' | 'upload' | 'warning' | 'x';
 
 export const Icon = forwardRef<SVGSVGElement, IconProps>(
   ({ name, size = 'md', className, ...props }, ref) => { ... }
@@ -507,13 +510,13 @@ export const Icon = forwardRef<SVGSVGElement, IconProps>(
 
 // Usage:
 <Icon name="plus" size="md" />
+<Icon name="spinner" className="animate-spin" />
 ```
 
-**Files to create:**
-- `src/components/ui/Icon.tsx`
-
-**Files to modify:**
-- Replace inline SVG with Icon component throughout codebase
+**Files:**
+- Created: `src/frontend/src/components/ui/Icon.tsx` - Icon component with 17 icon types
+- Modified: 11 files (Button, Toast, FileUpload, Navigation, RoleSwitcher, AdminPage, ClientPage, ClientsPage, ProductsPage, ProductFormModal, StyleFormModal)
+- Replaced: 36 inline SVG occurrences
 
 ---
 
@@ -633,7 +636,7 @@ export function PageLayout({
 9. Test Fixtures
 
 ### Frontend (by impact/effort ratio)
-1. Icon Component Library (high impact, low effort)
+1. ✅ Icon Component Library (completed)
 2. `useAsync`/`useList` hooks (high impact, medium effort)
 3. `formatDate` utility (medium impact, low effort)
 4. Page State Components (high impact, medium effort)

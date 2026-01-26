@@ -3,6 +3,7 @@ import { createStyle, updateStyle, ApiClientError } from '../../services/api';
 import type { Style } from '../../types/api';
 import {
   Button,
+  Icon,
   Input,
   Modal,
   Alert,
@@ -398,9 +399,7 @@ export function StyleFormModal({
                 {isEditMode && style && !formData.file && (
                   <div className="mb-3 p-3 bg-neutral-50 border border-neutral-200 rounded-lg">
                     <div className="flex items-center gap-2 text-sm">
-                      <svg className="w-4 h-4 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
+                      <Icon name="document" size="sm" className="text-neutral-500" />
                       <span className="text-neutral-700 font-medium">Current file:</span>
                       <span className="text-neutral-600">{style.template_blob_path.split('/').pop()}</span>
                     </div>

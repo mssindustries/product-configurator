@@ -1,4 +1,4 @@
-import { Card } from '@/components/ui';
+import { Card, Icon } from '@/components/ui';
 
 /**
  * ClientPage - The customer-facing view for product configuration.
@@ -17,19 +17,7 @@ export default function ClientPage() {
           <div className="flex items-start gap-6">
             <div className="flex-shrink-0">
               <div className="bg-success-50 w-16 h-16 rounded-full flex items-center justify-center">
-                <svg
-                  className="w-8 h-8 text-success-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1.5}
-                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                  />
-                </svg>
+                <Icon name="cube" size="xl" className="text-success-600" />
               </div>
             </div>
             <div className="flex-1">
