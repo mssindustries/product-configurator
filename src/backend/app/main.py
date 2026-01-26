@@ -3,14 +3,12 @@ FastAPI application entry point.
 Test backend PR workflow quality gates.
 """
 
-import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from sqlalchemy import inspect
 
 from app.api.v1.router import router as v1_router
 from app.core.config import settings
@@ -24,28 +22,12 @@ from app.core.exceptions import (
 from app.db.models import Base
 from app.db.session import engine
 
-logger = logging.getLogger(__name__)
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Application lifespan: create tables on startup if they don't exist."""
+    """Application lifespan: create tables on startup."""
     async with engine.begin() as conn:
-        # Check if tables already exist
-        def check_tables_exist(connection):
-            inspector = inspect(connection)
-            existing_tables = inspector.get_table_names()
-            return len(existing_tables) > 0
-
-        tables_exist = await conn.run_sync(check_tables_exist)
-
-        if tables_exist:
-            logger.info("Database tables already exist, skipping creation")
-        else:
-            logger.info("Creating database tables...")
-            await conn.run_sync(Base.metadata.create_all)
-            logger.info("Database tables created successfully")
-
+        await conn.run_sync(Base.metadata.create_all)
     yield
 
 
