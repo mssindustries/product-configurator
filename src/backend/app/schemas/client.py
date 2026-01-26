@@ -47,10 +47,3 @@ class ClientResponse(ClientBase):
     def from_models(cls, clients: Sequence["Client"]) -> list["ClientResponse"]:
         """Create responses from sequence of ORM models."""
         return [cls.from_model(c) for c in clients]
-
-
-class ClientListResponse(BaseSchema):
-    """Schema for listing clients."""
-
-    items: list[ClientResponse]
-    total: int

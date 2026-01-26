@@ -62,10 +62,3 @@ class ProductResponse(ProductBase):
     def from_models(cls, products: Sequence["Product"]) -> list["ProductResponse"]:
         """Create responses from sequence of ORM models."""
         return [cls.from_model(p) for p in products]
-
-
-class ProductListResponse(BaseSchema):
-    """Schema for listing products."""
-
-    items: list[ProductResponse]
-    total: int

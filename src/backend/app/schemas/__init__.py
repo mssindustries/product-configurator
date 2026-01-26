@@ -9,30 +9,27 @@ from app.schemas.base import (
     BaseSchema,
     ErrorDetail,
     ErrorResponse,
+    ListResponse,
     MessageResponse,
     PaginatedResponse,
     TimestampSchema,
 )
 from app.schemas.client import (
     ClientCreate,
-    ClientListResponse,
     ClientResponse,
 )
 from app.schemas.configuration import (
     ConfigurationCreate,
-    ConfigurationListResponse,
     ConfigurationResponse,
     ConfigurationUpdate,
 )
 from app.schemas.job import (
     JobCreate,
-    JobListResponse,
     JobResponse,
     JobStatusResponse,
 )
 from app.schemas.product import (
     ProductCreate,
-    ProductListResponse,
     ProductResponse,
     ProductUpdate,
 )
@@ -42,26 +39,23 @@ __all__ = [
     "BaseSchema",
     "ErrorDetail",
     "ErrorResponse",
+    "ListResponse",
     "MessageResponse",
     "PaginatedResponse",
     "TimestampSchema",
     # Client
     "ClientCreate",
-    "ClientListResponse",
     "ClientResponse",
     # Product
     "ProductCreate",
-    "ProductListResponse",
     "ProductResponse",
     "ProductUpdate",
     # Configuration
     "ConfigurationCreate",
-    "ConfigurationListResponse",
     "ConfigurationResponse",
     "ConfigurationUpdate",
     # Job
     "JobCreate",
-    "JobListResponse",
     "JobResponse",
     "JobStatusResponse",
 ]

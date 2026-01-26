@@ -20,9 +20,9 @@ from fastapi import APIRouter, Query, status
 from app.api.deps import DbSession
 from app.db.models import Product
 from app.repositories import ProductRepository
+from app.schemas import ListResponse
 from app.schemas.product import (
     ProductCreate,
-    ProductListResponse,
     ProductResponse,
     ProductUpdate,
 )
@@ -30,12 +30,12 @@ from app.schemas.product import (
 router = APIRouter()
 
 
-@router.get("", response_model=ProductListResponse)
+@router.get("", response_model=ListResponse[ProductResponse])
 async def list_products(
     db: DbSession,
     skip: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=1, le=100)] = 20,
-) -> ProductListResponse:
+) -> ListResponse[ProductResponse]:
     """
     List all products.
 
@@ -44,7 +44,7 @@ async def list_products(
     - limit: Maximum number of products to return (1-100)
 
     Returns:
-        ProductListResponse with items and total count.
+        ListResponse with items and total count.
     """
     repo = ProductRepository(db)
     result = await repo.list_paginated(
@@ -55,7 +55,7 @@ async def list_products(
 
     items = ProductResponse.from_models(result.items)
 
-    return ProductListResponse(items=items, total=result.total)
+    return ListResponse(items=items, total=result.total)
 
 
 @router.get("/{product_id}", response_model=ProductResponse)

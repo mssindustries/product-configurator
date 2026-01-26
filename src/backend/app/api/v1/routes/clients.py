@@ -11,20 +11,21 @@ from sqlalchemy import func, select
 
 from app.api.deps import DbSession
 from app.db.models import Client
-from app.schemas.client import ClientCreate, ClientListResponse, ClientResponse
+from app.schemas import ListResponse
+from app.schemas.client import ClientCreate, ClientResponse
 
 router = APIRouter()
 
 
-@router.get("", response_model=ClientListResponse)
+@router.get("", response_model=ListResponse[ClientResponse])
 async def list_clients(
     db: DbSession,
-) -> ClientListResponse:
+) -> ListResponse[ClientResponse]:
     """
     List all clients.
 
     Returns:
-        ClientListResponse with items and total count.
+        ListResponse with items and total count.
     """
     # Get total count
     count_stmt = select(func.count()).select_from(Client)
@@ -39,7 +40,7 @@ async def list_clients(
     # Convert to response schemas
     items = ClientResponse.from_models(clients)
 
-    return ClientListResponse(items=items, total=total)
+    return ListResponse(items=items, total=total)
 
 
 @router.post("", response_model=ClientResponse, status_code=status.HTTP_201_CREATED)

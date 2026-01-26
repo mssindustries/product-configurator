@@ -73,10 +73,3 @@ class ConfigurationResponse(ConfigurationBase):
     def from_models(cls, configs: Sequence["Configuration"]) -> list["ConfigurationResponse"]:
         """Create responses from sequence of ORM models."""
         return [cls.from_model(c) for c in configs]
-
-
-class ConfigurationListResponse(BaseSchema):
-    """Schema for listing configurations."""
-
-    items: list[ConfigurationResponse]
-    total: int
