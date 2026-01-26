@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import {
   getClients,
   getStyles,
@@ -8,7 +8,7 @@ import {
   updateProduct,
   ApiClientError,
 } from '../../services/api';
-import type { Client, Product, Style } from '../../types/api';
+import type { Product, Style } from '../../types/api';
 import {
   Button,
   Icon,
@@ -21,6 +21,7 @@ import {
   useToast,
 } from '../ui';
 import { StyleFormModal } from './StyleFormModal';
+import { useList } from '../../hooks';
 
 /**
  * Form data for creating/editing a product.
@@ -196,14 +197,13 @@ export function ProductFormModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Client dropdown state
-  const [clients, setClients] = useState<Client[]>([]);
-  const [isLoadingClients, setIsLoadingClients] = useState(true);
-  const [clientsError, setClientsError] = useState<string | null>(null);
+  const { items: clients, isLoading: isLoadingClients, error: clientsError, refetch: refetchClients } = useList(getClients, { immediate: false });
 
   // Styles state (for edit mode)
-  const [styles, setStyles] = useState<Style[]>([]);
-  const [isLoadingStyles, setIsLoadingStyles] = useState(false);
-  const [stylesError, setStylesError] = useState<string | null>(null);
+  const { items: styles, isLoading: isLoadingStyles, error: stylesError, refetch: refetchStyles } = useList(
+    () => getStyles(product?.id || ''),
+    { immediate: false }
+  );
   const [deletingStyleId, setDeletingStyleId] = useState<string | null>(null);
   const [settingDefaultStyleId, setSettingDefaultStyleId] = useState<string | null>(null);
 
@@ -217,53 +217,6 @@ export function ProductFormModal({
   // Active tab state for controlled tabs
   const [activeTab, setActiveTab] = useState('basic');
 
-  /**
-   * Fetch clients when modal opens.
-   */
-  const fetchClients = useCallback(async () => {
-    setIsLoadingClients(true);
-    setClientsError(null);
-
-    try {
-      const response = await getClients();
-      setClients(response.items);
-    } catch (err) {
-      if (err instanceof ApiClientError) {
-        setClientsError(err.detail || err.message);
-      } else if (err instanceof Error) {
-        setClientsError(err.message);
-      } else {
-        setClientsError('Failed to load clients');
-      }
-    } finally {
-      setIsLoadingClients(false);
-    }
-  }, []);
-
-  /**
-   * Fetch styles for the product (edit mode only).
-   */
-  const fetchStyles = useCallback(async () => {
-    if (!product) return;
-
-    setIsLoadingStyles(true);
-    setStylesError(null);
-
-    try {
-      const response = await getStyles(product.id);
-      setStyles(response.items);
-    } catch (err) {
-      if (err instanceof ApiClientError) {
-        setStylesError(err.detail || err.message);
-      } else if (err instanceof Error) {
-        setStylesError(err.message);
-      } else {
-        setStylesError('Failed to load styles');
-      }
-    } finally {
-      setIsLoadingStyles(false);
-    }
-  }, [product]);
 
   /**
    * Reset form when modal opens/closes.
@@ -280,21 +233,20 @@ export function ProductFormModal({
         });
         // Set tab based on justCreated flag
         setActiveTab(justCreated ? 'styles' : 'basic');
-        fetchStyles();
+        refetchStyles();
       } else {
         // Create mode: reset to initial state
         setFormData(initialFormData);
-        setStyles([]);
         setActiveTab('basic');
       }
       setErrors({});
       setSubmitError(null);
-      fetchClients();
+      refetchClients();
     } else {
       // Reset justCreated when modal closes
       setJustCreated(false);
     }
-  }, [isOpen, product, fetchClients, fetchStyles, justCreated]);
+  }, [isOpen, product, refetchClients, refetchStyles, justCreated]);
 
   /**
    * Handle keyboard events for accessibility.
@@ -441,7 +393,7 @@ export function ProductFormModal({
    * Handle style created/updated.
    */
   const handleStyleSuccess = () => {
-    fetchStyles();
+    refetchStyles();
   };
 
   /**
@@ -455,7 +407,7 @@ export function ProductFormModal({
     try {
       await setDefaultStyle(product.id, styleId);
       addToast('Default style updated!', 'success');
-      fetchStyles();
+      refetchStyles();
     } catch (err) {
       if (err instanceof ApiClientError) {
         addToast(err.detail || 'Failed to set default style', 'danger');
@@ -483,7 +435,7 @@ export function ProductFormModal({
     try {
       await deleteStyle(product.id, style.id);
       addToast(`Style "${style.name}" deleted`, 'success');
-      fetchStyles();
+      refetchStyles();
     } catch (err) {
       if (err instanceof ApiClientError) {
         addToast(err.detail || 'Failed to delete style', 'danger');
@@ -689,7 +641,7 @@ export function ProductFormModal({
                         <p className="text-sm">Failed to load styles: {stylesError}</p>
                         <button
                           type="button"
-                          onClick={fetchStyles}
+                          onClick={refetchStyles}
                           className="mt-2 text-sm font-medium text-danger-700 hover:text-danger-800 underline"
                         >
                           Try again

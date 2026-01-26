@@ -421,6 +421,22 @@ When building UI:
 3. If a pattern repeats 2+ times, extract it to a reusable component
 4. Use CVA (class-variance-authority) for component variants
 
+**Data Fetching:**
+Use custom hooks from `src/frontend/src/hooks/` to eliminate repeated fetch-loading-error patterns:
+- `useList()` - For API endpoints returning `{ items: T[], total: number }`
+- `useAsync()` - For general async operations
+
+```tsx
+// Example: Fetching a list
+const { items: clients, isLoading, error, refetch } = useList(getClients);
+
+// Example: Custom async operation
+const { data, isLoading, error, execute } = useAsync(
+  async () => await fetchUser(userId),
+  { immediate: false }
+);
+```
+
 #### Backend (`src/backend/`)
 
 **Tools & Commands:**

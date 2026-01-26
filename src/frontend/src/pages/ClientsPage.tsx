@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { getClients, createClient, ApiClientError } from '../services/api';
 import type { Client } from '../types/api';
 import { Button, Card, Input, Modal, Alert, Icon, useToast } from '../components/ui';
+import { useList } from '../hooks';
 
 /**
  * Format a date string to a human-readable format.
@@ -190,36 +191,10 @@ function ClientRow({ client }: { client: Client }) {
  */
 export default function ClientsPage() {
   const { addToast } = useToast();
-  const [clients, setClients] = useState<Client[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { items: clients, isLoading, error, refetch } = useList(getClients);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-
-  const fetchClients = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await getClients();
-      setClients(response.items);
-    } catch (err) {
-      if (err instanceof ApiClientError) {
-        setError(err.detail || err.message);
-      } else if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('An unexpected error occurred');
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchClients();
-  }, [fetchClients]);
 
   const handleAddClient = async (name: string) => {
     setIsSubmitting(true);
@@ -229,7 +204,7 @@ export default function ClientsPage() {
       await createClient({ name });
       addToast(`Client "${name}" created successfully!`, 'success');
       setIsModalOpen(false);
-      await fetchClients();
+      await refetch();
     } catch (err) {
       if (err instanceof ApiClientError) {
         if (err.status === 409) {
@@ -276,7 +251,7 @@ export default function ClientsPage() {
         {isLoading && <LoadingSkeleton />}
 
         {!isLoading && error && (
-          <ErrorState message={error} onRetry={fetchClients} />
+          <ErrorState message={error} onRetry={refetch} />
         )}
 
         {!isLoading && !error && clients.length === 0 && (

@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { getProducts, getClients, ApiClientError } from '../services/api';
-import type { Product, Client } from '../types/api';
+import { useState, useMemo } from 'react';
+import { getProducts, getClients } from '../services/api';
+import type { Product } from '../types/api';
 import { Button, Card, Alert, Icon } from '../components/ui';
 import { ProductFormModal } from '../components/products';
+import { useList } from '../hooks';
 
 /**
  * Format a date string to a human-readable format.
@@ -150,47 +151,20 @@ function ProductRow({
  * ProductsPage - View and manage products.
  */
 export default function ProductsPage() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [clients, setClients] = useState<Client[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { items: products, isLoading: isLoadingProducts, error: productsError, refetch: refetchProducts } = useList(getProducts);
+  const { items: clients, isLoading: isLoadingClients, error: clientsError } = useList(getClients);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | undefined>(undefined);
+
+  // Combine loading and error states
+  const isLoading = isLoadingProducts || isLoadingClients;
+  const error = productsError || clientsError;
 
   // Create client lookup map for O(1) name resolution
   const clientsMap = useMemo(
     () => new Map(clients.map((c) => [c.id, c])),
     [clients]
   );
-
-  const fetchData = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      // Fetch both products and clients in parallel
-      const [productsResponse, clientsResponse] = await Promise.all([
-        getProducts(),
-        getClients(),
-      ]);
-      setProducts(productsResponse.items);
-      setClients(clientsResponse.items);
-    } catch (err) {
-      if (err instanceof ApiClientError) {
-        setError(err.detail || err.message);
-      } else if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('An unexpected error occurred');
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
 
   const handleAddProduct = () => {
     setSelectedProduct(undefined);
@@ -209,7 +183,7 @@ export default function ProductsPage() {
 
   const handleProductSaved = () => {
     // Refresh the product list after successful creation or update
-    fetchData();
+    refetchProducts();
   };
 
   /**
@@ -241,7 +215,7 @@ export default function ProductsPage() {
         {isLoading && <LoadingSkeleton />}
 
         {!isLoading && error && (
-          <ErrorState message={error} onRetry={fetchData} />
+          <ErrorState message={error} onRetry={refetchProducts} />
         )}
 
         {!isLoading && !error && products.length === 0 && (
