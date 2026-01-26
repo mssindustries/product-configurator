@@ -1,73 +1,20 @@
 import { useState } from 'react';
 import { getClients, createClient, ApiClientError } from '../services/api';
 import type { Client } from '../types/api';
-import { Button, Card, Input, Modal, Alert, Icon, useToast } from '../components/ui';
+import {
+  Button,
+  Card,
+  Input,
+  Modal,
+  Alert,
+  Icon,
+  useToast,
+  ListSkeleton,
+  EmptyState,
+  ErrorState,
+} from '../components/ui';
 import { useList } from '../hooks';
 import { formatDate } from '../lib/format';
-
-/**
- * Loading skeleton for client list.
- */
-function LoadingSkeleton() {
-  return (
-    <Card>
-      <div className="divide-y divide-neutral-200">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="p-4 animate-pulse">
-            <div className="h-5 bg-neutral-200 rounded w-1/3 mb-2" />
-            <div className="h-4 bg-neutral-200 rounded w-1/4" />
-          </div>
-        ))}
-      </div>
-    </Card>
-  );
-}
-
-/**
- * Empty state when no clients exist.
- */
-function EmptyState({ onAddClick }: { onAddClick: () => void }) {
-  return (
-    <Card padding="lg" className="text-center">
-      <Icon name="building" size="3xl" className="mx-auto text-neutral-400 mb-4" />
-      <h3 className="text-lg font-medium text-neutral-900 mb-2">
-        No clients yet
-      </h3>
-      <p className="text-neutral-500 mb-6">
-        Get started by adding your first client.
-      </p>
-      <Button intent="primary" onClick={onAddClick}>
-        Add Client
-      </Button>
-    </Card>
-  );
-}
-
-/**
- * Error state with retry button.
- */
-function ErrorState({
-  message,
-  onRetry,
-}: {
-  message: string;
-  onRetry: () => void;
-}) {
-  return (
-    <div className="text-center">
-      <Alert intent="danger" className="mb-6">
-        <div className="flex flex-col items-center py-4">
-          <Icon name="warning" size="2xl" className="text-danger-500 mb-4" />
-          <h3 className="text-lg font-medium mb-2">Failed to load clients</h3>
-          <p className="mb-4">{message}</p>
-          <Button intent="danger" onClick={onRetry}>
-            Try Again
-          </Button>
-        </div>
-      </Alert>
-    </div>
-  );
-}
 
 /**
  * Add Client Modal
@@ -237,14 +184,23 @@ export default function ClientsPage() {
           )}
         </div>
 
-        {isLoading && <LoadingSkeleton />}
+        {isLoading && <ListSkeleton />}
 
         {!isLoading && error && (
-          <ErrorState message={error} onRetry={refetch} />
+          <ErrorState
+            title="Failed to load clients"
+            message={error}
+            onRetry={refetch}
+          />
         )}
 
         {!isLoading && !error && clients.length === 0 && (
-          <EmptyState onAddClick={handleOpenModal} />
+          <EmptyState
+            icon="building"
+            title="No clients yet"
+            description="Get started by adding your first client."
+            action={{ label: 'Add Client', onClick: handleOpenModal }}
+          />
         )}
 
         {!isLoading && !error && clients.length > 0 && (
