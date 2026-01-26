@@ -8,7 +8,7 @@ import {
   updateProduct,
   ApiClientError,
 } from '../../services/api';
-import type { Client, Product, Style } from '../../types/api';
+import type { Product, Style } from '../../types/api';
 import {
   Button,
   Icon,

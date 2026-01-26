@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { getProducts, getClients } from '../services/api';
-import type { Product, Client } from '../types/api';
+import type { Product } from '../types/api';
 import { Button, Card, Alert, Icon } from '../components/ui';
 import { ProductFormModal } from '../components/products';
 import { useList } from '../hooks';
