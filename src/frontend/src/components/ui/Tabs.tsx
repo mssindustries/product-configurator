@@ -23,13 +23,29 @@ function useTabsContext() {
 
 // Root Tabs component
 interface TabsProps {
-  defaultTab: string;
+  defaultTab?: string;
+  value?: string;
+  onValueChange?: (value: string) => void;
   children: ReactNode;
   className?: string;
 }
 
-export function Tabs({ defaultTab, children, className = '' }: TabsProps) {
-  const [activeTab, setActiveTab] = useState(defaultTab);
+export function Tabs({ defaultTab, value, onValueChange, children, className = '' }: TabsProps) {
+  const [internalActiveTab, setInternalActiveTab] = useState(defaultTab || '');
+
+  // Determine if controlled or uncontrolled
+  const isControlled = value !== undefined;
+  const activeTab = isControlled ? value : internalActiveTab;
+
+  const setActiveTab = (tab: string) => {
+    if (isControlled) {
+      // Controlled mode: call the parent's callback
+      onValueChange?.(tab);
+    } else {
+      // Uncontrolled mode: update internal state
+      setInternalActiveTab(tab);
+    }
+  };
 
   return (
     <TabsContext.Provider value={{ activeTab, setActiveTab }}>
