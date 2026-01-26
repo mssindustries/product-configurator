@@ -69,7 +69,8 @@ class BaseRepository(Generic[ModelT]):
             The entity if found, None otherwise
         """
         id_str = str(id)
-        stmt = select(self.model).where(self.model.id == id_str)
+        # Type ignore for model.id access - pyright can't infer column attributes on generic model types
+        stmt = select(self.model).where(self.model.id == id_str)  # type: ignore[attr-defined]
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
 
