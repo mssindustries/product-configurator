@@ -11,6 +11,7 @@ from uuid import UUID
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import InstrumentedAttribute
 from sqlalchemy.sql.elements import ColumnElement
 
 from app.core.exceptions import EntityNotFoundError
@@ -116,7 +117,12 @@ class BaseRepository(Generic[ModelT]):
         *,
         skip: int = 0,
         limit: int = 20,
-        order_by: ColumnElement[Any] | tuple[ColumnElement[Any], ...] | None = None,
+        order_by: (
+            ColumnElement[Any]
+            | InstrumentedAttribute[Any]
+            | tuple[ColumnElement[Any] | InstrumentedAttribute[Any], ...]
+            | None
+        ) = None,
         filters: list[Any] | None = None,
     ) -> PaginatedResult[ModelT]:
         """
