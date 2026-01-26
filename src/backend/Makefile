@@ -24,8 +24,8 @@ lint: ## Check code style with ruff
 format: ## Auto-format code with ruff
 	uv run ruff format app tests
 
-typecheck: ## Run type checking with mypy
-	uv run mypy app
+typecheck: ## Run type checking with pyright
+	uv run pyright app
 
 check: lint typecheck test ## Run lint, typecheck, and test
 
