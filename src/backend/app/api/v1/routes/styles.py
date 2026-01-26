@@ -16,7 +16,7 @@ authenticated client.
 
 import json
 import logging
-from typing import Annotated
+from typing import Annotated, Any, cast
 from uuid import UUID
 
 from fastapi import (
@@ -63,10 +63,10 @@ def _validate_blend_file(file: UploadFile) -> None:
         )
 
 
-def _parse_json_schema(schema_str: str) -> dict:
+def _parse_json_schema(schema_str: str) -> dict[str, Any]:
     """Parse and validate JSON Schema from form string."""
     try:
-        schema = json.loads(schema_str)
+        schema = cast(dict[str, Any], json.loads(schema_str))
     except json.JSONDecodeError as e:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
