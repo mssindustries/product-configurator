@@ -3,18 +3,7 @@ import { getClients, createClient, ApiClientError } from '../services/api';
 import type { Client } from '../types/api';
 import { Button, Card, Input, Modal, Alert, Icon, useToast } from '../components/ui';
 import { useList } from '../hooks';
-
-/**
- * Format a date string to a human-readable format.
- */
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-}
+import { formatDate } from '../lib/format';
 
 /**
  * Loading skeleton for client list.

@@ -4,18 +4,7 @@ import type { Product } from '../types/api';
 import { Button, Card, Alert, Icon } from '../components/ui';
 import { ProductFormModal } from '../components/products';
 import { useList } from '../hooks';
-
-/**
- * Format a date string to a human-readable format.
- */
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-}
+import { formatDate } from '../lib/format';
 
 /**
  * Loading skeleton for product list.
