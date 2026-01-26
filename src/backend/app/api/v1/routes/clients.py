@@ -37,15 +37,7 @@ async def list_clients(
     clients = result.scalars().all()
 
     # Convert to response schemas
-    items = [
-        ClientResponse(
-            id=str(client.id),
-            name=client.name,
-            created_at=client.created_at,
-            updated_at=client.updated_at,
-        )
-        for client in clients
-    ]
+    items = ClientResponse.from_models(clients)
 
     return ClientListResponse(items=items, total=total)
 
@@ -86,9 +78,4 @@ async def create_client(
     await db.commit()
     await db.refresh(client)
 
-    return ClientResponse(
-        id=str(client.id),
-        name=client.name,
-        created_at=client.created_at,
-        updated_at=client.updated_at,
-    )
+    return ClientResponse.from_model(client)

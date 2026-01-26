@@ -70,21 +70,7 @@ async def create_job(
     await db.commit()
     await db.refresh(job)
 
-    return JobResponse(
-        id=str(job.id),
-        configuration_id=str(job.configuration_id),
-        status=job.status,
-        progress=job.progress,
-        result_url=job.result_url,
-        error_code=job.error_code,
-        error_message=job.error_message,
-        retry_count=job.retry_count,
-        max_retries=job.max_retries,
-        worker_id=job.worker_id,
-        created_at=job.created_at,
-        started_at=job.started_at,
-        completed_at=job.completed_at,
-    )
+    return JobResponse.from_model(job)
 
 
 @router.get("/{job_id}", response_model=JobResponse)
@@ -113,21 +99,7 @@ async def get_job(
     repo = JobRepository(db)
     job = await repo.ensure_exists(job_id)
 
-    return JobResponse(
-        id=str(job.id),
-        configuration_id=str(job.configuration_id),
-        status=job.status,
-        progress=job.progress,
-        result_url=job.result_url,
-        error_code=job.error_code,
-        error_message=job.error_message,
-        retry_count=job.retry_count,
-        max_retries=job.max_retries,
-        worker_id=job.worker_id,
-        created_at=job.created_at,
-        started_at=job.started_at,
-        completed_at=job.completed_at,
-    )
+    return JobResponse.from_model(job)
 
 
 @router.post("/{job_id}/cancel", response_model=JobResponse)
@@ -167,18 +139,4 @@ async def cancel_job(
     await db.commit()
     await db.refresh(job)
 
-    return JobResponse(
-        id=str(job.id),
-        configuration_id=str(job.configuration_id),
-        status=job.status,
-        progress=job.progress,
-        result_url=job.result_url,
-        error_code=job.error_code,
-        error_message=job.error_message,
-        retry_count=job.retry_count,
-        max_retries=job.max_retries,
-        worker_id=job.worker_id,
-        created_at=job.created_at,
-        started_at=job.started_at,
-        completed_at=job.completed_at,
-    )
+    return JobResponse.from_model(job)

@@ -3,12 +3,16 @@ Pydantic schemas for Job entity.
 """
 
 from datetime import datetime
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 from pydantic import Field
 
 from app.db.models.job import JobStatus
 from app.schemas.base import BaseSchema
+
+if TYPE_CHECKING:
+    from app.db.models import Job
 
 
 class JobCreate(BaseSchema):
@@ -36,6 +40,30 @@ class JobResponse(BaseSchema):
     created_at: datetime
     started_at: datetime | None = None
     completed_at: datetime | None = None
+
+    @classmethod
+    def from_model(cls, job: "Job") -> "JobResponse":
+        """Create response from ORM model."""
+        return cls(
+            id=str(job.id),
+            configuration_id=str(job.configuration_id),
+            status=job.status,
+            progress=job.progress,
+            result_url=job.result_url,
+            error_code=job.error_code,
+            error_message=job.error_message,
+            retry_count=job.retry_count,
+            max_retries=job.max_retries,
+            worker_id=job.worker_id,
+            created_at=job.created_at,
+            started_at=job.started_at,
+            completed_at=job.completed_at,
+        )
+
+    @classmethod
+    def from_models(cls, jobs: list["Job"]) -> list["JobResponse"]:
+        """Create responses from list of ORM models."""
+        return [cls.from_model(j) for j in jobs]
 
 
 class JobStatusResponse(BaseSchema):

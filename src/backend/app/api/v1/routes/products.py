@@ -63,17 +63,7 @@ async def list_products(
     products = result.scalars().all()
 
     # Convert to response schemas
-    items = [
-        ProductResponse(
-            id=str(product.id),
-            client_id=str(product.client_id),
-            name=product.name,
-            description=product.description,
-            created_at=product.created_at,
-            updated_at=product.updated_at,
-        )
-        for product in products
-    ]
+    items = ProductResponse.from_models(products)
 
     return ProductListResponse(items=items, total=total)
 
@@ -98,14 +88,7 @@ async def get_product(
     repo = ProductRepository(db)
     product = await repo.ensure_exists(product_id)
 
-    return ProductResponse(
-        id=str(product.id),
-        client_id=str(product.client_id),
-        name=product.name,
-        description=product.description,
-        created_at=product.created_at,
-        updated_at=product.updated_at,
-    )
+    return ProductResponse.from_model(product)
 
 
 @router.post("", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)
@@ -140,14 +123,7 @@ async def create_product(
     await db.commit()
     await db.refresh(product)
 
-    return ProductResponse(
-        id=str(product.id),
-        client_id=str(product.client_id),
-        name=product.name,
-        description=product.description,
-        created_at=product.created_at,
-        updated_at=product.updated_at,
-    )
+    return ProductResponse.from_model(product)
 
 
 @router.patch("/{product_id}", response_model=ProductResponse)
@@ -184,11 +160,4 @@ async def update_product(
     await db.commit()
     await db.refresh(product)
 
-    return ProductResponse(
-        id=str(product.id),
-        client_id=str(product.client_id),
-        name=product.name,
-        description=product.description,
-        created_at=product.created_at,
-        updated_at=product.updated_at,
-    )
+    return ProductResponse.from_model(product)

@@ -64,20 +64,7 @@ async def list_configurations(
     configurations = result.scalars().all()
 
     # Convert to response schemas
-    items = [
-        ConfigurationResponse(
-            id=str(config.id),
-            product_id=str(config.product_id),
-            style_id=str(config.style_id),
-            client_id=str(config.client_id),
-            name=config.name,
-            config_data=config.config_data,
-            product_schema_version=config.product_schema_version,
-            created_at=config.created_at,
-            updated_at=config.updated_at,
-        )
-        for config in configurations
-    ]
+    items = ConfigurationResponse.from_models(configurations)
 
     return ConfigurationListResponse(items=items, total=total)
 
@@ -102,17 +89,7 @@ async def get_configuration(
     repo = ConfigurationRepository(db)
     config = await repo.ensure_exists(configuration_id)
 
-    return ConfigurationResponse(
-        id=str(config.id),
-        product_id=str(config.product_id),
-        style_id=str(config.style_id),
-        client_id=str(config.client_id),
-        name=config.name,
-        config_data=config.config_data,
-        product_schema_version=config.product_schema_version,
-        created_at=config.created_at,
-        updated_at=config.updated_at,
-    )
+    return ConfigurationResponse.from_model(config)
 
 
 @router.post("", response_model=ConfigurationResponse, status_code=status.HTTP_201_CREATED)
@@ -188,17 +165,7 @@ async def create_configuration(
     await db.commit()
     await db.refresh(configuration)
 
-    return ConfigurationResponse(
-        id=str(configuration.id),
-        product_id=str(configuration.product_id),
-        style_id=str(configuration.style_id),
-        client_id=str(configuration.client_id),
-        name=configuration.name,
-        config_data=configuration.config_data,
-        product_schema_version=configuration.product_schema_version,
-        created_at=configuration.created_at,
-        updated_at=configuration.updated_at,
-    )
+    return ConfigurationResponse.from_model(configuration)
 
 
 @router.delete("/{configuration_id}", status_code=status.HTTP_204_NO_CONTENT)

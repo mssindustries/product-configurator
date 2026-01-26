@@ -3,10 +3,14 @@ Pydantic schemas for Product entity.
 """
 
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from pydantic import Field
 
 from app.schemas.base import BaseSchema
+
+if TYPE_CHECKING:
+    from app.db.models import Product
 
 
 class ProductBase(BaseSchema):
@@ -40,6 +44,23 @@ class ProductResponse(ProductBase):
     client_id: str
     created_at: datetime
     updated_at: datetime
+
+    @classmethod
+    def from_model(cls, product: "Product") -> "ProductResponse":
+        """Create response from ORM model."""
+        return cls(
+            id=str(product.id),
+            client_id=str(product.client_id),
+            name=product.name,
+            description=product.description,
+            created_at=product.created_at,
+            updated_at=product.updated_at,
+        )
+
+    @classmethod
+    def from_models(cls, products: list["Product"]) -> list["ProductResponse"]:
+        """Create responses from list of ORM models."""
+        return [cls.from_model(p) for p in products]
 
 
 class ProductListResponse(BaseSchema):
