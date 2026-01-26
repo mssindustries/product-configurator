@@ -2,13 +2,17 @@
 Pydantic schemas for Style entity.
 """
 
+from collections.abc import Sequence
 from datetime import datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from jsonschema import Draft7Validator, SchemaError
 from pydantic import Field, field_validator
 
 from app.schemas.base import BaseSchema
+
+if TYPE_CHECKING:
+    from app.db.models import Style
 
 
 class StyleBase(BaseSchema):
@@ -84,6 +88,28 @@ class StyleResponse(StyleBase):
     display_order: int
     created_at: datetime
     updated_at: datetime
+
+    @classmethod
+    def from_model(cls, style: "Style") -> "StyleResponse":
+        """Create response from ORM model."""
+        return cls(
+            id=str(style.id),
+            product_id=str(style.product_id),
+            name=style.name,
+            description=style.description,
+            template_blob_path=style.template_blob_path,
+            customization_schema=style.customization_schema,
+            default_glb_path=style.default_glb_path,
+            is_default=style.is_default,
+            display_order=style.display_order,
+            created_at=style.created_at,
+            updated_at=style.updated_at,
+        )
+
+    @classmethod
+    def from_models(cls, styles: Sequence["Style"]) -> list["StyleResponse"]:
+        """Create responses from sequence of ORM models."""
+        return [cls.from_model(s) for s in styles]
 
 
 class StyleListResponse(BaseSchema):

@@ -93,23 +93,6 @@ def _parse_json_schema(schema_str: str) -> dict[str, Any]:
     return schema
 
 
-def _style_to_response(style: Style) -> StyleResponse:
-    """Convert Style model to StyleResponse schema."""
-    return StyleResponse(
-        id=str(style.id),
-        product_id=str(style.product_id),
-        name=style.name,
-        description=style.description,
-        template_blob_path=style.template_blob_path,
-        customization_schema=style.customization_schema,
-        default_glb_path=style.default_glb_path,
-        is_default=style.is_default,
-        display_order=style.display_order,
-        created_at=style.created_at,
-        updated_at=style.updated_at,
-    )
-
-
 async def _check_duplicate_name(
     db: DbSession, product_id: UUID, name: str, exclude_style_id: str | None = None
 ) -> None:
@@ -268,7 +251,7 @@ async def create_style(
     await db.commit()
     await db.refresh(style)
 
-    return _style_to_response(style)
+    return StyleResponse.from_model(style)
 
 
 # ============================================================================
@@ -315,7 +298,7 @@ async def list_styles(
     result = await db.execute(stmt)
     styles = result.scalars().all()
 
-    items = [_style_to_response(style) for style in styles]
+    items = StyleResponse.from_models(styles)
 
     return StyleListResponse(items=items, total=total)
 
@@ -352,7 +335,7 @@ async def get_style(
     style_repo = StyleRepository(db)
     style = await style_repo.ensure_exists_for_product(product_id, style_id)
 
-    return _style_to_response(style)
+    return StyleResponse.from_model(style)
 
 
 # ============================================================================
@@ -476,7 +459,7 @@ async def update_style(
                 detail="Failed to upload template file. Database changes were saved but file upload failed.",
             )
 
-    return _style_to_response(style)
+    return StyleResponse.from_model(style)
 
 
 # ============================================================================
@@ -588,4 +571,4 @@ async def set_default_style(
     await db.commit()
     await db.refresh(style)
 
-    return _style_to_response(style)
+    return StyleResponse.from_model(style)
