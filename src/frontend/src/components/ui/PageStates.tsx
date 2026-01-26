@@ -5,7 +5,6 @@
  * Eliminates duplication of these common UI patterns.
  */
 
-import type { ReactNode } from 'react';
 import { Card } from './Card';
 import { Alert } from './Alert';
 import { Button } from './Button';
