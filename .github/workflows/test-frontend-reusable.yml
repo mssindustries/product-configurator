@@ -1,19 +1,19 @@
-name: Frontend E2E Tests
+name: Test Frontend (Reusable)
 
 on:
-  push:
-    branches: [main]
-    paths: ['src/frontend/**']
+  workflow_call:
 
 jobs:
   test:
+    name: Test
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: src/frontend
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
         uses: actions/setup-node@v4

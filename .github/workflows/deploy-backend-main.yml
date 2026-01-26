@@ -14,6 +14,7 @@ on:
     paths:
       - 'src/backend/**'
       - '.github/workflows/deploy-backend*.yml'
+      - '.github/workflows/test-backend-reusable.yml'
   workflow_dispatch:
     inputs:
       environment:
@@ -26,8 +27,13 @@ on:
         default: test
 
 jobs:
+  test:
+    name: Test
+    uses: ./.github/workflows/test-backend-reusable.yml
+
   build:
     name: Build
+    needs: test
     uses: ./.github/workflows/build-backend-reusable.yml
     with:
       tag: sha-${{ github.sha }}
