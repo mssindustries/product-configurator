@@ -280,27 +280,18 @@ async def list_styles(
     product_repo = ProductRepository(db)
     await product_repo.ensure_exists(product_id)
 
-    # Get total count
-    count_stmt = select(func.count()).select_from(Style).where(
-        Style.product_id == str(product_id)
-    )
-    count_result = await db.execute(count_stmt)
-    total = count_result.scalar_one()
-
     # Get paginated styles
-    stmt = (
-        select(Style)
-        .where(Style.product_id == str(product_id))
-        .order_by(Style.display_order, Style.created_at)
-        .offset(skip)
-        .limit(limit)
+    style_repo = StyleRepository(db)
+    result = await style_repo.list_paginated(
+        skip=skip,
+        limit=limit,
+        order_by=(Style.display_order, Style.created_at),
+        filters=[Style.product_id == str(product_id)],
     )
-    result = await db.execute(stmt)
-    styles = result.scalars().all()
 
-    items = StyleResponse.from_models(styles)
+    items = StyleResponse.from_models(result.items)
 
-    return StyleListResponse(items=items, total=total)
+    return StyleListResponse(items=items, total=result.total)
 
 
 # ============================================================================

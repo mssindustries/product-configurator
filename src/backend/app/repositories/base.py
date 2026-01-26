@@ -5,17 +5,34 @@ The repository pattern provides a clean abstraction over data access,
 making it easier to test and maintain domain logic.
 """
 
-from typing import Generic, TypeVar
+from dataclasses import dataclass
+from typing import Any, Generic, TypeVar
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import InstrumentedAttribute
+from sqlalchemy.sql.elements import ColumnElement
 
 from app.core.exceptions import EntityNotFoundError
 from app.db.models.base import Base
 
 # Type variable for SQLAlchemy models
 ModelT = TypeVar("ModelT", bound=Base)
+
+
+@dataclass
+class PaginatedResult(Generic[ModelT]):
+    """
+    Container for paginated query results.
+
+    Attributes:
+        items: List of model instances for the current page
+        total: Total count of items across all pages
+    """
+
+    items: list[ModelT]
+    total: int
 
 
 class BaseRepository(Generic[ModelT]):
@@ -94,3 +111,81 @@ class BaseRepository(Generic[ModelT]):
         if entity is None:
             raise EntityNotFoundError(self._entity_name, str(id))
         return entity
+
+    async def list_paginated(
+        self,
+        *,
+        skip: int = 0,
+        limit: int = 20,
+        order_by: (
+            ColumnElement[Any]
+            | InstrumentedAttribute[Any]
+            | tuple[ColumnElement[Any] | InstrumentedAttribute[Any], ...]
+            | None
+        ) = None,
+        filters: list[Any] | None = None,
+    ) -> PaginatedResult[ModelT]:
+        """
+        Get paginated list with total count.
+
+        This method consolidates the common pagination pattern used across
+        multiple endpoints, eliminating duplication of count + offset/limit queries.
+
+        Args:
+            skip: Number of items to skip (for pagination)
+            limit: Maximum number of items to return
+            order_by: SQLAlchemy order_by expression or tuple of expressions
+                     (e.g., Model.created_at.desc() or (Model.order, Model.created_at))
+            filters: Optional list of SQLAlchemy filter expressions
+
+        Returns:
+            PaginatedResult containing items and total count
+
+        Example:
+            # Simple pagination with default ordering
+            result = await repo.list_paginated(skip=0, limit=20)
+
+            # With custom ordering
+            result = await repo.list_paginated(
+                skip=0,
+                limit=20,
+                order_by=Product.created_at.desc()
+            )
+
+            # With filters
+            result = await repo.list_paginated(
+                skip=0,
+                limit=20,
+                filters=[Product.is_active == True]
+            )
+        """
+        # Build count query
+        count_stmt = select(func.count()).select_from(self.model)
+        if filters:
+            for filter_expr in filters:
+                count_stmt = count_stmt.where(filter_expr)
+
+        # Execute count query
+        count_result = await self.db.execute(count_stmt)
+        total = count_result.scalar_one()
+
+        # Build paginated query
+        stmt = select(self.model)
+        if filters:
+            for filter_expr in filters:
+                stmt = stmt.where(filter_expr)
+
+        if order_by is not None:
+            # Support both single expression and tuple of expressions
+            if isinstance(order_by, tuple):
+                stmt = stmt.order_by(*order_by)
+            else:
+                stmt = stmt.order_by(order_by)
+
+        stmt = stmt.offset(skip).limit(limit)
+
+        # Execute paginated query
+        result = await self.db.execute(stmt)
+        items = list(result.scalars().all())
+
+        return PaginatedResult(items=items, total=total)
