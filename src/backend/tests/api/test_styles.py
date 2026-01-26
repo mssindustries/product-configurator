@@ -743,6 +743,94 @@ async def test_update_style_duplicate_name(
     assert response.status_code == 409
 
 
+@pytest.mark.anyio
+async def test_update_style_cannot_remove_only_default(
+    client: AsyncClient,
+    product: dict,
+    sample_style_schema: dict,
+):
+    """Returns 400 when trying to unset is_default on the only default style."""
+    with patch("app.services.blob_storage.BlobStorageService.upload_file") as mock_upload:
+        mock_upload.return_value = "blender-templates/test-style-id.blend"
+
+        # Create a single style (will be default)
+        files = {"file": ("template.blend", b"BLENDER-v300" + b"\x00" * 100, "application/octet-stream")}
+        data = {
+            "name": "Only Style",
+            "customization_schema": json.dumps(sample_style_schema),
+        }
+        create_response = await client.post(
+            f"/api/v1/products/{product['id']}/styles",
+            files=files,
+            data=data,
+        )
+        style = create_response.json()
+        assert style["is_default"] is True
+
+    # Try to remove default status
+    response = await client.patch(
+        f"/api/v1/products/{product['id']}/styles/{style['id']}",
+        data={"is_default": "false"},
+    )
+    assert response.status_code == 400
+    assert "only default style" in response.json()["detail"].lower()
+
+
+@pytest.mark.anyio
+async def test_update_style_can_remove_default_when_others_exist(
+    client: AsyncClient,
+    product: dict,
+    sample_style_schema: dict,
+):
+    """Can unset is_default when there are other default styles."""
+    with patch("app.services.blob_storage.BlobStorageService.upload_file") as mock_upload:
+        mock_upload.return_value = "blender-templates/test-style-id.blend"
+
+        # Create first style (will be default)
+        files1 = {"file": ("template1.blend", b"BLENDER-v300" + b"\x00" * 100, "application/octet-stream")}
+        data1 = {
+            "name": "First Style",
+            "customization_schema": json.dumps(sample_style_schema),
+        }
+        response1 = await client.post(
+            f"/api/v1/products/{product['id']}/styles",
+            files=files1,
+            data=data1,
+        )
+        first_style = response1.json()
+        assert first_style["is_default"] is True
+
+        # Create second style with is_default=true (replaces first)
+        files2 = {"file": ("template2.blend", b"BLENDER-v300" + b"\x00" * 100, "application/octet-stream")}
+        data2 = {
+            "name": "Second Style",
+            "customization_schema": json.dumps(sample_style_schema),
+            "is_default": "true",
+        }
+        response2 = await client.post(
+            f"/api/v1/products/{product['id']}/styles",
+            files=files2,
+            data=data2,
+        )
+        second_style = response2.json()
+        assert second_style["is_default"] is True
+
+    # First style should no longer be default
+    response = await client.get(
+        f"/api/v1/products/{product['id']}/styles/{first_style['id']}"
+    )
+    assert response.json()["is_default"] is False
+
+    # Now trying to unset second style's default should fail
+    # because first style is not default anymore
+    response = await client.patch(
+        f"/api/v1/products/{product['id']}/styles/{second_style['id']}",
+        data={"is_default": "false"},
+    )
+    assert response.status_code == 400
+    assert "only default style" in response.json()["detail"].lower()
+
+
 # ============================================================================
 # DELETE /api/v1/products/{product_id}/styles/{style_id} - Delete Style
 # ============================================================================

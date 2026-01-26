@@ -13,7 +13,7 @@ export default function Navigation() {
             <span className="text-xl font-bold text-gray-900">MSS Industries</span>
             <Link
               to="/"
-              className="flex items-center gap-2 ml-6 text-gray-600 hover:text-gray-900 transition-colors"
+              className="flex items-center gap-2 ml-6 text-neutral-600 hover:text-neutral-900 transition-colors"
             >
               <svg
                 className="w-5 h-5"
@@ -34,7 +34,7 @@ export default function Navigation() {
               <>
                 <Link
                   to="/clients"
-                  className="flex items-center gap-2 ml-6 text-gray-600 hover:text-gray-900 transition-colors"
+                  className="flex items-center gap-2 ml-6 text-neutral-600 hover:text-neutral-900 transition-colors"
                 >
                   <svg
                     className="w-5 h-5"
@@ -53,7 +53,7 @@ export default function Navigation() {
                 </Link>
                 <Link
                   to="/products"
-                  className="flex items-center gap-2 ml-6 text-gray-600 hover:text-gray-900 transition-colors"
+                  className="flex items-center gap-2 ml-6 text-neutral-600 hover:text-neutral-900 transition-colors"
                 >
                   <svg
                     className="w-5 h-5"

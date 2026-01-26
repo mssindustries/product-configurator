@@ -14,6 +14,7 @@ public. When authentication is added, endpoints will be scoped to the
 authenticated client.
 """
 
+import io
 import json
 import logging
 from typing import Annotated, Any, cast
@@ -60,6 +61,13 @@ def _validate_blend_file(file: UploadFile) -> None:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=f"Invalid file type. Must be .blend file. Got: {file.filename}",
+        )
+
+    # Check file size
+    if file.size and file.size > MAX_FILE_SIZE_MB * 1024 * 1024:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"File too large. Maximum size is {MAX_FILE_SIZE_MB}MB",
         )
 
 
@@ -176,6 +184,30 @@ async def _has_styles(db: DbSession, product_id: UUID) -> bool:
     result = await db.execute(stmt)
     count = result.scalar_one()
     return count > 0
+
+
+async def _is_only_default_style(
+    db: DbSession, product_id: UUID, style_id: str
+) -> bool:
+    """Check if the given style is the only default style for the product."""
+    # Count total default styles for this product
+    stmt = select(func.count()).select_from(Style).where(
+        Style.product_id == str(product_id),
+        Style.is_default.is_(True),
+    )
+    result = await db.execute(stmt)
+    default_count = result.scalar_one()
+
+    # If there's only one default and it's this style, return True
+    if default_count == 1:
+        check_stmt = select(Style).where(
+            Style.id == style_id,
+            Style.is_default.is_(True),
+        )
+        check_result = await db.execute(check_stmt)
+        return check_result.scalar_one_or_none() is not None
+
+    return False
 
 
 # ============================================================================
@@ -411,39 +443,64 @@ async def update_style(
         if should_be_default and not style.is_default:
             # Unset other defaults
             await _unset_other_defaults(db, product_id, exclude_style_id=str(style_id))
+        elif not should_be_default and style.is_default:
+            # Prevent removing the last default style
+            if await _is_only_default_style(db, product_id, str(style_id)):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Cannot remove default status. This is the only default style for the product. Set another style as default first.",
+                )
         style.is_default = should_be_default
 
-    # Handle file upload
+    # Handle file upload - validate and read content before committing DB changes
+    new_file_content: bytes | None = None
+    old_blob_path: str | None = None
     if file is not None:
         _validate_blend_file(file)
-
-        blob_service = BlobStorageService()
+        # Read file content now (before commit) so we have it ready
+        new_file_content = await file.read()
         old_blob_path = style.template_blob_path
+        # We'll update the blob path after successful commit
 
+    # Commit database changes first
+    await db.commit()
+    await db.refresh(style)
+
+    # Now handle blob operations after successful DB commit
+    # If blob operations fail, the DB state is already committed,
+    # but we can log and handle gracefully (style data is consistent)
+    if new_file_content is not None:
         try:
-            # Upload new file
+            blob_service = BlobStorageService()
+
+            # Upload new file using BytesIO since we already read the content
             blob_name = f"{style.id}.blend"
             blob_path = await blob_service.upload_file(
-                file=file.file,
+                file=io.BytesIO(new_file_content),
                 blob_name=blob_name,
                 content_type="application/octet-stream",
             )
-            style.template_blob_path = blob_path
 
-            # Delete old file (if different path)
+            # Update blob path in database
+            style.template_blob_path = blob_path
+            await db.commit()
+            await db.refresh(style)
+
+            # Delete old file (if different path) - non-critical operation
             if old_blob_path and old_blob_path != blob_path:
-                old_blob_name = old_blob_path.split("/")[-1]
-                await blob_service.delete_file(old_blob_name)
+                try:
+                    old_blob_name = old_blob_path.split("/")[-1]
+                    await blob_service.delete_file(old_blob_name)
+                except Exception as e:
+                    # Log but don't fail - old file cleanup is non-critical
+                    logger.warning(f"Failed to delete old blob {old_blob_path}: {e}")
 
         except Exception as e:
             logger.error(f"Failed to update blob for style {style.id}: {e}")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to upload template file",
+                detail="Failed to upload template file. Database changes were saved but file upload failed.",
             )
-
-    await db.commit()
-    await db.refresh(style)
 
     return _style_to_response(style)
 

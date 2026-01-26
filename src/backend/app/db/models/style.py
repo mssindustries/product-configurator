@@ -4,7 +4,16 @@ Style model - Product variant with template and customization schema.
 
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import Boolean, ForeignKey, Index, Integer, String, Text, UniqueConstraint
+from sqlalchemy import (
+    Boolean,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+    text,
+)
 from sqlalchemy.dialects.postgresql import JSON, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -46,10 +55,17 @@ class Style(BaseModel):
     __table_args__ = (
         # Unique constraint on (product_id, name) - no duplicate style names per product
         UniqueConstraint("product_id", "name", name="uq_styles_product_id_name"),
-        # Note: Partial unique index for is_default is created via migration/raw SQL
-        # SQLite doesn't support partial indexes in the same way as PostgreSQL
-        # For PostgreSQL: CREATE UNIQUE INDEX ix_styles_product_default
-        #                 ON styles (product_id) WHERE is_default = true
+        # Partial unique index to ensure only one default style per product
+        # This prevents race conditions when multiple requests try to create default styles
+        # Works on PostgreSQL and SQLite 3.8.0+ (released 2013-08-26)
+        # Use text() for the WHERE clause to work across dialects
+        Index(
+            "ix_styles_product_default",
+            "product_id",
+            unique=True,
+            sqlite_where=text("is_default = 1"),
+            postgresql_where=text("is_default = true"),
+        ),
         Index("ix_styles_product_id", "product_id"),
         Index("ix_styles_display_order", "display_order"),
     )
