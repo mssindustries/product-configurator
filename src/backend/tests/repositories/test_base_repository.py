@@ -98,7 +98,7 @@ async def test_ensure_unique_with_scope_filters(db_session: AsyncSession) -> Non
     style1 = Style(
         product_id=str(product1.id),
         name="Style A",
-        blend_file_url="https://example.com/style1.blend",
+        template_blob_path="blender-templates/style1.blend",
         customization_schema={},
     )
     db_session.add(style1)
@@ -134,7 +134,7 @@ async def test_ensure_unique_with_scope_filters_detects_duplicates_in_scope(
     style = Style(
         product_id=str(product.id),
         name="Style A",
-        blend_file_url="https://example.com/style.blend",
+        template_blob_path="blender-templates/style.blend",
         customization_schema={},
     )
     db_session.add(style)
@@ -175,7 +175,7 @@ async def test_ensure_unique_with_scope_filters_and_exclude_id(
     style = Style(
         product_id=str(product.id),
         name="Style A",
-        blend_file_url="https://example.com/style.blend",
+        template_blob_path="blender-templates/style.blend",
         customization_schema={},
     )
     db_session.add(style)
