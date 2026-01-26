@@ -41,6 +41,30 @@ class EntityNotFoundError(NotFoundError):
         return f"EntityNotFoundError(entity_name={self.entity_name!r}, entity_id={self.entity_id!r})"
 
 
+class EntityAlreadyExistsError(ConfiguratorError):
+    """Raised when an entity with duplicate unique field value already exists.
+
+    This exception provides structured information about which entity
+    and field value caused the conflict.
+
+    Attributes:
+        entity_name: The name of the entity type (e.g., "Product", "Client")
+        field_name: The name of the field that must be unique
+        field_value: The duplicate value that was attempted
+    """
+
+    def __init__(self, entity_name: str, field_name: str, field_value: str) -> None:
+        self.entity_name = entity_name
+        self.field_name = field_name
+        self.field_value = field_value
+        super().__init__(
+            f"{entity_name} with {field_name} '{field_value}' already exists"
+        )
+
+    def __repr__(self) -> str:
+        return f"EntityAlreadyExistsError(entity_name={self.entity_name!r}, field_name={self.field_name!r}, field_value={self.field_value!r})"
+
+
 class AuthenticationError(ConfiguratorError):
     """Raised when authentication fails."""
 
