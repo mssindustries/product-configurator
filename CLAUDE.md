@@ -448,7 +448,6 @@ The codebase uses a repository pattern to eliminate duplicated data access logic
 - Raises `EntityNotFoundError` which is caught by global exception handler
 - Example: `product = await ProductRepository(db).ensure_exists(product_id)`
 - Available repositories: `ProductRepository`, `ClientRepository`, `ConfigurationRepository`, `JobRepository`, `StyleRepository`
-- See `docs/ai-friendly-refactoring.md` for full refactoring documentation
 
 #### Multi-Domain (e.g., frontend + backend)
 
