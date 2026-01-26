@@ -16,7 +16,6 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Query, status
-from sqlalchemy import func, select
 
 from app.api.deps import DbSession
 from app.db.models import Product
@@ -47,25 +46,16 @@ async def list_products(
     Returns:
         ProductListResponse with items and total count.
     """
-    # Get total count
-    count_stmt = select(func.count()).select_from(Product)
-    count_result = await db.execute(count_stmt)
-    total = count_result.scalar_one()
-
-    # Get paginated products
-    stmt = (
-        select(Product)
-        .order_by(Product.created_at.desc())
-        .offset(skip)
-        .limit(limit)
+    repo = ProductRepository(db)
+    result = await repo.list_paginated(
+        skip=skip,
+        limit=limit,
+        order_by=Product.created_at.desc(),
     )
-    result = await db.execute(stmt)
-    products = result.scalars().all()
 
-    # Convert to response schemas
-    items = ProductResponse.from_models(products)
+    items = ProductResponse.from_models(result.items)
 
-    return ProductListResponse(items=items, total=total)
+    return ProductListResponse(items=items, total=result.total)
 
 
 @router.get("/{product_id}", response_model=ProductResponse)

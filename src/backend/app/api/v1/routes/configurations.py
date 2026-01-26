@@ -17,7 +17,7 @@ from uuid import UUID
 
 import jsonschema
 from fastapi import APIRouter, HTTPException, Query, status
-from sqlalchemy import func, select
+from sqlalchemy import select
 
 from app.api.deps import DbSession
 from app.core.exceptions import EntityNotFoundError
@@ -48,25 +48,16 @@ async def list_configurations(
     Returns:
         ConfigurationListResponse with items and total count.
     """
-    # Get total count
-    count_stmt = select(func.count()).select_from(Configuration)
-    count_result = await db.execute(count_stmt)
-    total = count_result.scalar_one()
-
-    # Get paginated configurations
-    stmt = (
-        select(Configuration)
-        .order_by(Configuration.created_at.desc())
-        .offset(skip)
-        .limit(limit)
+    repo = ConfigurationRepository(db)
+    result = await repo.list_paginated(
+        skip=skip,
+        limit=limit,
+        order_by=Configuration.created_at.desc(),
     )
-    result = await db.execute(stmt)
-    configurations = result.scalars().all()
 
-    # Convert to response schemas
-    items = ConfigurationResponse.from_models(configurations)
+    items = ConfigurationResponse.from_models(result.items)
 
-    return ConfigurationListResponse(items=items, total=total)
+    return ConfigurationListResponse(items=items, total=result.total)
 
 
 @router.get("/{configuration_id}", response_model=ConfigurationResponse)
