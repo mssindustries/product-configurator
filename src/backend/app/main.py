@@ -18,6 +18,7 @@ from app.core.exceptions import (
     AuthenticationError,
     AuthorizationError,
     ConfiguratorError,
+    EntityAlreadyExistsError,
     EntityNotFoundError,
     NotFoundError,
     ValidationError,
@@ -80,6 +81,35 @@ async def entity_not_found_error_handler(
             "message": str(exc),
             "entity": exc.entity_name,
             "id": exc.entity_id,
+        },
+    )
+
+
+@app.exception_handler(EntityAlreadyExistsError)
+async def entity_already_exists_error_handler(
+    request: Request, exc: EntityAlreadyExistsError
+) -> JSONResponse:
+    """
+    Handle EntityAlreadyExistsError exceptions.
+
+    Provides structured error response with entity name, field, and value.
+
+    Args:
+        request: The incoming request
+        exc: The EntityAlreadyExistsError exception
+
+    Returns:
+        JSONResponse with 409 status and error details including entity and field info
+    """
+    return JSONResponse(
+        status_code=status.HTTP_409_CONFLICT,
+        content={
+            "detail": str(exc),  # For compatibility with HTTPException format
+            "error": "entity_already_exists",
+            "message": str(exc),
+            "entity": exc.entity_name,
+            "field": exc.field_name,
+            "value": exc.field_value,
         },
     )
 

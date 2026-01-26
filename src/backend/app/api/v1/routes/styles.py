@@ -98,19 +98,13 @@ async def _check_duplicate_name(
     db: DbSession, product_id: UUID, name: str, exclude_style_id: str | None = None
 ) -> None:
     """Check if a style with the given name already exists for the product."""
-    stmt = select(Style).where(
-        Style.product_id == str(product_id),
-        Style.name == name,
+    repo = StyleRepository(db)
+    await repo.ensure_unique(
+        "name",
+        name,
+        exclude_id=exclude_style_id,
+        scope_filters=[Style.product_id == str(product_id)],
     )
-    if exclude_style_id:
-        stmt = stmt.where(Style.id != exclude_style_id)
-
-    result = await db.execute(stmt)
-    if result.scalar_one_or_none():
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=f"Style with name '{name}' already exists for this product",
-        )
 
 
 async def _unset_other_defaults(

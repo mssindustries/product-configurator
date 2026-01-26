@@ -14,7 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import InstrumentedAttribute
 from sqlalchemy.sql.elements import ColumnElement
 
-from app.core.exceptions import EntityNotFoundError
+from app.core.exceptions import EntityAlreadyExistsError, EntityNotFoundError
 from app.db.models.base import Base
 
 # Type variable for SQLAlchemy models
@@ -111,6 +111,67 @@ class BaseRepository(Generic[ModelT]):
         if entity is None:
             raise EntityNotFoundError(self._entity_name, str(id))
         return entity
+
+    async def ensure_unique(
+        self,
+        field: str,
+        value: Any,
+        *,
+        exclude_id: UUID | str | None = None,
+        scope_filters: list[Any] | None = None,
+    ) -> None:
+        """
+        Ensure field value is unique, raising EntityAlreadyExistsError if not.
+
+        This method checks if a record with the given field value already exists,
+        optionally excluding a specific ID (for updates) and applying scope filters
+        (e.g., checking uniqueness within a parent entity).
+
+        Args:
+            field: The field name to check for uniqueness (e.g., "name")
+            value: The value to check for uniqueness
+            exclude_id: Optional ID to exclude from the check (for updates)
+            scope_filters: Optional list of SQLAlchemy filter expressions to scope the check
+                         (e.g., [Product.client_id == client_id])
+
+        Raises:
+            EntityAlreadyExistsError: If an entity with the given field value already exists
+
+        Example:
+            # Simple uniqueness check
+            await repo.ensure_unique("name", "My Client")
+
+            # Update case (exclude current entity)
+            await repo.ensure_unique("name", "New Name", exclude_id=client_id)
+
+            # Scoped uniqueness (unique within parent)
+            await repo.ensure_unique(
+                "name",
+                "Style A",
+                scope_filters=[Style.product_id == product_id]
+            )
+        """
+        # Build query to check for existing entity
+        field_attr = getattr(self.model, field)
+        stmt = select(self.model).where(field_attr == value)
+
+        # Apply scope filters if provided
+        if scope_filters:
+            for filter_expr in scope_filters:
+                stmt = stmt.where(filter_expr)
+
+        # Exclude specific ID if provided (for update operations)
+        if exclude_id is not None:
+            # Type ignore for model.id access - pyright can't infer column attributes on generic model types
+            stmt = stmt.where(self.model.id != str(exclude_id))  # type: ignore[attr-defined]
+
+        # Execute query
+        result = await self.db.execute(stmt)
+        existing = result.scalar_one_or_none()
+
+        # Raise exception if duplicate found
+        if existing is not None:
+            raise EntityAlreadyExistsError(self._entity_name, field, str(value))
 
     async def list_paginated(
         self,

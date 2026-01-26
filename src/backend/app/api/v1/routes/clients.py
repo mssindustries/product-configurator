@@ -6,11 +6,12 @@ Provides operations for managing clients:
 - POST /api/v1/clients - Create new client
 """
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, status
 from sqlalchemy import func, select
 
 from app.api.deps import DbSession
 from app.db.models import Client
+from app.repositories.client import ClientRepository
 from app.schemas import ListResponse
 from app.schemas.client import ClientCreate, ClientResponse
 
@@ -58,19 +59,12 @@ async def create_client(
         ClientResponse with the created client details.
 
     Raises:
-        HTTPException 409: Client with this name already exists.
+        EntityAlreadyExistsError: Client with this name already exists (handled as 409).
         HTTPException 422: Validation error (handled by FastAPI).
     """
     # Check for duplicate name
-    stmt = select(Client).where(Client.name == client_data.name)
-    result = await db.execute(stmt)
-    existing = result.scalar_one_or_none()
-
-    if existing:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=f"Client with name '{client_data.name}' already exists",
-        )
+    repo = ClientRepository(db)
+    await repo.ensure_unique("name", client_data.name)
 
     # Create new client instance
     client = Client(name=client_data.name)
