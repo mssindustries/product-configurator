@@ -30,7 +30,7 @@ from fastapi import (
     status,
 )
 from jsonschema import Draft7Validator, SchemaError
-from sqlalchemy import select, update
+from sqlalchemy import func, select, update
 from sqlalchemy.exc import IntegrityError
 
 from app.api.deps import DbSession
