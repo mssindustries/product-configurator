@@ -2,10 +2,10 @@
 Product model - Configurable product template.
 """
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from sqlalchemy import ForeignKey, String, Text
-from sqlalchemy.dialects.postgresql import JSON, UUID
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.models.base import BaseModel
@@ -13,20 +13,21 @@ from app.db.models.base import BaseModel
 if TYPE_CHECKING:
     from app.db.models.client import Client
     from app.db.models.configuration import Configuration
+    from app.db.models.style import Style
 
 
 class Product(BaseModel):
     """
     Configurable product template.
 
+    Products are containers for Styles. Each Style has its own Blender template
+    and customization schema. Configurations are created against specific Styles.
+
     Attributes:
         id: UUID primary key
         client_id: Foreign key to Client
         name: Product name
         description: Product description
-        template_blob_path: Reference to Blender template in Blob Storage
-        template_version: Version string for cache invalidation
-        config_schema: JSON Schema defining valid configuration options
         created_at: Creation timestamp
         updated_at: Last update timestamp
     """
@@ -41,9 +42,6 @@ class Product(BaseModel):
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    template_blob_path: Mapped[str] = mapped_column(String(500), nullable=False)
-    template_version: Mapped[str] = mapped_column(String(50), nullable=False, default="1.0.0")
-    config_schema: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
 
     # Relationships
     client: Mapped["Client"] = relationship("Client", back_populates="products")
@@ -52,3 +50,14 @@ class Product(BaseModel):
         back_populates="product",
         cascade="all, delete-orphan",
     )
+    styles: Mapped[list["Style"]] = relationship(
+        "Style",
+        back_populates="product",
+        cascade="all, delete-orphan",
+        order_by="Style.display_order",
+    )
+
+    @property
+    def default_style(self) -> "Style | None":
+        """Return the default style for this product, if any."""
+        return next((s for s in self.styles if s.is_default), None)

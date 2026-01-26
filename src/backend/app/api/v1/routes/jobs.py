@@ -14,11 +14,11 @@ authenticated client.
 from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, status
-from sqlalchemy import select
 
 from app.api.deps import DbSession
-from app.db.models import Configuration, Job
+from app.db.models import Job
 from app.db.models.job import JobStatus
+from app.repositories import ConfigurationRepository, JobRepository
 from app.schemas.job import JobCreate, JobResponse
 
 router = APIRouter()
@@ -47,15 +47,8 @@ async def create_job(
         HTTPException 422: Validation error (handled by FastAPI).
     """
     # Validate configuration exists and has a client
-    stmt = select(Configuration).where(Configuration.id == str(job_data.configuration_id))
-    result = await db.execute(stmt)
-    configuration = result.scalar_one_or_none()
-
-    if not configuration:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Configuration {job_data.configuration_id} not found",
-        )
+    config_repo = ConfigurationRepository(db)
+    configuration = await config_repo.ensure_exists(job_data.configuration_id)
 
     # Verify configuration belongs to a client (structural validation)
     if not configuration.client_id:
@@ -117,15 +110,8 @@ async def get_job(
     Raises:
         HTTPException 404: Job not found.
     """
-    stmt = select(Job).where(Job.id == str(job_id))
-    result = await db.execute(stmt)
-    job = result.scalar_one_or_none()
-
-    if not job:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Job {job_id} not found",
-        )
+    repo = JobRepository(db)
+    job = await repo.ensure_exists(job_id)
 
     return JobResponse(
         id=str(job.id),
@@ -165,15 +151,8 @@ async def cancel_job(
         HTTPException 404: Job not found.
         HTTPException 400: Job cannot be cancelled (already processing/completed).
     """
-    stmt = select(Job).where(Job.id == str(job_id))
-    result = await db.execute(stmt)
-    job = result.scalar_one_or_none()
-
-    if not job:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Job {job_id} not found",
-        )
+    repo = JobRepository(db)
+    job = await repo.ensure_exists(job_id)
 
     # Check if job can be cancelled
     if job.status not in (JobStatus.PENDING, JobStatus.QUEUED):

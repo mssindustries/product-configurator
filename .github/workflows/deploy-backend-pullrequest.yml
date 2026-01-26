@@ -17,48 +17,15 @@ on:
       - '.github/workflows/backend*.yml'
       - '.github/workflows/deploy-backend*.yml'
       - '.github/workflows/build-backend-reusable.yml'
+      - '.github/workflows/test-backend-reusable.yml'
 
 jobs:
   test:
     name: Test
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: src/backend
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: Cache uv dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/uv
-            src/backend/.venv
-          key: ${{ runner.os }}-uv-${{ hashFiles('src/backend/uv.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-uv-
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v4
-
-      - name: Install dependencies
-        run: make install
-
-      - name: Lint
-        run: make lint
-
-      - name: Test
-        run: make test-ci
+    uses: ./.github/workflows/test-backend-reusable.yml
 
   build:
-    name: Build
+    name: Build Docker
     needs: test
     uses: ./.github/workflows/build-backend-reusable.yml
     with:
@@ -78,3 +45,5 @@ jobs:
       image_tag: ${{ needs.build.outputs.image_tag }}
     secrets:
       AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+      AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}

@@ -49,7 +49,7 @@ services:
   azurite:
     image: mcr.microsoft.com/azure-storage/azurite:latest
     container_name: mss-configurator-azurite
-    command: "azurite --blobHost 0.0.0.0 --queueHost 0.0.0.0 --tableHost 0.0.0.0 --loose --skipApiVersionCheck"
+    command: "azurite --blobHost 0.0.0.0 --queueHost 0.0.0.0 --tableHost 0.0.0.0 --loose --skipApiVersionCheck --location /data"
     ports:
       - "10000:10000"  # Blob service
       - "10001:10001"  # Queue service

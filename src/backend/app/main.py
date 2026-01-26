@@ -3,7 +3,9 @@ FastAPI application entry point.
 Test backend PR workflow quality gates.
 """
 
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from typing import Any, cast
 
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
@@ -16,6 +18,7 @@ from app.core.exceptions import (
     AuthenticationError,
     AuthorizationError,
     ConfiguratorError,
+    EntityNotFoundError,
     NotFoundError,
     ValidationError,
 )
@@ -24,7 +27,7 @@ from app.db.session import engine
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Application lifespan: create tables on startup."""
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
@@ -53,6 +56,34 @@ app.include_router(v1_router)
 
 
 # Exception Handlers
+@app.exception_handler(EntityNotFoundError)
+async def entity_not_found_error_handler(
+    request: Request, exc: EntityNotFoundError
+) -> JSONResponse:
+    """
+    Handle EntityNotFoundError exceptions.
+
+    Provides structured error response with entity name and ID.
+
+    Args:
+        request: The incoming request
+        exc: The EntityNotFoundError exception
+
+    Returns:
+        JSONResponse with 404 status and error details including entity info
+    """
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content={
+            "detail": str(exc),  # For compatibility with HTTPException format
+            "error": "entity_not_found",
+            "message": str(exc),
+            "entity": exc.entity_name,
+            "id": exc.entity_id,
+        },
+    )
+
+
 @app.exception_handler(NotFoundError)
 async def not_found_error_handler(request: Request, exc: NotFoundError) -> JSONResponse:
     """
@@ -164,6 +195,25 @@ async def configurator_error_handler(
     )
 
 
+def _sanitize_error_details(errors: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Sanitize Pydantic validation errors for JSON serialization.
+
+    Pydantic may include non-serializable objects (like ValueError instances)
+    in the 'ctx' field. This function converts them to strings.
+    """
+    sanitized = []
+    for error in errors:
+        sanitized_error = error.copy()
+        if "ctx" in sanitized_error:
+            # Convert any non-serializable objects in ctx to strings
+            sanitized_error["ctx"] = {
+                k: str(v) if not isinstance(v, (str, int, float, bool, type(None))) else v
+                for k, v in error["ctx"].items()
+            }
+        sanitized.append(sanitized_error)
+    return sanitized
+
+
 @app.exception_handler(RequestValidationError)
 async def request_validation_error_handler(
     request: Request, exc: RequestValidationError
@@ -183,7 +233,7 @@ async def request_validation_error_handler(
         content={
             "error": "validation_error",
             "message": "Request validation failed",
-            "details": exc.errors(),
+            "details": _sanitize_error_details(cast(list[dict[str, Any]], exc.errors())),
         },
     )
 
@@ -211,7 +261,7 @@ async def general_exception_handler(request: Request, exc: Exception) -> JSONRes
 
 
 @app.get("/health")
-async def health_check():
+async def health_check() -> dict[str, str]:
     """
     Health check endpoint for liveness probes.
 
@@ -222,7 +272,7 @@ async def health_check():
 
 
 @app.get("/")
-async def root():
+async def root() -> dict[str, str]:
     """
     Root endpoint with API information.
 

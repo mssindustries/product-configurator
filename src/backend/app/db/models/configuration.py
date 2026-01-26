@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from app.db.models.client import Client
     from app.db.models.job import Job
     from app.db.models.product import Product
+    from app.db.models.style import Style
 
 
 class Configuration(BaseModel):
@@ -39,6 +40,12 @@ class Configuration(BaseModel):
         nullable=False,
         index=True,
     )
+    style_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False),
+        ForeignKey("styles.id", ondelete="RESTRICT"),
+        nullable=False,
+        index=True,
+    )
     client_id: Mapped[str] = mapped_column(
         UUID(as_uuid=False),
         ForeignKey("clients.id", ondelete="CASCADE"),
@@ -51,6 +58,7 @@ class Configuration(BaseModel):
 
     # Relationships
     product: Mapped["Product"] = relationship("Product", back_populates="configurations")
+    style: Mapped["Style"] = relationship("Style", back_populates="configurations")
     client: Mapped["Client"] = relationship("Client", back_populates="configurations")
     jobs: Mapped[list["Job"]] = relationship(
         "Job",

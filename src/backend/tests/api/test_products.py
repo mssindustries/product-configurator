@@ -1,5 +1,14 @@
 """
 Tests for Products API endpoints.
+
+NOTE: These tests use random UUIDs for client_id. This works because:
+1. SQLite (used in tests) does not enforce foreign key constraints by default.
+2. The Product model does not have an explicit FK constraint to Client.
+
+On PostgreSQL (production), if FK constraints were enforced, using random UUIDs
+would fail. For production-like tests, create a valid Client first and use its ID.
+
+Future improvement: Update fixtures to create valid clients before products.
 """
 
 import uuid
@@ -10,21 +19,14 @@ from httpx import AsyncClient
 
 @pytest.fixture
 def sample_product_data():
-    """Sample product data for tests."""
+    """Sample product data for tests.
+
+    NOTE: Uses a random UUID for client_id. See module docstring for FK note.
+    """
     return {
         "client_id": str(uuid.uuid4()),
         "name": "Test Cabinet",
         "description": "A test cabinet product",
-        "template_blob_path": "/templates/cabinet.glb",
-        "template_version": "1.0.0",
-        "config_schema": {
-            "type": "object",
-            "properties": {
-                "width": {"type": "number", "minimum": 10, "maximum": 100},
-                "color": {"type": "string", "enum": ["white", "black", "oak"]},
-            },
-            "required": ["width", "color"],
-        },
     }
 
 
@@ -55,7 +57,11 @@ async def test_get_product_not_found(client: AsyncClient):
     fake_id = str(uuid.uuid4())
     response = await client.get(f"/api/v1/products/{fake_id}")
     assert response.status_code == 404
-    assert "not found" in response.json()["detail"].lower()
+    data = response.json()
+    assert data["error"] == "entity_not_found"
+    assert data["entity"] == "Product"
+    assert data["id"] == fake_id
+    assert "not found" in data["message"].lower()
 
 
 async def test_get_product_success(client: AsyncClient, sample_product_data: dict):
@@ -69,7 +75,6 @@ async def test_get_product_success(client: AsyncClient, sample_product_data: dic
     data = response.json()
     assert data["id"] == product_id
     assert data["name"] == sample_product_data["name"]
-    assert data["config_schema"] == sample_product_data["config_schema"]
 
 
 async def test_create_product_success(client: AsyncClient, sample_product_data: dict):
@@ -80,8 +85,6 @@ async def test_create_product_success(client: AsyncClient, sample_product_data: 
     assert "id" in data
     assert data["name"] == sample_product_data["name"]
     assert data["description"] == sample_product_data["description"]
-    assert data["template_blob_path"] == sample_product_data["template_blob_path"]
-    assert data["config_schema"] == sample_product_data["config_schema"]
     assert "created_at" in data
     assert "updated_at" in data
 
@@ -91,7 +94,7 @@ async def test_create_product_validation_error(client: AsyncClient):
     # Missing required fields
     invalid_data = {
         "name": "Test Product",
-        # missing client_id, template_blob_path, config_schema
+        # missing client_id
     }
     response = await client.post("/api/v1/products", json=invalid_data)
     assert response.status_code == 422
@@ -118,3 +121,79 @@ async def test_list_products_pagination(client: AsyncClient, sample_product_data
     data = response.json()
     assert len(data["items"]) == 1
     assert data["total"] == 3
+
+
+# ============================================================================
+# PATCH /api/v1/products/{product_id} - Update Product
+# ============================================================================
+
+
+async def test_update_product_success(client: AsyncClient, sample_product_data: dict):
+    """Updates all product fields successfully."""
+    # Create a product first
+    create_response = await client.post("/api/v1/products", json=sample_product_data)
+    assert create_response.status_code == 201
+    product_id = create_response.json()["id"]
+
+    # Update all fields
+    update_data = {
+        "name": "Updated Cabinet",
+        "description": "An updated description",
+    }
+
+    response = await client.patch(f"/api/v1/products/{product_id}", json=update_data)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["id"] == product_id
+    assert data["name"] == update_data["name"]
+    assert data["description"] == update_data["description"]
+    # client_id should remain unchanged
+    assert data["client_id"] == sample_product_data["client_id"]
+
+
+async def test_update_product_partial(client: AsyncClient, sample_product_data: dict):
+    """Updates only the name field, leaving others unchanged."""
+    # Create a product first
+    create_response = await client.post("/api/v1/products", json=sample_product_data)
+    assert create_response.status_code == 201
+    original = create_response.json()
+
+    # Update only name
+    update_data = {"name": "Partially Updated Name"}
+
+    response = await client.patch(f"/api/v1/products/{original['id']}", json=update_data)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["name"] == update_data["name"]
+    # Other fields should remain unchanged
+    assert data["description"] == original["description"]
+
+
+async def test_update_product_not_found(client: AsyncClient):
+    """Returns 404 for non-existent product ID."""
+    fake_id = str(uuid.uuid4())
+    update_data = {"name": "Does Not Exist"}
+
+    response = await client.patch(f"/api/v1/products/{fake_id}", json=update_data)
+    assert response.status_code == 404
+    data = response.json()
+    assert data["error"] == "entity_not_found"
+    assert data["entity"] == "Product"
+    assert data["id"] == fake_id
+    assert "not found" in data["message"].lower()
+
+
+async def test_update_product_empty_body(client: AsyncClient, sample_product_data: dict):
+    """Accepts empty update (no changes made)."""
+    # Create a product first
+    create_response = await client.post("/api/v1/products", json=sample_product_data)
+    assert create_response.status_code == 201
+    original = create_response.json()
+
+    # Send empty update
+    response = await client.patch(f"/api/v1/products/{original['id']}", json={})
+    assert response.status_code == 200
+    data = response.json()
+    # All fields should remain unchanged
+    assert data["name"] == original["name"]
+    assert data["description"] == original["description"]

@@ -6,7 +6,7 @@
 # Deploys to: Test environment only (creates PR preview environments)
 # Related workflow: deploy-frontend-main.yml (main branch deploys)
 
-name: Deploy Frontend (Pull Request)
+name: Frontend (Pull Request)
 
 on:
   pull_request:
@@ -14,13 +14,24 @@ on:
     paths:
       - 'src/frontend/**'
       - '.github/workflows/deploy-frontend*.yml'
+      - '.github/workflows/test-frontend-reusable.yml'
 
 permissions:
   contents: read
   pull-requests: write
 
 jobs:
+  test:
+    name: Test
+    # Skip tests when PR is closed (only deploy to cleanup)
+    if: github.event.action != 'closed'
+    uses: ./.github/workflows/test-frontend-reusable.yml
+
   deploy:
+    name: Deploy to Test Environment
+    needs: test
+    # Deploy always runs (to cleanup on close), but test is skipped on close
+    if: always() && (needs.test.result == 'success' || github.event.action == 'closed')
     uses: ./.github/workflows/deploy-frontend-reusable.yml
     with:
       environment: test

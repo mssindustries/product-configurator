@@ -8,7 +8,10 @@ import type {
   ClientListResponse,
   Product,
   ProductCreate,
+  ProductUpdate,
   ProductListResponse,
+  Style,
+  StyleListResponse,
   Configuration,
   ConfigurationCreate,
   ConfigurationListResponse,
@@ -125,6 +128,130 @@ export async function createProduct(data: ProductCreate): Promise<Product> {
     method: 'POST',
     body: JSON.stringify(data),
   });
+}
+
+export async function updateProduct(
+  id: string,
+  data: ProductUpdate
+): Promise<Product> {
+  return fetchApi<Product>(`/api/v1/products/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+// ============================================================================
+// Styles API
+// ============================================================================
+
+/**
+ * Get all styles for a product.
+ */
+export async function getStyles(
+  productId: string,
+  params?: PaginationParams
+): Promise<StyleListResponse> {
+  return fetchApi<StyleListResponse>(
+    `/api/v1/products/${productId}/styles${buildQueryString(params)}`
+  );
+}
+
+/**
+ * Get a single style by ID.
+ */
+export async function getStyle(productId: string, styleId: string): Promise<Style> {
+  return fetchApi<Style>(`/api/v1/products/${productId}/styles/${styleId}`);
+}
+
+/**
+ * Create a new style with file upload.
+ * Uses FormData for multipart/form-data upload.
+ */
+export async function createStyle(
+  productId: string,
+  formData: FormData
+): Promise<Style> {
+  const url = `${API_BASE_URL}/api/v1/products/${productId}/styles`;
+  const response = await fetch(url, {
+    method: 'POST',
+    body: formData,
+    // Note: Don't set Content-Type header - browser will set it with boundary for multipart
+  });
+
+  if (!response.ok) {
+    let detail = 'An error occurred';
+    try {
+      const errorData: ApiError = await response.json();
+      detail = errorData.detail;
+    } catch {
+      detail = response.statusText;
+    }
+    throw new ApiClientError(
+      `API Error: ${response.status} ${response.statusText}`,
+      response.status,
+      detail
+    );
+  }
+
+  return response.json();
+}
+
+/**
+ * Update an existing style with optional file upload.
+ * Uses FormData for multipart/form-data upload.
+ */
+export async function updateStyle(
+  productId: string,
+  styleId: string,
+  formData: FormData
+): Promise<Style> {
+  const url = `${API_BASE_URL}/api/v1/products/${productId}/styles/${styleId}`;
+  const response = await fetch(url, {
+    method: 'PATCH',
+    body: formData,
+    // Note: Don't set Content-Type header - browser will set it with boundary for multipart
+  });
+
+  if (!response.ok) {
+    let detail = 'An error occurred';
+    try {
+      const errorData: ApiError = await response.json();
+      detail = errorData.detail;
+    } catch {
+      detail = response.statusText;
+    }
+    throw new ApiClientError(
+      `API Error: ${response.status} ${response.statusText}`,
+      response.status,
+      detail
+    );
+  }
+
+  return response.json();
+}
+
+/**
+ * Delete a style.
+ */
+export async function deleteStyle(productId: string, styleId: string): Promise<void> {
+  return fetchApi<void>(`/api/v1/products/${productId}/styles/${styleId}`, {
+    method: 'DELETE',
+  });
+}
+
+/**
+ * Set a style as the default for a product.
+ */
+export async function setDefaultStyle(
+  productId: string,
+  styleId: string
+): Promise<Style> {
+  return fetchApi<Style>(
+    `/api/v1/products/${productId}/styles/${styleId}/set-default`,
+    {
+      method: 'POST',
+    }
+  );
 }
 
 // ============================================================================

@@ -6,7 +6,7 @@
 #
 # Related workflow: deploy-frontend-pullrequest.yml (PR previews)
 
-name: Deploy Frontend (Main)
+name: Frontend (Main)
 
 on:
   push:
@@ -14,6 +14,7 @@ on:
     paths:
       - 'src/frontend/**'
       - '.github/workflows/deploy-frontend*.yml'
+      - '.github/workflows/test-frontend-reusable.yml'
   workflow_dispatch:
     inputs:
       environment:
@@ -26,7 +27,13 @@ on:
         default: test
 
 jobs:
+  test:
+    name: Test
+    uses: ./.github/workflows/test-frontend-reusable.yml
+
   deploy:
+    name: Deploy
+    needs: test
     uses: ./.github/workflows/deploy-frontend-reusable.yml
     with:
       environment: ${{ (github.event_name == 'workflow_dispatch' && inputs.environment) || 'test' }}

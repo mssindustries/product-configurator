@@ -49,6 +49,9 @@ config/*.env
 *.swo
 *~
 
+# Browser automation
+.playwright-mcp/
+
 # OS
 .DS_Store
 Thumbs.db

@@ -3,7 +3,6 @@ Pydantic schemas for Product entity.
 """
 
 from datetime import datetime
-from typing import Any
 
 from pydantic import Field
 
@@ -15,12 +14,6 @@ class ProductBase(BaseSchema):
 
     name: str = Field(..., min_length=1, max_length=255)
     description: str | None = Field(default=None, max_length=5000)
-    template_blob_path: str = Field(..., max_length=500)
-    template_version: str = Field(default="1.0.0", max_length=50)
-    config_schema: dict[str, Any] = Field(
-        ...,
-        description="JSON Schema defining valid configuration options",
-    )
 
 
 class ProductCreate(ProductBase):
@@ -38,9 +31,6 @@ class ProductUpdate(BaseSchema):
 
     name: str | None = Field(default=None, min_length=1, max_length=255)
     description: str | None = Field(default=None, max_length=5000)
-    template_blob_path: str | None = Field(default=None, max_length=500)
-    template_version: str | None = Field(default=None, max_length=50)
-    config_schema: dict[str, Any] | None = Field(default=None)
 
 
 class ProductResponse(ProductBase):

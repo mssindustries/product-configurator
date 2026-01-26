@@ -20,7 +20,9 @@ from fastapi import APIRouter, HTTPException, Query, status
 from sqlalchemy import func, select
 
 from app.api.deps import DbSession
-from app.db.models import Configuration, Product
+from app.core.exceptions import EntityNotFoundError
+from app.db.models import Configuration, Style
+from app.repositories import ConfigurationRepository, ProductRepository
 from app.schemas.configuration import (
     ConfigurationCreate,
     ConfigurationListResponse,
@@ -66,6 +68,7 @@ async def list_configurations(
         ConfigurationResponse(
             id=str(config.id),
             product_id=str(config.product_id),
+            style_id=str(config.style_id),
             client_id=str(config.client_id),
             name=config.name,
             config_data=config.config_data,
@@ -96,19 +99,13 @@ async def get_configuration(
     Raises:
         HTTPException 404: Configuration not found.
     """
-    stmt = select(Configuration).where(Configuration.id == str(configuration_id))
-    result = await db.execute(stmt)
-    config = result.scalar_one_or_none()
-
-    if not config:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Configuration {configuration_id} not found",
-        )
+    repo = ConfigurationRepository(db)
+    config = await repo.ensure_exists(configuration_id)
 
     return ConfigurationResponse(
         id=str(config.id),
         product_id=str(config.product_id),
+        style_id=str(config.style_id),
         client_id=str(config.client_id),
         name=config.name,
         config_data=config.config_data,
@@ -137,25 +134,32 @@ async def create_configuration(
         ConfigurationResponse with the created configuration details.
 
     Raises:
-        HTTPException 404: Product not found.
+        HTTPException 404: Product or Style not found.
         HTTPException 422: Config data validation error.
     """
-    # Fetch the product to get its config_schema
-    product_stmt = select(Product).where(Product.id == config_data.product_id)
-    product_result = await db.execute(product_stmt)
-    product = product_result.scalar_one_or_none()
+    # Verify product exists
+    product_repo = ProductRepository(db)
+    await product_repo.ensure_exists(config_data.product_id)
 
-    if not product:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Product {config_data.product_id} not found",
+    # Fetch the style to get its customization_schema (scoped to product)
+    style_stmt = select(Style).where(
+        Style.id == config_data.style_id,
+        Style.product_id == config_data.product_id,
+    )
+    style_result = await db.execute(style_stmt)
+    style = style_result.scalar_one_or_none()
+
+    if not style:
+        raise EntityNotFoundError(
+            "Style",
+            f"{config_data.style_id} for product {config_data.product_id}",
         )
 
-    # Validate config_data against product's config_schema
+    # Validate config_data against style's customization_schema
     try:
         jsonschema.validate(
             instance=config_data.config_data,
-            schema=product.config_schema,
+            schema=style.customization_schema,
         )
     except jsonschema.ValidationError as e:
         raise HTTPException(
@@ -163,19 +167,21 @@ async def create_configuration(
             detail=f"Invalid configuration data: {e.message}",
         ) from e
     except jsonschema.SchemaError as e:
-        # This means the product's config_schema itself is invalid
+        # This means the style's customization_schema itself is invalid
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Product schema is invalid: {e.message}",
+            detail=f"Style schema is invalid: {e.message}",
         ) from e
 
     # Create new configuration instance
+    # Use style.id as a simple version identifier since styles don't have a version field
     configuration = Configuration(
         product_id=config_data.product_id,
+        style_id=config_data.style_id,
         client_id=config_data.client_id,
         name=config_data.name,
         config_data=config_data.config_data,
-        product_schema_version=product.template_version,
+        product_schema_version="1.0.0",  # TODO: Add version field to Style if needed
     )
 
     db.add(configuration)
@@ -185,6 +191,7 @@ async def create_configuration(
     return ConfigurationResponse(
         id=str(configuration.id),
         product_id=str(configuration.product_id),
+        style_id=str(configuration.style_id),
         client_id=str(configuration.client_id),
         name=configuration.name,
         config_data=configuration.config_data,
@@ -211,15 +218,8 @@ async def delete_configuration(
     Raises:
         HTTPException 404: Configuration not found.
     """
-    stmt = select(Configuration).where(Configuration.id == str(configuration_id))
-    result = await db.execute(stmt)
-    config = result.scalar_one_or_none()
-
-    if not config:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Configuration {configuration_id} not found",
-        )
+    repo = ConfigurationRepository(db)
+    config = await repo.ensure_exists(configuration_id)
 
     await db.delete(config)
     await db.commit()

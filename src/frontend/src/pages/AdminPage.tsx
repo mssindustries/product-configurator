@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Card } from '../components/ui';
+import { Card, Icon } from '../components/ui';
 
 /**
  * AdminPage - Main admin dashboard with navigation to admin sections.
@@ -16,25 +16,29 @@ export default function AdminPage() {
             <Card className="p-6 hover:shadow-lg transition-shadow group">
               <div className="flex items-center gap-4">
                 <div className="bg-primary-100 p-3 rounded-lg group-hover:bg-primary-200 transition-colors">
-                  <svg
-                    className="w-8 h-8 text-primary-600"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                    />
-                  </svg>
+                  <Icon name="building" size="xl" className="text-primary-600" />
                 </div>
                 <div>
                   <h2 className="text-lg font-semibold text-neutral-900 group-hover:text-primary-600 transition-colors">
                     Clients
                   </h2>
                   <p className="text-sm text-neutral-500">Manage client accounts</p>
+                </div>
+              </div>
+            </Card>
+          </Link>
+
+          <Link to="/products">
+            <Card className="p-6 hover:shadow-lg transition-shadow group">
+              <div className="flex items-center gap-4">
+                <div className="bg-primary-100 p-3 rounded-lg group-hover:bg-primary-200 transition-colors">
+                  <Icon name="cube" size="xl" className="text-primary-600" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-neutral-900 group-hover:text-primary-600 transition-colors">
+                    Products
+                  </h2>
+                  <p className="text-sm text-neutral-500">Manage product catalog</p>
                 </div>
               </div>
             </Card>

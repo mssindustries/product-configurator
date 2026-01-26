@@ -440,6 +440,14 @@ When building UI:
 - FastAPI async endpoints
 - SQLAlchemy 2.0 async ORM
 - Pydantic v2 for validation
+- Repository pattern for data access (eliminates "get or 404" duplication)
+
+**Repository Pattern:**
+The codebase uses a repository pattern to eliminate duplicated data access logic:
+- Use `EntityRepository.ensure_exists(id)` instead of manual SELECT + None check
+- Raises `EntityNotFoundError` which is caught by global exception handler
+- Example: `product = await ProductRepository(db).ensure_exists(product_id)`
+- Repositories are in `app/repositories/` - check there for available entity repositories
 
 #### Multi-Domain (e.g., frontend + backend)
 
