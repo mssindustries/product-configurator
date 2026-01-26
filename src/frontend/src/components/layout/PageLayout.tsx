@@ -44,7 +44,18 @@ export function PageLayout({
   children,
   maxWidth = '4xl',
 }: PageLayoutProps) {
-  const maxWidthClass = `max-w-${maxWidth}`;
+  const maxWidthClasses = {
+    xl: 'max-w-xl',
+    '2xl': 'max-w-2xl',
+    '3xl': 'max-w-3xl',
+    '4xl': 'max-w-4xl',
+    '5xl': 'max-w-5xl',
+    '6xl': 'max-w-6xl',
+    '7xl': 'max-w-7xl',
+    full: 'max-w-full',
+  } as const;
+
+  const maxWidthClass = maxWidthClasses[maxWidth];
 
   return (
     <div className="min-h-screen bg-neutral-100 p-8">
