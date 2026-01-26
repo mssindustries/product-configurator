@@ -9,6 +9,7 @@ import {
   EmptyState,
   ErrorState,
 } from '../components/ui';
+import { PageLayout } from '../components/layout';
 import { ProductFormModal } from '../components/products';
 import { useList } from '../hooks';
 import { formatDate } from '../lib/format';
@@ -111,67 +112,63 @@ export default function ProductsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-100 p-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-neutral-900">Products</h1>
-            <p className="text-neutral-600 mt-1">
-              Manage your product catalog and 3D configurator templates.
-            </p>
-          </div>
-          {!isLoading && !error && products.length > 0 && (
-            <Button intent="primary" onClick={handleAddProduct}>
-              <Icon name="plus" size="md" className="mr-1" />
-              Add Product
-            </Button>
-          )}
-        </div>
-
-        {isLoading && (
-          <ListSkeleton rows={3} config={{ lines: 3, widths: ['w-1/3', 'w-1/4', 'w-1/5'] }} />
-        )}
-
-        {!isLoading && error && (
-          <ErrorState
-            title="Failed to load products"
-            message={error}
-            onRetry={refetchProducts}
-          />
-        )}
-
-        {!isLoading && !error && products.length === 0 && (
-          <EmptyState
-            icon="cube"
-            title="No products yet"
-            description="Get started by adding your first product. Products define the 3D configurator templates that your clients can customize."
-            action={{ label: 'Add Your First Product', onClick: handleAddProduct }}
-            layout="horizontal"
-          />
-        )}
-
+    <PageLayout
+      title="Products"
+      description="Manage your product catalog and 3D configurator templates."
+    >
+      <div className="flex items-center justify-between mb-6">
+        <div />
         {!isLoading && !error && products.length > 0 && (
-          <Card>
-            <div className="divide-y divide-neutral-200">
-              {products.map((product) => (
-                <ProductRow
-                  key={product.id}
-                  product={product}
-                  clientName={getClientName(product.client_id)}
-                  onEdit={handleEditProduct}
-                />
-              ))}
-            </div>
-          </Card>
+          <Button intent="primary" onClick={handleAddProduct}>
+            <Icon name="plus" size="md" className="mr-1" />
+            Add Product
+          </Button>
         )}
-
-        <ProductFormModal
-          isOpen={isModalOpen}
-          onClose={handleCloseModal}
-          onSuccess={handleProductSaved}
-          product={selectedProduct}
-        />
       </div>
-    </div>
+
+      {isLoading && (
+        <ListSkeleton rows={3} config={{ lines: 3, widths: ['w-1/3', 'w-1/4', 'w-1/5'] }} />
+      )}
+
+      {!isLoading && error && (
+        <ErrorState
+          title="Failed to load products"
+          message={error}
+          onRetry={refetchProducts}
+        />
+      )}
+
+      {!isLoading && !error && products.length === 0 && (
+        <EmptyState
+          icon="cube"
+          title="No products yet"
+          description="Get started by adding your first product. Products define the 3D configurator templates that your clients can customize."
+          action={{ label: 'Add Your First Product', onClick: handleAddProduct }}
+          layout="horizontal"
+        />
+      )}
+
+      {!isLoading && !error && products.length > 0 && (
+        <Card>
+          <div className="divide-y divide-neutral-200">
+            {products.map((product) => (
+              <ProductRow
+                key={product.id}
+                product={product}
+                clientName={getClientName(product.client_id)}
+                onEdit={handleEditProduct}
+              />
+            ))}
+          </div>
+        </Card>
+      )}
+
+      <ProductFormModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSuccess={handleProductSaved}
+        product={selectedProduct}
+      />
+    </PageLayout>
   );
 }
