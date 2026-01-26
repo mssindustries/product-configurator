@@ -34,7 +34,8 @@ from sqlalchemy import func, select, update
 from sqlalchemy.exc import IntegrityError
 
 from app.api.deps import DbSession
-from app.db.models import Configuration, Product, Style
+from app.db.models import Configuration, Style
+from app.repositories import ProductRepository, StyleRepository
 from app.schemas.style import StyleListResponse, StyleResponse
 from app.services.blob_storage import BlobStorageService
 
@@ -107,39 +108,6 @@ def _style_to_response(style: Style) -> StyleResponse:
         created_at=style.created_at,
         updated_at=style.updated_at,
     )
-
-
-async def _get_product_or_404(db: DbSession, product_id: UUID) -> Product:
-    """Get product by ID or raise 404."""
-    stmt = select(Product).where(Product.id == str(product_id))
-    result = await db.execute(stmt)
-    product = result.scalar_one_or_none()
-
-    if not product:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Product {product_id} not found",
-        )
-    return product
-
-
-async def _get_style_or_404(
-    db: DbSession, product_id: UUID, style_id: UUID
-) -> Style:
-    """Get style by ID (scoped to product) or raise 404."""
-    stmt = select(Style).where(
-        Style.id == str(style_id),
-        Style.product_id == str(product_id),
-    )
-    result = await db.execute(stmt)
-    style = result.scalar_one_or_none()
-
-    if not style:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Style {style_id} not found for product {product_id}",
-        )
-    return style
 
 
 async def _check_duplicate_name(
@@ -241,7 +209,8 @@ async def create_style(
     - Style names must be unique within a product
     """
     # Verify product exists
-    await _get_product_or_404(db, product_id)
+    product_repo = ProductRepository(db)
+    await product_repo.ensure_exists(product_id)
 
     # Validate file
     _validate_blend_file(file)
@@ -325,7 +294,8 @@ async def list_styles(
         StyleListResponse with items and total count.
     """
     # Verify product exists
-    await _get_product_or_404(db, product_id)
+    product_repo = ProductRepository(db)
+    await product_repo.ensure_exists(product_id)
 
     # Get total count
     count_stmt = select(func.count()).select_from(Style).where(
@@ -375,10 +345,12 @@ async def get_style(
         HTTPException 404: Style or product not found.
     """
     # Verify product exists
-    await _get_product_or_404(db, product_id)
+    product_repo = ProductRepository(db)
+    await product_repo.ensure_exists(product_id)
 
     # Get style (scoped to product)
-    style = await _get_style_or_404(db, product_id, style_id)
+    style_repo = StyleRepository(db)
+    style = await style_repo.ensure_exists_for_product(product_id, style_id)
 
     return _style_to_response(style)
 
@@ -417,10 +389,12 @@ async def update_style(
     - If is_default=true, other styles are unset as default
     """
     # Verify product exists
-    await _get_product_or_404(db, product_id)
+    product_repo = ProductRepository(db)
+    await product_repo.ensure_exists(product_id)
 
     # Get style
-    style = await _get_style_or_404(db, product_id, style_id)
+    style_repo = StyleRepository(db)
+    style = await style_repo.ensure_exists_for_product(product_id, style_id)
 
     # Update fields
     if name is not None:
@@ -528,10 +502,12 @@ async def delete_style(
     - Deletes blob file from storage
     """
     # Verify product exists
-    await _get_product_or_404(db, product_id)
+    product_repo = ProductRepository(db)
+    await product_repo.ensure_exists(product_id)
 
     # Get style
-    style = await _get_style_or_404(db, product_id, style_id)
+    style_repo = StyleRepository(db)
+    style = await style_repo.ensure_exists_for_product(product_id, style_id)
 
     # Cannot delete default style
     if style.is_default:
@@ -598,10 +574,12 @@ async def set_default_style(
     style succeeds without error.
     """
     # Verify product exists
-    await _get_product_or_404(db, product_id)
+    product_repo = ProductRepository(db)
+    await product_repo.ensure_exists(product_id)
 
     # Get style
-    style = await _get_style_or_404(db, product_id, style_id)
+    style_repo = StyleRepository(db)
+    style = await style_repo.ensure_exists_for_product(product_id, style_id)
 
     # Unset other defaults and set this one
     await _unset_other_defaults(db, product_id, exclude_style_id=str(style_id))

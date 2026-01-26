@@ -15,11 +15,12 @@ authenticated client.
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, Query, status
 from sqlalchemy import func, select
 
 from app.api.deps import DbSession
 from app.db.models import Product
+from app.repositories import ProductRepository
 from app.schemas.product import (
     ProductCreate,
     ProductListResponse,
@@ -92,17 +93,10 @@ async def get_product(
         ProductResponse with full product details including config_schema.
 
     Raises:
-        HTTPException 404: Product not found.
+        EntityNotFoundError: Product not found (returns 404).
     """
-    stmt = select(Product).where(Product.id == str(product_id))
-    result = await db.execute(stmt)
-    product = result.scalar_one_or_none()
-
-    if not product:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Product {product_id} not found",
-        )
+    repo = ProductRepository(db)
+    product = await repo.ensure_exists(product_id)
 
     return ProductResponse(
         id=str(product.id),
@@ -176,19 +170,11 @@ async def update_product(
         ProductResponse with the updated product details.
 
     Raises:
-        HTTPException 404: Product not found.
+        EntityNotFoundError: Product not found (returns 404).
         HTTPException 422: Validation error (handled by FastAPI).
     """
-    # Get existing product
-    stmt = select(Product).where(Product.id == str(product_id))
-    result = await db.execute(stmt)
-    product = result.scalar_one_or_none()
-
-    if not product:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Product {product_id} not found",
-        )
+    repo = ProductRepository(db)
+    product = await repo.ensure_exists(product_id)
 
     # Update only fields that are provided (not None)
     update_data = product_data.model_dump(exclude_unset=True)

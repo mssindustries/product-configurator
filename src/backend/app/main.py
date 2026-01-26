@@ -18,6 +18,7 @@ from app.core.exceptions import (
     AuthenticationError,
     AuthorizationError,
     ConfiguratorError,
+    EntityNotFoundError,
     NotFoundError,
     ValidationError,
 )
@@ -55,6 +56,34 @@ app.include_router(v1_router)
 
 
 # Exception Handlers
+@app.exception_handler(EntityNotFoundError)
+async def entity_not_found_error_handler(
+    request: Request, exc: EntityNotFoundError
+) -> JSONResponse:
+    """
+    Handle EntityNotFoundError exceptions.
+
+    Provides structured error response with entity name and ID.
+
+    Args:
+        request: The incoming request
+        exc: The EntityNotFoundError exception
+
+    Returns:
+        JSONResponse with 404 status and error details including entity info
+    """
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content={
+            "detail": str(exc),  # For compatibility with HTTPException format
+            "error": "entity_not_found",
+            "message": str(exc),
+            "entity": exc.entity_name,
+            "id": exc.entity_id,
+        },
+    )
+
+
 @app.exception_handler(NotFoundError)
 async def not_found_error_handler(request: Request, exc: NotFoundError) -> JSONResponse:
     """

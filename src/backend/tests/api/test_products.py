@@ -57,7 +57,11 @@ async def test_get_product_not_found(client: AsyncClient):
     fake_id = str(uuid.uuid4())
     response = await client.get(f"/api/v1/products/{fake_id}")
     assert response.status_code == 404
-    assert "not found" in response.json()["detail"].lower()
+    data = response.json()
+    assert data["error"] == "entity_not_found"
+    assert data["entity"] == "Product"
+    assert data["id"] == fake_id
+    assert "not found" in data["message"].lower()
 
 
 async def test_get_product_success(client: AsyncClient, sample_product_data: dict):
@@ -172,7 +176,11 @@ async def test_update_product_not_found(client: AsyncClient):
 
     response = await client.patch(f"/api/v1/products/{fake_id}", json=update_data)
     assert response.status_code == 404
-    assert "not found" in response.json()["detail"].lower()
+    data = response.json()
+    assert data["error"] == "entity_not_found"
+    assert data["entity"] == "Product"
+    assert data["id"] == fake_id
+    assert "not found" in data["message"].lower()
 
 
 async def test_update_product_empty_body(client: AsyncClient, sample_product_data: dict):
