@@ -447,7 +447,7 @@ The codebase uses a repository pattern to eliminate duplicated data access logic
 - Use `EntityRepository.ensure_exists(id)` instead of manual SELECT + None check
 - Raises `EntityNotFoundError` which is caught by global exception handler
 - Example: `product = await ProductRepository(db).ensure_exists(product_id)`
-- Available repositories: `ProductRepository`, `ClientRepository`, `ConfigurationRepository`, `JobRepository`, `StyleRepository`
+- Repositories are in `app/repositories/` - check there for available entity repositories
 
 #### Multi-Domain (e.g., frontend + backend)
 
