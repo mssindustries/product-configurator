@@ -110,10 +110,3 @@ class StyleResponse(StyleBase):
     def from_models(cls, styles: Sequence["Style"]) -> list["StyleResponse"]:
         """Create responses from sequence of ORM models."""
         return [cls.from_model(s) for s in styles]
-
-
-class StyleListResponse(BaseSchema):
-    """Schema for listing styles."""
-
-    items: list[StyleResponse]
-    total: int

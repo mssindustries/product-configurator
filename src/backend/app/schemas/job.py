@@ -76,10 +76,3 @@ class JobStatusResponse(BaseSchema):
     result_url: str | None = None
     error_code: str | None = None
     error_message: str | None = None
-
-
-class JobListResponse(BaseSchema):
-    """Schema for listing jobs."""
-
-    items: list[JobResponse]
-    total: int

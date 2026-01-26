@@ -32,6 +32,15 @@ class TimestampSchema(BaseSchema):
     updated_at: datetime
 
 
+class ListResponse(BaseModel, Generic[T]):
+    """Simple list response with items and total."""
+
+    items: list[T]
+    total: int
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class PaginatedResponse(BaseModel, Generic[T]):
     """Generic paginated response schema."""
 

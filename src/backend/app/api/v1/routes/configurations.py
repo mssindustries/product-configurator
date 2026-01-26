@@ -23,21 +23,21 @@ from app.api.deps import DbSession
 from app.core.exceptions import EntityNotFoundError
 from app.db.models import Configuration, Style
 from app.repositories import ConfigurationRepository, ProductRepository
+from app.schemas import ListResponse
 from app.schemas.configuration import (
     ConfigurationCreate,
-    ConfigurationListResponse,
     ConfigurationResponse,
 )
 
 router = APIRouter()
 
 
-@router.get("", response_model=ConfigurationListResponse)
+@router.get("", response_model=ListResponse[ConfigurationResponse])
 async def list_configurations(
     db: DbSession,
     skip: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=1, le=100)] = 20,
-) -> ConfigurationListResponse:
+) -> ListResponse[ConfigurationResponse]:
     """
     List all configurations.
 
@@ -46,7 +46,7 @@ async def list_configurations(
     - limit: Maximum number of configurations to return (1-100)
 
     Returns:
-        ConfigurationListResponse with items and total count.
+        ListResponse with items and total count.
     """
     repo = ConfigurationRepository(db)
     result = await repo.list_paginated(
@@ -57,7 +57,7 @@ async def list_configurations(
 
     items = ConfigurationResponse.from_models(result.items)
 
-    return ConfigurationListResponse(items=items, total=result.total)
+    return ListResponse(items=items, total=result.total)
 
 
 @router.get("/{configuration_id}", response_model=ConfigurationResponse)

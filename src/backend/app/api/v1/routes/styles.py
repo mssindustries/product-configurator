@@ -36,7 +36,8 @@ from sqlalchemy.exc import IntegrityError
 from app.api.deps import DbSession
 from app.db.models import Configuration, Style
 from app.repositories import ProductRepository, StyleRepository
-from app.schemas.style import StyleListResponse, StyleResponse
+from app.schemas import ListResponse
+from app.schemas.style import StyleResponse
 from app.services.blob_storage import BlobStorageService
 
 logger = logging.getLogger(__name__)
@@ -259,13 +260,13 @@ async def create_style(
 # ============================================================================
 
 
-@router.get("", response_model=StyleListResponse)
+@router.get("", response_model=ListResponse[StyleResponse])
 async def list_styles(
     product_id: UUID,
     db: DbSession,
     skip: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=1, le=100)] = 100,
-) -> StyleListResponse:
+) -> ListResponse[StyleResponse]:
     """
     List all styles for a product.
 
@@ -274,7 +275,7 @@ async def list_styles(
     - limit: Maximum number of styles to return (1-100)
 
     Returns:
-        StyleListResponse with items and total count.
+        ListResponse with items and total count.
     """
     # Verify product exists
     product_repo = ProductRepository(db)
@@ -291,7 +292,7 @@ async def list_styles(
 
     items = StyleResponse.from_models(result.items)
 
-    return StyleListResponse(items=items, total=result.total)
+    return ListResponse(items=items, total=result.total)
 
 
 # ============================================================================
