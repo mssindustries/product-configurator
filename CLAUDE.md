@@ -35,6 +35,7 @@ This project uses Claude Code plugins. Use them proactively, not as a last resor
 
 | Task | Command/Agent | Notes |
 |------|---------------|-------|
+| Work on GitHub issue | `/work-on-issue` | Fetch issue, create branch, follow workflow |
 | Start new feature | `/feature-dev` | Guided workflow with architecture focus |
 | Design React UI | `/frontend-design` | High-quality, distinctive interfaces |
 | Create commit | `/commit` | Auto-generates message from changes |
@@ -79,6 +80,7 @@ Skills are plugin-provided prompts. Invoke with `/skill-name`. Some require full
 Local commands stored in `.claude/commands/`. Project-specific shortcuts.
 
 - `/create-issue` - Create a GitHub issue with proper issue type and add it to the project
+- `/work-on-issue` - Start work on a GitHub issue (fetches details, creates branch, follows workflow)
 
 ### Agents
 
@@ -269,8 +271,6 @@ gh project item-add 1 --owner mssindustries --url https://github.com/mssindustri
 
 ## GitHub Issue Workflow
 
-This workflow enables seamless handoffs between local Claude Code and GitHub Claude Action.
-
 ### Project Statuses
 
 | Status | Purpose |
@@ -281,51 +281,47 @@ This workflow enables seamless handoffs between local Claude Code and GitHub Cla
 | In Development | Writing code |
 | Done | Complete |
 
-### Handoffs
+### Working on Issues
 
-**You → Claude:**
-1. Push your changes to a branch
-2. Comment `@claude continue from here`
+Use `/work-on-issue <number>` to start work on a GitHub issue. This will:
+1. Fetch the issue details
+2. Create a branch using the naming convention
+3. Move the issue to the appropriate status
+4. Follow the workflow based on the current status
 
-**Claude → You:**
-1. Claude comments on issue/PR with status/summary
-2. You get notified, pull the branch, continue locally
-
-### Status-Specific Guidance
+### Status-Specific Workflow
 
 #### Backlog
 
-When triggered:
+When starting work on a backlog issue:
 1. Move issue to "In Analysis"
 2. Begin analysis process
 
 #### In Analysis
-Imagine you are a product owner/business analyst and want to provide additional business context to the issue. You leave technical implementation details out of it. 
-When triggered:
-1. **Format the issue** based on its type (User Story, Task, Bug, Feature)
+
+Act as a product owner/business analyst to provide business context, leaving technical implementation details for later.
+
+1. **Format the issue** based on its type (Feature, Task, Bug)
 2. **Validate requirements:**
    - Are acceptance criteria clear and complete?
    - Are there ambiguities or missing details?
-3. **Ask clarifying questions** if needed (comment on issue)
+3. **Ask clarifying questions** if needed
 4. **Move to Planning** when the issue is well-defined
 
 #### Planning
 
-When triggered:
 1. **Determine plan complexity** (simple vs complex)
 2. **Create implementation plan:**
    - **Simple plan:** Files to touch + brief steps
    - **Complex plan:** Architecture overview + detailed TDD tasks
 3. **Store plan** in `plans/YYYY-MM-DD-<issue-number>-<slug>.md`
-4. **Comment on issue** linking to the plan
-5. **Wait for approval** - do NOT start coding
-6. Move to In Development only after approval
+4. **Wait for approval** - do NOT start coding
+5. Move to In Development only after approval
 
 #### In Development
 
-When triggered:
 1. **Check for existing work** (branches/PRs related to this issue)
-2. **Follow the plan** - it's the contract
+2. **Follow the plan** if one exists
 3. **Use TDD for code changes:**
    - Write test → make it pass → commit
 4. **Adapt with judgment:**
@@ -532,5 +528,3 @@ See the [Branch Naming Guidelines in README.md](README.md#branch-naming-guidelin
 - `test/description` - experiments and testing
 - `fix/description` - hotfixes
 - `chore/description` - non-feature work
-
-**Note:** Claude GitHub Action branches use the format: `claude/issue-{number}-{timestamp}`
