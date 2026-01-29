@@ -13,21 +13,7 @@ Future improvement: Update fixtures to create valid clients before products.
 
 import uuid
 
-import pytest
 from httpx import AsyncClient
-
-
-@pytest.fixture
-def sample_product_data():
-    """Sample product data for tests.
-
-    NOTE: Uses a random UUID for client_id. See module docstring for FK note.
-    """
-    return {
-        "client_id": str(uuid.uuid4()),
-        "name": "Test Cabinet",
-        "description": "A test cabinet product",
-    }
 
 
 async def test_list_products_empty(client: AsyncClient):

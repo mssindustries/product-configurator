@@ -5,7 +5,10 @@ Provides:
 - SQLite in-memory database for fast, isolated tests
 - Async database session fixture
 - Async HTTP client fixture with dependency overrides
+- Shared product test fixtures
 """
+
+import uuid
 
 import pytest
 from httpx import ASGITransport, AsyncClient
@@ -60,3 +63,34 @@ async def client(db_session):
     ) as ac:
         yield ac
     app.dependency_overrides.clear()
+
+
+# Shared product test fixtures
+
+
+@pytest.fixture
+def client_id() -> str:
+    """Generate a client ID for tests."""
+    return str(uuid.uuid4())
+
+
+@pytest.fixture
+def sample_product_data(client_id: str) -> dict:
+    """Standard product data for tests.
+
+    NOTE: Uses a random UUID for client_id. Foreign key constraints are not
+    enforced in SQLite, so this client_id does not need to exist in the database.
+    """
+    return {
+        "client_id": client_id,
+        "name": "Test Cabinet",
+        "description": "A test cabinet product",
+    }
+
+
+@pytest.fixture
+async def created_product(client: AsyncClient, sample_product_data: dict) -> dict:
+    """Create a product and return its data."""
+    response = await client.post("/api/v1/products", json=sample_product_data)
+    assert response.status_code == 201
+    return response.json()

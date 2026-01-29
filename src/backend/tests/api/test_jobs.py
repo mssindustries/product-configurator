@@ -13,16 +13,6 @@ from app.db.models.job import JobStatus
 
 
 @pytest.fixture
-def sample_product_data():
-    """Sample product data for tests."""
-    return {
-        "client_id": str(uuid.uuid4()),
-        "name": "Test Cabinet",
-        "description": "A test cabinet product",
-    }
-
-
-@pytest.fixture
 def sample_style_schema():
     """Sample customization schema for styles."""
     return {
