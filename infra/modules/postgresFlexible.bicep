@@ -13,7 +13,7 @@ param administratorLogin string
 param administratorPassword string
 
 var name = 'psql-msscfg-${environment}-${location}'
-var databaseName = 'configurator'
+var databaseName = 'customizer'
 
 // Burstable SKU is cost-effective for dev/test and light production workloads
 var sku = {

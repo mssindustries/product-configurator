@@ -34,7 +34,7 @@ from sqlalchemy import func, select, update
 from sqlalchemy.exc import IntegrityError
 
 from app.api.deps import DbSession
-from app.db.models import Configuration, Style
+from app.db.models import ProductCustomization, Style
 from app.repositories import ProductRepository, StyleRepository
 from app.schemas import ListResponse
 from app.schemas.style import StyleResponse
@@ -485,9 +485,9 @@ async def delete_style(
             detail="Cannot delete default style. Set another style as default first.",
         )
 
-    # Check for existing configurations (using explicit query to avoid sync lazy-load)
-    config_count_stmt = select(func.count()).select_from(Configuration).where(
-        Configuration.style_id == str(style_id)
+    # Check for existing product customizations (using explicit query to avoid sync lazy-load)
+    config_count_stmt = select(func.count()).select_from(ProductCustomization).where(
+        ProductCustomization.style_id == str(style_id)
     )
     config_count_result = await db.execute(config_count_stmt)
     if config_count_result.scalar_one() > 0:

@@ -20,8 +20,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.models.base import BaseModel
 
 if TYPE_CHECKING:
-    from app.db.models.configuration import Configuration
     from app.db.models.product import Product
+    from app.db.models.product_customization import ProductCustomization
 
 
 class Style(BaseModel):
@@ -85,8 +85,8 @@ class Style(BaseModel):
 
     # Relationships
     product: Mapped["Product"] = relationship("Product", back_populates="styles")
-    configurations: Mapped[list["Configuration"]] = relationship(
-        "Configuration",
+    product_customizations: Mapped[list["ProductCustomization"]] = relationship(
+        "ProductCustomization",
         back_populates="style",
         passive_deletes=True,  # Let DB handle deletion restriction
     )

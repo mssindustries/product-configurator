@@ -1,4 +1,4 @@
-# MSS Industries Product Configurator
+# MSS Industries Product Customizer
 
 ## Test Environment
 

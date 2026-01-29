@@ -2,7 +2,7 @@ services:
   # PostgreSQL Database
   db:
     image: postgres:15-alpine
-    container_name: mss-configurator-db
+    container_name: mss-customizer-db
     env_file:
       - .env.docker
     ports:
@@ -10,19 +10,19 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-configurator}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-customizer}"]
       interval: 10s
       timeout: 5s
       retries: 5
     networks:
-      - configurator-network
+      - customizer-network
 
   # FastAPI + Blender Backend
   api:
     build:
       context: ./src/backend
       dockerfile: Dockerfile
-    container_name: mss-configurator-api
+    container_name: mss-customizer-api
     env_file:
       - .env.docker
     # Override CMD to enable hot reload for development
@@ -43,12 +43,12 @@ services:
       azurite:
         condition: service_started
     networks:
-      - configurator-network
+      - customizer-network
 
   # Azure Storage Emulator (Azurite)
   azurite:
     image: mcr.microsoft.com/azure-storage/azurite:latest
-    container_name: mss-configurator-azurite
+    container_name: mss-customizer-azurite
     command: "azurite --blobHost 0.0.0.0 --queueHost 0.0.0.0 --tableHost 0.0.0.0 --loose --skipApiVersionCheck --location /data"
     ports:
       - "10000:10000"  # Blob service
@@ -57,7 +57,7 @@ services:
     volumes:
       - azurite_data:/data
     networks:
-      - configurator-network
+      - customizer-network
 
 volumes:
   postgres_data:
@@ -66,5 +66,5 @@ volumes:
     driver: local
 
 networks:
-  configurator-network:
+  customizer-network:
     driver: bridge

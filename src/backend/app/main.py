@@ -203,7 +203,7 @@ async def authorization_error_handler(
 
 
 @app.exception_handler(ConfiguratorError)
-async def configurator_error_handler(
+async def customizer_error_handler(
     request: Request, exc: ConfiguratorError
 ) -> JSONResponse:
     """

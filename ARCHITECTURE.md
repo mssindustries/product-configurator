@@ -1,10 +1,10 @@
 # Architecture
 
-This document describes the target architecture for the MSS Industries Product Configurator.
+This document describes the target architecture for the MSS Industries Product Customizer.
 
 ## Overview
 
-The platform is a B2B 3D product configurator that allows manufacturers to offer real-time 3D visualizations of customizable products (cabinets, fireplace covers, range hoods, etc.). Customers can configure products with various options, and the system dynamically generates accurate 3D models using Blender headless.
+The platform is a B2B 3D product customizer that allows manufacturers to offer real-time 3D visualizations of customizable products (cabinets, fireplace covers, range hoods, etc.). Customers can configure products with various options, and the system dynamically generates accurate 3D models using Blender headless.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -30,7 +30,7 @@ The platform is a B2B 3D product configurator that allows manufacturers to offer
 │  │                      │      │                                          │ │
 │  │  - Generated GLB     │      │  - Clients      - Jobs                   │ │
 │  │    models            │      │  - Products     - Users                  │ │
-│  │  - Textures/Assets   │      │  - Configurations                        │ │
+│  │  - Textures/Assets   │      │  - ProductCustomizations                        │ │
 │  └──────────────────────┘      └──────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -74,7 +74,7 @@ src/frontend/
 │   └── assets/              # Static assets
 ├── src/
 │   ├── components/
-│   │   ├── controls/        # Configuration UI controls
+│   │   ├── controls/        # ProductCustomization UI controls
 │   │   ├── scene/           # React Three Fiber components
 │   │   └── layout/          # Page layout components
 │   ├── context/             # React Context providers
@@ -95,8 +95,8 @@ src/frontend/
 | Route | Description |
 |-------|-------------|
 | `/` | Home/landing page |
-| `/configure/:productId` | Product configurator |
-| `/saved` | Saved configurations list |
+| `/configure/:productId` | Product customizer |
+| `/saved` | Saved product_customizations list |
 
 ### State Management
 - React Context for configuration state
@@ -113,7 +113,7 @@ src/backend/
 │   │   ├── v1/                    # Versioned API routes
 │   │   │   ├── routes/            # Route handlers
 │   │   │   │   ├── products.py
-│   │   │   │   ├── configurations.py
+│   │   │   │   ├── product_customizations.py
 │   │   │   │   ├── jobs.py
 │   │   │   │   └── health.py
 │   │   │   └── router.py          # Aggregate v1 routes
@@ -177,13 +177,13 @@ src/backend/
 | GET | `/api/v1/products/{id}` | Get product details with config schema |
 | POST | `/api/v1/products` | Create product (admin) |
 
-#### Configurations
+#### ProductCustomizations
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/v1/configurations` | List saved configurations |
-| GET | `/api/v1/configurations/{id}` | Get configuration details |
-| POST | `/api/v1/configurations` | Save a configuration |
-| DELETE | `/api/v1/configurations/{id}` | Delete configuration |
+| GET | `/api/v1/product_customizations` | List saved product_customizations |
+| GET | `/api/v1/product_customizations/{id}` | Get configuration details |
+| POST | `/api/v1/product_customizations` | Save a configuration |
+| DELETE | `/api/v1/product_customizations/{id}` | Delete configuration |
 
 #### Jobs (GLB Generation)
 | Method | Endpoint | Description |
@@ -211,7 +211,7 @@ def validate_configuration(config_data: dict, product: Product):
 │   Client    │                         │                 │
 └─────────────┘                         │                 │
       │                                  │                 │
-      │             ┌─────────────┐     │  Configuration  │
+      │             ┌─────────────┐     │  ProductCustomization  │
       └────────────>│   Product   │────<│                 │
                     └─────────────┘     └─────────────────┘
                                                  │
@@ -249,11 +249,11 @@ def validate_configuration(config_data: dict, product: Product):
 - `created_at` - Creation timestamp
 - `updated_at` - Last update timestamp
 
-**Configuration** - Saved product configuration
+**ProductCustomization** - Saved product configuration
 - `id` - Primary key
 - `product_id` - Foreign key to Product
 - `user_id` - Foreign key to User
-- `name` - Configuration name
+- `name` - ProductCustomization name
 - `config_data` - JSON configuration values (validated against product schema)
 - `product_schema_version` - Schema version at time of creation
 - `created_at` - Creation timestamp
@@ -261,7 +261,7 @@ def validate_configuration(config_data: dict, product: Product):
 
 **Job** - GLB generation job
 - `id` - Primary key
-- `configuration_id` - Foreign key to Configuration
+- `configuration_id` - Foreign key to ProductCustomization
 - `status` - Job status (see below)
 - `progress` - Progress percentage (0-100)
 - `result_url` - URL to generated GLB in Blob Storage
@@ -408,7 +408,7 @@ VITE_API_URL=http://localhost:8000
 
 **Backend** (`.env` or Docker Compose)
 ```
-DATABASE_URL=postgresql+asyncpg://user:pass@db:5432/configurator
+DATABASE_URL=postgresql+asyncpg://user:pass@db:5432/customizer
 AZURE_STORAGE_CONNECTION_STRING=UseDevelopmentStorage=true
 BLENDER_PATH=/usr/bin/blender
 BLENDER_MAX_CONCURRENT=2
@@ -427,7 +427,7 @@ tests/
 │   └── job.py
 ├── api/                  # API endpoint tests
 │   ├── test_products.py
-│   ├── test_configurations.py
+│   ├── test_product_customizations.py
 │   └── test_jobs.py
 ├── services/             # Service layer tests
 └── blender/              # Blender integration tests

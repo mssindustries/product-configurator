@@ -1,6 +1,6 @@
 # GitHub Environments Setup
 
-This document explains how to configure GitHub environments for the MSS Product Configurator deployment workflows.
+This document explains how to configure GitHub environments for the MSS Product Customizer deployment workflows.
 
 ## Overview
 
@@ -30,7 +30,7 @@ The infrastructure uses **user-assigned managed identities** to solve the chicke
 - User-Assigned Identity: `id-msscfg-{environment}-{location}`
 - Container App: Uses the user-assigned identity, not system-assigned
 
-## Environment Configuration
+## Environment ProductCustomization
 
 ### 1. Create Environments
 
@@ -172,12 +172,12 @@ PostgreSQL connection string for the environment:
 
 **Test:**
 ```
-postgresql+asyncpg://pgadmin:<PASSWORD>@psql-msscfg-test-westus2.postgres.database.azure.com:5432/configurator?sslmode=require
+postgresql+asyncpg://pgadmin:<PASSWORD>@psql-msscfg-test-westus2.postgres.database.azure.com:5432/customizer?sslmode=require
 ```
 
 **Production:**
 ```
-postgresql+asyncpg://pgadmin:<PASSWORD>@psql-msscfg-prod-westus2.postgres.database.azure.com:5432/configurator?sslmode=require
+postgresql+asyncpg://pgadmin:<PASSWORD>@psql-msscfg-prod-westus2.postgres.database.azure.com:5432/customizer?sslmode=require
 ```
 
 ## Deployment Flow

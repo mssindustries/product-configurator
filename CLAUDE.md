@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-MSS Industries Product Configurator - A B2B 3D product configurator platform for manufacturers of custom products (cabinets, fireplace covers, range hoods, etc.). Allows businesses to show customers real-time 3D visualizations of customizable products.
+MSS Industries Product Customizer - A B2B 3D product customizer platform for manufacturers of custom products (cabinets, fireplace covers, range hoods, etc.). Allows businesses to show customers real-time 3D visualizations of customizable products.
 
 ## Tech Stack
 
@@ -220,7 +220,7 @@ This project uses GitHub Projects with issue types and parent-child relationship
 
 ### Project
 
-- **Project Name**: Product Configurator
+- **Project Name**: Product Customizer
 - **Project Number**: 1
 - **Owner**: mssindustries
 
@@ -262,7 +262,7 @@ mutation {
 After creating an issue, add it to the project:
 
 ```bash
-gh project item-add 1 --owner mssindustries --url https://github.com/mssindustries/product-configurator/issues/ISSUE_NUMBER
+gh project item-add 1 --owner mssindustries --url https://github.com/mssindustries/product-customizer/issues/ISSUE_NUMBER
 ```
 
 ### Repository ID

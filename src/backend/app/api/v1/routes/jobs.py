@@ -18,7 +18,7 @@ from fastapi import APIRouter, HTTPException, status
 from app.api.deps import DbSession
 from app.db.models import Job
 from app.db.models.job import JobStatus
-from app.repositories import ConfigurationRepository, JobRepository
+from app.repositories import JobRepository, ProductCustomizationRepository
 from app.schemas.job import JobCreate, JobResponse
 
 router = APIRouter()
@@ -32,34 +32,34 @@ async def create_job(
     """
     Submit a new GLB generation job.
 
-    NOTE: This endpoint currently accepts any valid configuration_id.
-    When authentication is implemented, it will verify that the configuration
+    NOTE: This endpoint currently accepts any valid product_customization_id.
+    When authentication is implemented, it will verify that the product customization
     belongs to the authenticated client.
 
     Args:
-        job_data: Job creation data (configuration_id)
+        job_data: Job creation data (product_customization_id)
 
     Returns:
         JobResponse with the created job details (status: PENDING, progress: 0).
 
     Raises:
-        HTTPException 404: Configuration not found.
+        HTTPException 404: Product customization not found.
         HTTPException 422: Validation error (handled by FastAPI).
     """
-    # Validate configuration exists and has a client
-    config_repo = ConfigurationRepository(db)
-    configuration = await config_repo.ensure_exists(job_data.configuration_id)
+    # Validate product customization exists and has a client
+    product_customization_repo = ProductCustomizationRepository(db)
+    product_customization = await product_customization_repo.ensure_exists(job_data.product_customization_id)
 
-    # Verify configuration belongs to a client (structural validation)
-    if not configuration.client_id:
+    # Verify product customization belongs to a client (structural validation)
+    if not product_customization.client_id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Configuration must belong to a client",
+            detail="Product customization must belong to a client",
         )
 
     # Create new job instance
     job = Job(
-        configuration_id=str(job_data.configuration_id),
+        product_customization_id=str(job_data.product_customization_id),
         status=JobStatus.PENDING,
         progress=0,
         max_retries=3,  # Default from requirements

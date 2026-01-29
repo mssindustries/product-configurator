@@ -23,7 +23,7 @@ This document tracks systematic patterns in the codebase that make AI-assisted c
 - Created `BaseRepository[ModelT]` with `ensure_exists(id)` method
 - Created `EntityNotFoundError` domain exception
 - Added global exception handler in `main.py`
-- Created concrete repositories: `ProductRepository`, `ClientRepository`, `ConfigurationRepository`, `JobRepository`, `StyleRepository`
+- Created concrete repositories: `ProductRepository`, `ClientRepository`, `ProductCustomizationRepository`, `JobRepository`, `StyleRepository`
 
 **Usage:**
 ```python
@@ -36,7 +36,7 @@ product = await repo.ensure_exists(product_id)  # Auto 404 via exception handler
 - ✅ `app/repositories/base.py` - Base repository class
 - ✅ `app/repositories/product.py` - ProductRepository
 - ✅ `app/repositories/client.py` - ClientRepository
-- ✅ `app/repositories/configuration.py` - ConfigurationRepository
+- ✅ `app/repositories/configuration.py` - ProductCustomizationRepository
 - ✅ `app/repositories/job.py` - JobRepository
 - ✅ `app/repositories/style.py` - StyleRepository (with product-scoped methods)
 - ✅ `app/repositories/__init__.py` - Exports
@@ -248,24 +248,24 @@ Create service classes that encapsulate business logic.
 **Proposed Implementation:**
 ```python
 # app/services/configuration.py
-class ConfigurationService:
+class ProductCustomizationService:
     def __init__(self, db: AsyncSession):
         self.db = db
-        self.repo = ConfigurationRepository(db)
+        self.repo = ProductCustomizationRepository(db)
         self.product_repo = ProductRepository(db)
         self.style_repo = StyleRepository(db)
 
-    async def create(self, data: ConfigurationCreate) -> Configuration:
+    async def create(self, data: ProductCustomizationCreate) -> ProductCustomization:
         """Create a new configuration with validation."""
         # Validation logic here
         return await self.repo.create(...)
 
 # Usage in route:
 @router.post("")
-async def create_configuration(config_data: ConfigurationCreate, db: DbSession):
-    service = ConfigurationService(db)
+async def create_configuration(config_data: ProductCustomizationCreate, db: DbSession):
+    service = ProductCustomizationService(db)
     configuration = await service.create(config_data)
-    return ConfigurationResponse.from_model(configuration)
+    return ProductCustomizationResponse.from_model(configuration)
 ```
 
 **Files to create:**

@@ -10,7 +10,7 @@
 
 ---
 
-## Task 1: Create Environment Configuration Files
+## Task 1: Create Environment ProductCustomization Files
 
 **Files:**
 - Create: `src/frontend/.env.development`
@@ -340,7 +340,7 @@ Expected: Long API token string
 
 Manual steps (document for user):
 
-1. Go to: https://github.com/mssindustries/product-configurator/settings/environments
+1. Go to: https://github.com/mssindustries/product-customizer/settings/environments
 2. Click on "test" environment
 3. Click "Add secret"
 4. Name: `AZURE_STATIC_WEB_APPS_API_TOKEN`
@@ -572,7 +572,7 @@ gh issue comment 109 --body "## ✅ Implementation Complete
 
 All acceptance criteria met:
 
-### Part 1: Azure Static Web Apps Configuration
+### Part 1: Azure Static Web Apps ProductCustomization
 - ✅ Azure Static Web App created for test environment
 - ✅ Custom domain: Using default azurestaticapps.net domain
 - ✅ API proxy: Frontend calls backend directly (configured via VITE_API_URL)

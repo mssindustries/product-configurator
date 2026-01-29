@@ -4,7 +4,7 @@ Base exception classes for the application.
 
 
 class ConfiguratorError(Exception):
-    """Base exception for all configurator errors."""
+    """Base exception for all customizer errors."""
 
     pass
 

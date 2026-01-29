@@ -56,12 +56,12 @@ async def created_style(
 
 
 @pytest.fixture
-async def created_configuration(
+async def created_product_customization(
     client: AsyncClient,
     created_product: dict,
     created_style: dict,
 ) -> dict:
-    """Create a configuration and return its data."""
+    """Create a product customization and return its data."""
     config_data = {
         "product_id": created_product["id"],
         "style_id": created_style["id"],
@@ -69,17 +69,17 @@ async def created_configuration(
         "name": "Test Configuration",
         "config_data": {"width": 50, "color": "oak"},
     }
-    response = await client.post("/api/v1/configurations", json=config_data)
+    response = await client.post("/api/v1/product-customizations", json=config_data)
     return response.json()
 
 
 # POST /api/v1/jobs - Create Job Tests
 
 
-async def test_create_job_success(client: AsyncClient, created_configuration: dict):
+async def test_create_job_success(client: AsyncClient, created_product_customization: dict):
     """Creates and returns job with PENDING status."""
     job_data = {
-        "configuration_id": created_configuration["id"],
+        "product_customization_id": created_product_customization["id"],
     }
 
     response = await client.post("/api/v1/jobs", json=job_data)
@@ -88,7 +88,7 @@ async def test_create_job_success(client: AsyncClient, created_configuration: di
 
     # Verify response structure
     assert "id" in data
-    assert data["configuration_id"] == created_configuration["id"]
+    assert data["product_customization_id"] == created_product_customization["id"]
     assert data["status"] == JobStatus.PENDING.value
     assert data["progress"] == 0
     assert data["result_url"] is None
@@ -103,10 +103,10 @@ async def test_create_job_success(client: AsyncClient, created_configuration: di
 
 
 async def test_create_job_configuration_not_found(client: AsyncClient):
-    """Returns 404 when configuration does not exist."""
+    """Returns 404 when product customization does not exist."""
     fake_config_id = str(uuid.uuid4())
     job_data = {
-        "configuration_id": fake_config_id,
+        "product_customization_id": fake_config_id,
     }
 
     response = await client.post("/api/v1/jobs", json=job_data)
@@ -115,18 +115,18 @@ async def test_create_job_configuration_not_found(client: AsyncClient):
     assert fake_config_id in response.json()["detail"]
 
 
-async def test_create_job_missing_configuration_id(client: AsyncClient):
-    """Returns 422 when configuration_id is missing."""
+async def test_create_job_missing_product_customization_id(client: AsyncClient):
+    """Returns 422 when product_customization_id is missing."""
     job_data = {}
 
     response = await client.post("/api/v1/jobs", json=job_data)
     assert response.status_code == 422
 
 
-async def test_create_job_invalid_configuration_id_format(client: AsyncClient):
-    """Returns 422 when configuration_id is not a valid UUID."""
+async def test_create_job_invalid_product_customization_id_format(client: AsyncClient):
+    """Returns 422 when product_customization_id is not a valid UUID."""
     job_data = {
-        "configuration_id": "not-a-uuid",
+        "product_customization_id": "not-a-uuid",
     }
 
     response = await client.post("/api/v1/jobs", json=job_data)
@@ -136,10 +136,10 @@ async def test_create_job_invalid_configuration_id_format(client: AsyncClient):
 # GET /api/v1/jobs/{id} - Get Job Tests
 
 
-async def test_get_job_success(client: AsyncClient, created_configuration: dict):
+async def test_get_job_success(client: AsyncClient, created_product_customization: dict):
     """Returns job by ID."""
     # Create a job first
-    job_data = {"configuration_id": created_configuration["id"]}
+    job_data = {"product_customization_id": created_product_customization["id"]}
     create_response = await client.post("/api/v1/jobs", json=job_data)
     job_id = create_response.json()["id"]
 
@@ -147,7 +147,7 @@ async def test_get_job_success(client: AsyncClient, created_configuration: dict)
     assert response.status_code == 200
     data = response.json()
     assert data["id"] == job_id
-    assert data["configuration_id"] == created_configuration["id"]
+    assert data["product_customization_id"] == created_product_customization["id"]
     assert data["status"] == JobStatus.PENDING.value
     assert data["progress"] == 0
 
@@ -168,14 +168,14 @@ async def test_get_job_invalid_uuid_format(client: AsyncClient):
 
 
 async def test_get_job_with_result(
-    client: AsyncClient, created_configuration: dict, db_session
+    client: AsyncClient, created_product_customization: dict, db_session
 ):
     """Returns job with result_url when completed."""
     from app.db.models import Job
 
     # Create job directly in database with completed status
     job = Job(
-        configuration_id=created_configuration["id"],
+        product_customization_id=created_product_customization["id"],
         status=JobStatus.COMPLETED,
         progress=100,
         result_url="https://storage.example.com/result.glb",
@@ -195,14 +195,14 @@ async def test_get_job_with_result(
 
 
 async def test_get_job_with_error(
-    client: AsyncClient, created_configuration: dict, db_session
+    client: AsyncClient, created_product_customization: dict, db_session
 ):
     """Returns job with error details when failed."""
     from app.db.models import Job
 
     # Create job directly in database with failed status
     job = Job(
-        configuration_id=created_configuration["id"],
+        product_customization_id=created_product_customization["id"],
         status=JobStatus.FAILED,
         progress=50,
         error_code="BLENDER_TIMEOUT",
@@ -227,11 +227,11 @@ async def test_get_job_with_error(
 
 
 async def test_cancel_job_pending_success(
-    client: AsyncClient, created_configuration: dict
+    client: AsyncClient, created_product_customization: dict
 ):
     """Cancels a PENDING job successfully."""
     # Create a job first
-    job_data = {"configuration_id": created_configuration["id"]}
+    job_data = {"product_customization_id": created_product_customization["id"]}
     create_response = await client.post("/api/v1/jobs", json=job_data)
     job_id = create_response.json()["id"]
 
@@ -248,14 +248,14 @@ async def test_cancel_job_pending_success(
 
 
 async def test_cancel_job_queued_success(
-    client: AsyncClient, created_configuration: dict, db_session
+    client: AsyncClient, created_product_customization: dict, db_session
 ):
     """Cancels a QUEUED job successfully."""
     from app.db.models import Job
 
     # Create job directly in database with queued status
     job = Job(
-        configuration_id=created_configuration["id"],
+        product_customization_id=created_product_customization["id"],
         status=JobStatus.QUEUED,
         progress=0,
         max_retries=3,
@@ -287,14 +287,14 @@ async def test_cancel_job_invalid_uuid_format(client: AsyncClient):
 
 
 async def test_cancel_job_processing_fails(
-    client: AsyncClient, created_configuration: dict, db_session
+    client: AsyncClient, created_product_customization: dict, db_session
 ):
     """Returns 400 when trying to cancel a PROCESSING job."""
     from app.db.models import Job
 
     # Create job directly in database with processing status
     job = Job(
-        configuration_id=created_configuration["id"],
+        product_customization_id=created_product_customization["id"],
         status=JobStatus.PROCESSING,
         progress=50,
         max_retries=3,
@@ -311,14 +311,14 @@ async def test_cancel_job_processing_fails(
 
 
 async def test_cancel_job_completed_fails(
-    client: AsyncClient, created_configuration: dict, db_session
+    client: AsyncClient, created_product_customization: dict, db_session
 ):
     """Returns 400 when trying to cancel a COMPLETED job."""
     from app.db.models import Job
 
     # Create job directly in database with completed status
     job = Job(
-        configuration_id=created_configuration["id"],
+        product_customization_id=created_product_customization["id"],
         status=JobStatus.COMPLETED,
         progress=100,
         result_url="https://storage.example.com/result.glb",
@@ -335,14 +335,14 @@ async def test_cancel_job_completed_fails(
 
 
 async def test_cancel_job_failed_fails(
-    client: AsyncClient, created_configuration: dict, db_session
+    client: AsyncClient, created_product_customization: dict, db_session
 ):
     """Returns 400 when trying to cancel a FAILED job."""
     from app.db.models import Job
 
     # Create job directly in database with failed status
     job = Job(
-        configuration_id=created_configuration["id"],
+        product_customization_id=created_product_customization["id"],
         status=JobStatus.FAILED,
         progress=30,
         error_code="BLENDER_ERROR",
@@ -360,14 +360,14 @@ async def test_cancel_job_failed_fails(
 
 
 async def test_cancel_job_already_cancelled_fails(
-    client: AsyncClient, created_configuration: dict, db_session
+    client: AsyncClient, created_product_customization: dict, db_session
 ):
     """Returns 400 when trying to cancel an already CANCELLED job."""
     from app.db.models import Job
 
     # Create job directly in database with cancelled status
     job = Job(
-        configuration_id=created_configuration["id"],
+        product_customization_id=created_product_customization["id"],
         status=JobStatus.CANCELLED,
         progress=0,
         max_retries=3,
@@ -386,10 +386,10 @@ async def test_cancel_job_already_cancelled_fails(
 
 
 async def test_create_multiple_jobs_for_same_configuration(
-    client: AsyncClient, created_configuration: dict
+    client: AsyncClient, created_product_customization: dict
 ):
-    """Multiple jobs can be created for the same configuration."""
-    job_data = {"configuration_id": created_configuration["id"]}
+    """Multiple jobs can be created for the same product customization."""
+    job_data = {"product_customization_id": created_product_customization["id"]}
 
     # Create first job
     response1 = await client.post("/api/v1/jobs", json=job_data)
@@ -406,11 +406,11 @@ async def test_create_multiple_jobs_for_same_configuration(
 
 
 async def test_job_cascade_delete_on_configuration_delete(
-    client: AsyncClient, created_configuration: dict
+    client: AsyncClient, created_product_customization: dict
 ):
-    """Jobs are deleted when their configuration is deleted."""
+    """Jobs are deleted when their product customization is deleted."""
     # Create a job
-    job_data = {"configuration_id": created_configuration["id"]}
+    job_data = {"product_customization_id": created_product_customization["id"]}
     create_response = await client.post("/api/v1/jobs", json=job_data)
     job_id = create_response.json()["id"]
 
@@ -418,8 +418,8 @@ async def test_job_cascade_delete_on_configuration_delete(
     get_response = await client.get(f"/api/v1/jobs/{job_id}")
     assert get_response.status_code == 200
 
-    # Delete configuration
-    await client.delete(f"/api/v1/configurations/{created_configuration['id']}")
+    # Delete product customization
+    await client.delete(f"/api/v1/product-customizations/{created_product_customization['id']}")
 
     # Verify job is gone (cascade delete)
     get_response = await client.get(f"/api/v1/jobs/{job_id}")

@@ -1,4 +1,4 @@
-# Product Configurator - Client Interaction Design
+# Product Customizer - Client Interaction Design
 
 **Date:** 2026-01-23
 **Status:** Design Complete
@@ -19,7 +19,7 @@ A B2B SaaS platform where manufacturers (Clients) use real-time 3D visualization
 - **Customer** - The Client's end customer (person buying the customized product)
 - **Product** - High-level product type (e.g., "Range Hood", "Cabinet", "Fireplace Cover")
 - **Style** - Specific variant of a Product (e.g., "Open Style", "Closed Style")
-- **Configuration** - Saved customization with customer information
+- **ProductCustomization** - Saved customization with customer information
 
 ---
 
@@ -106,7 +106,7 @@ MSS Admin Production:
 }
 ```
 
-### Configuration
+### ProductCustomization
 - Belongs to one Client
 - References Product + Style
 - Customer name (required)
@@ -136,7 +136,7 @@ MSS Admin Production:
 - **Product/Style Selection** - Browse assigned products, select style
 - **3D Viewer** - React Three Fiber with OrbitControls (rotate + zoom)
 - **Customization Sidebar** - Dynamic controls rendered from Style schema
-- **Configuration Management** - Save/load/edit/delete/submit
+- **ProductCustomization Management** - Save/load/edit/delete/submit
 - **Job Polling** - Poll generation job status every 2 seconds
 
 ### Backend (FastAPI + Python)
@@ -212,12 +212,12 @@ MSS Admin Production:
 3. OAuth flow (if already authorized, instant redirect)
 4. Lands on Client dashboard
 
-### Client: Creating a Configuration
+### Client: Creating a ProductCustomization
 
-1. **Dashboard:** Click "Start New Configuration"
+1. **Dashboard:** Click "Start New ProductCustomization"
 2. **Product Selection:** Grid/list of assigned Products, select one (e.g., "Range Hood")
 3. **Style Selection:** Grid/list of Styles for that Product, select one (e.g., "Open Style")
-4. **Configuration Screen Loads:**
+4. **ProductCustomization Screen Loads:**
    - 3D viewer shows default GLB model immediately
    - Sidebar shows customization controls (dynamically generated from Style schema)
    - Sidebar is expanded by default
@@ -238,21 +238,21 @@ MSS Admin Production:
    - Zoom in/out with scroll wheel
    - Toggle sidebar collapse for full-screen 3D view
 8. **Repeat steps 5-7** as needed (make adjustments, regenerate)
-9. **When satisfied, click "Save Configuration":**
+9. **When satisfied, click "Save ProductCustomization":**
    - Modal appears requesting:
      - Customer name (required)
      - Customer email
      - Customer phone
      - Notes (text area for project details, special requests, etc.)
    - Fill form and click Save
-10. **Configuration saved:**
+10. **ProductCustomization saved:**
     - Success message
-    - Redirected to Configurations list
+    - Redirected to ProductCustomizations list
 
-### Client: Managing Saved Configurations
+### Client: Managing Saved ProductCustomizations
 
-**View Configurations List:**
-1. Dashboard → "Saved Configurations"
+**View ProductCustomizations List:**
+1. Dashboard → "Saved ProductCustomizations"
 2. Chronological list (newest first) showing:
    - Customer name
    - Product + Style
@@ -260,7 +260,7 @@ MSS Admin Production:
    - Date saved
 3. Search bar at top (filter by customer name)
 
-**View/Edit Configuration:**
+**View/Edit ProductCustomization:**
 1. Click on a configuration to open detail view
 2. Customer info displayed (name, email, phone, notes)
 3. 3D viewer loads last generated GLB (if available)
@@ -273,16 +273,16 @@ MSS Admin Production:
 
 **Note:** Behavior after submission (whether locked or editable) is TBD - to be determined based on real-world workflow needs.
 
-### MSS Admin: Viewing Submitted Configurations
+### MSS Admin: Viewing Submitted ProductCustomizations
 
-1. Admin portal → "Submitted Configurations"
+1. Admin portal → "Submitted ProductCustomizations"
 2. List/queue of all submitted configurations across all Clients
 3. Shows:
    - Client name
    - Customer name
    - Product + Style
    - Date submitted
-   - Configuration parameters
+   - ProductCustomization parameters
 4. Click to view:
    - Full customer details
    - 3D model (load saved GLB)
@@ -311,7 +311,7 @@ MSS Admin Production:
 - `GET /api/styles/{id}` - Get Style details (schema, default GLB URL)
 - `POST /api/styles/{id}/upload-blend` - Upload Blender file for Style (Admin only)
 
-### Configurations
+### ProductCustomizations
 - `GET /api/configurations`
   - **Client role:** Returns only their own configurations
   - **Admin role:** Can filter by Client, or view all submitted configs
@@ -357,7 +357,7 @@ MSS Admin Production:
 
 ### Key Components
 
-**ConfigurationSession**
+**ProductCustomizationSession**
 - Main container for active configuration
 - 3D Viewer (React Three Fiber canvas)
 - Collapsible Sidebar (customization controls)
@@ -383,9 +383,9 @@ MSS Admin Production:
 - Collapse/expand toggle button
 - Parameter values managed in parent state
 
-**ConfigurationList**
+**ProductCustomizationList**
 - Search input (filter by customer name)
-- Configuration cards/rows with:
+- ProductCustomization cards/rows with:
   - Customer name
   - Product + Style
   - Date saved
@@ -479,7 +479,7 @@ MSS Admin Production:
 
 ## UI/UX Details
 
-### Configuration Screen Layout
+### ProductCustomization Screen Layout
 
 **Desktop (1920x1080):**
 ```
@@ -556,11 +556,11 @@ MSS Admin Production:
    - Show error message with "Retry" button
    - Keep previous model visible
 
-### Save Configuration Modal
+### Save ProductCustomization Modal
 
 ```
 ┌─────────────────────────────────────────────┐
-│  Save Configuration                    [×]  │
+│  Save ProductCustomization                    [×]  │
 ├─────────────────────────────────────────────┤
 │                                             │
 │  Customer Name *                            │
@@ -632,7 +632,7 @@ The following features were discussed but are deferred to later phases:
 
 1. **Post-submission editing:** Can Clients edit configurations after submitting, or should they be locked?
 2. **Blender performance:** What's the realistic generation time? (Will inform UX decisions around polling frequency, timeout duration)
-3. **Configuration versioning:** Should edits create new versions or overwrite existing configurations?
+3. **ProductCustomization versioning:** Should edits create new versions or overwrite existing configurations?
 4. **Status workflow:** Do we need intermediate statuses (In Production, Complete), or is Submitted sufficient for MVP?
 5. **Multi-user timing:** When should we add support for multiple users per Client?
 

@@ -19,9 +19,9 @@ if TYPE_CHECKING:
 class JobCreate(BaseSchema):
     """Schema for creating a new GLB generation job."""
 
-    configuration_id: UUID = Field(
+    product_customization_id: UUID = Field(
         ...,
-        description="ID of the configuration to generate GLB for",
+        description="ID of the product customization to generate GLB for",
     )
 
 
@@ -29,7 +29,7 @@ class JobResponse(BaseSchema):
     """Schema for job response."""
 
     id: str
-    configuration_id: str
+    product_customization_id: str
     status: JobStatus
     progress: int = Field(..., ge=0, le=100)
     result_url: str | None = None
@@ -47,7 +47,7 @@ class JobResponse(BaseSchema):
         """Create response from ORM model."""
         return cls(
             id=str(job.id),
-            configuration_id=str(job.configuration_id),
+            product_customization_id=str(job.product_customization_id),
             status=job.status,
             progress=job.progress,
             result_url=job.result_url,

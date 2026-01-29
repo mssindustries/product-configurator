@@ -18,11 +18,6 @@ from app.schemas.client import (
     ClientCreate,
     ClientResponse,
 )
-from app.schemas.configuration import (
-    ConfigurationCreate,
-    ConfigurationResponse,
-    ConfigurationUpdate,
-)
 from app.schemas.job import (
     JobCreate,
     JobResponse,
@@ -32,6 +27,11 @@ from app.schemas.product import (
     ProductCreate,
     ProductResponse,
     ProductUpdate,
+)
+from app.schemas.product_customization import (
+    ProductCustomizationCreate,
+    ProductCustomizationResponse,
+    ProductCustomizationUpdate,
 )
 
 __all__ = [
@@ -46,16 +46,16 @@ __all__ = [
     # Client
     "ClientCreate",
     "ClientResponse",
-    # Product
-    "ProductCreate",
-    "ProductResponse",
-    "ProductUpdate",
-    # Configuration
-    "ConfigurationCreate",
-    "ConfigurationResponse",
-    "ConfigurationUpdate",
     # Job
     "JobCreate",
     "JobResponse",
     "JobStatusResponse",
+    # Product
+    "ProductCreate",
+    "ProductResponse",
+    "ProductUpdate",
+    # ProductCustomization
+    "ProductCustomizationCreate",
+    "ProductCustomizationResponse",
+    "ProductCustomizationUpdate",
 ]

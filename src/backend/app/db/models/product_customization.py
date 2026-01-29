@@ -1,5 +1,5 @@
 """
-Configuration model - Saved product configuration.
+ProductCustomization model - Saved product customization.
 """
 
 from typing import TYPE_CHECKING, Any
@@ -17,22 +17,22 @@ if TYPE_CHECKING:
     from app.db.models.style import Style
 
 
-class Configuration(BaseModel):
+class ProductCustomization(BaseModel):
     """
-    Saved product configuration.
+    Saved product customization.
 
     Attributes:
         id: UUID primary key
         product_id: Foreign key to Product
         client_id: Foreign key to Client
-        name: Configuration name
-        config_data: JSON configuration values (validated against product schema)
+        name: ProductCustomization name
+        config_data: JSON customization values (validated against product schema)
         product_schema_version: Schema version at time of creation
         created_at: Creation timestamp
         updated_at: Last update timestamp
     """
 
-    __tablename__ = "configurations"
+    __tablename__ = "product_customizations"
 
     product_id: Mapped[str] = mapped_column(
         UUID(as_uuid=False),
@@ -57,11 +57,11 @@ class Configuration(BaseModel):
     product_schema_version: Mapped[str] = mapped_column(String(50), nullable=False)
 
     # Relationships
-    product: Mapped["Product"] = relationship("Product", back_populates="configurations")
-    style: Mapped["Style"] = relationship("Style", back_populates="configurations")
-    client: Mapped["Client"] = relationship("Client", back_populates="configurations")
+    product: Mapped["Product"] = relationship("Product", back_populates="product_customizations")
+    style: Mapped["Style"] = relationship("Style", back_populates="product_customizations")
+    client: Mapped["Client"] = relationship("Client", back_populates="product_customizations")
     jobs: Mapped[list["Job"]] = relationship(
         "Job",
-        back_populates="configuration",
+        back_populates="product_customization",
         cascade="all, delete-orphan",
     )

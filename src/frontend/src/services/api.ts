@@ -12,9 +12,9 @@ import type {
   ProductListResponse,
   Style,
   StyleListResponse,
-  Configuration,
-  ConfigurationCreate,
-  ConfigurationListResponse,
+  ProductCustomization,
+  ProductCustomizationCreate,
+  ProductCustomizationListResponse,
   Job,
   JobCreate,
   JobStatusResponse,
@@ -255,32 +255,32 @@ export async function setDefaultStyle(
 }
 
 // ============================================================================
-// Configurations API
+// Product Customizations API
 // ============================================================================
 
-export async function getConfigurations(
+export async function getProductCustomizations(
   params?: PaginationParams
-): Promise<ConfigurationListResponse> {
-  return fetchApi<ConfigurationListResponse>(
-    `/api/v1/configurations${buildQueryString(params)}`
+): Promise<ProductCustomizationListResponse> {
+  return fetchApi<ProductCustomizationListResponse>(
+    `/api/v1/product-customizations${buildQueryString(params)}`
   );
 }
 
-export async function getConfiguration(id: string): Promise<Configuration> {
-  return fetchApi<Configuration>(`/api/v1/configurations/${id}`);
+export async function getProductCustomization(id: string): Promise<Configuration> {
+  return fetchApi<Configuration>(`/api/v1/product-customizations/${id}`);
 }
 
-export async function saveConfiguration(
-  data: ConfigurationCreate
+export async function saveProductCustomization(
+  data: ProductCustomizationCreate
 ): Promise<Configuration> {
-  return fetchApi<Configuration>('/api/v1/configurations', {
+  return fetchApi<Configuration>('/api/v1/product-customizations', {
     method: 'POST',
     body: JSON.stringify(data),
   });
 }
 
-export async function deleteConfiguration(id: string): Promise<void> {
-  return fetchApi<void>(`/api/v1/configurations/${id}`, {
+export async function deleteProductCustomization(id: string): Promise<void> {
+  return fetchApi<void>(`/api/v1/product-customizations/${id}`, {
     method: 'DELETE',
   });
 }

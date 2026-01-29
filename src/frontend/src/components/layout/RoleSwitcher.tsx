@@ -9,7 +9,7 @@ const roleLabels: Record<UserRole, string> = {
 };
 
 const roleDescriptions: Record<UserRole, string> = {
-  client: 'Customer view for product configuration',
+  client: 'Customer view for product customization',
   admin: 'Administrative view for management',
 };
 

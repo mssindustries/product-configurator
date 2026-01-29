@@ -44,7 +44,7 @@ class Style(Base):
 
     # Relationships
     product: Product
-    configurations: list[Configuration]
+    configurations: list[ProductCustomization]
 ```
 
 **Constraints:**
@@ -71,7 +71,7 @@ class Product(Base):
     # Relationships
     client: Client
     styles: list[Style]
-    configurations: list[Configuration]
+    configurations: list[ProductCustomization]
 
     # Property
     @property
@@ -79,10 +79,10 @@ class Product(Base):
         return next((s for s in self.styles if s.is_default), None)
 ```
 
-### Configuration Entity (UPDATED)
+### ProductCustomization Entity (UPDATED)
 
 ```python
-class Configuration(Base):
+class ProductCustomization(Base):
     """Saved product configuration."""
 
     id: UUID
@@ -270,11 +270,11 @@ POST   /api/v1/products/{product_id}/styles/{style_id}/set-default
 
 **Request:** `ProductUpdate` (same fields removed)
 
-### Configuration Endpoints (UPDATED)
+### ProductCustomization Endpoints (UPDATED)
 
 #### POST /api/v1/configurations
 
-**Request:** `ConfigurationCreate` (now requires `style_id`)
+**Request:** `ProductCustomizationCreate` (now requires `style_id`)
 ```json
 {
   "product_id": "...",
@@ -322,8 +322,8 @@ async def migrate():
 
             # Step 3: Update configurations to reference new style
             await db.execute(
-                update(Configuration)
-                .where(Configuration.product_id == product.id)
+                update(ProductCustomization)
+                .where(ProductCustomization.product_id == product.id)
                 .values(style_id=default_style.id)
             )
 
@@ -335,7 +335,7 @@ async def migrate():
 1. **Deploy code with dual support:**
    - Product model has old fields + new fields
    - Style model exists
-   - Configuration has both product_id and style_id
+   - ProductCustomization has both product_id and style_id
 
 2. **Run migration script:**
    - Creates default styles
@@ -347,7 +347,7 @@ async def migrate():
 
 4. **Deploy final code:**
    - Remove old Product fields
-   - Make Configuration.style_id NOT NULL
+   - Make ProductCustomization.style_id NOT NULL
 
 ---
 
@@ -460,7 +460,7 @@ export interface StyleCreate {
   is_default?: boolean;
 }
 
-export interface Configuration {
+export interface ProductCustomization {
   id: string;
   product_id: string;
   style_id: string;  // NEW
@@ -504,7 +504,7 @@ export async function setDefaultStyle(productId: string, styleId: string): Promi
 **Tasks:**
 1. Create `Style` model in `app/db/models/style.py`
 2. Update `Product` model (add styles relationship, keep old fields)
-3. Update `Configuration` model (add style_id, keep nullable)
+3. Update `ProductCustomization` model (add style_id, keep nullable)
 4. Create `Style` schemas in `app/schemas/style.py`
 5. Add style endpoints in `app/api/v1/routes/styles.py`
 6. Create blob storage service in `app/services/blob_storage.py`
@@ -537,7 +537,7 @@ export async function setDefaultStyle(productId: string, styleId: string): Promi
 **Tasks:**
 1. Remove `template_blob_path`, `config_schema`, `template_version` from Product model
 2. Update Product schemas (remove old fields)
-3. Make Configuration.style_id NOT NULL
+3. Make ProductCustomization.style_id NOT NULL
 4. Update configuration validation (use style.customization_schema)
 5. Update all tests
 
@@ -582,7 +582,7 @@ export async function setDefaultStyle(productId: string, styleId: string): Promi
 - [ ] Delete default style (should fail)
 - [ ] Delete blob file when style deleted
 - [ ] Cascade delete: Product → Styles
-- [ ] Configuration validation uses style.customization_schema
+- [ ] ProductCustomization validation uses style.customization_schema
 - [ ] Cannot create configuration with style from different product
 
 **Frontend:**

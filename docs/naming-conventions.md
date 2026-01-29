@@ -1,6 +1,6 @@
 # Azure Resource Naming Conventions
 
-Naming conventions for Azure resources in the MSS Product Configurator project.
+Naming conventions for Azure resources in the MSS Product Customizer project.
 
 ## Pattern
 
@@ -43,4 +43,4 @@ stmsscfgtestwestus2
 
 - **Global uniqueness**: Container Registry and Storage Account names must be globally unique across Azure
 - **Region**: Omit for global resources like Static Web Apps (`stapp-msscfg-test`)
-- **Database name**: PostgreSQL database is `configurator` (not environment-specific)
+- **Database name**: PostgreSQL database is `customizer` (not environment-specific)

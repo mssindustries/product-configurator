@@ -1,10 +1,10 @@
 targetScope = 'subscription'
 
 // ============================================================================
-// MSS Industries Product Configurator - Main Infrastructure Orchestration
+// MSS Industries Product Customizer - Main Infrastructure Orchestration
 // ============================================================================
 // This file orchestrates the deployment of all Azure resources for the
-// Product Configurator application. It deploys at subscription scope to
+// Product Customizer application. It deploys at subscription scope to
 // create the resource group first, then deploys all other resources into it.
 // ============================================================================
 
