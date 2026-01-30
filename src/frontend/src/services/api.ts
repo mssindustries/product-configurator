@@ -266,14 +266,14 @@ export async function getProductCustomizations(
   );
 }
 
-export async function getProductCustomization(id: string): Promise<Configuration> {
-  return fetchApi<Configuration>(`/api/v1/product-customizations/${id}`);
+export async function getProductCustomization(id: string): Promise<ProductCustomization> {
+  return fetchApi<ProductCustomization>(`/api/v1/product-customizations/${id}`);
 }
 
 export async function saveProductCustomization(
   data: ProductCustomizationCreate
-): Promise<Configuration> {
-  return fetchApi<Configuration>('/api/v1/product-customizations', {
+): Promise<ProductCustomization> {
+  return fetchApi<ProductCustomization>('/api/v1/product-customizations', {
     method: 'POST',
     body: JSON.stringify(data),
   });

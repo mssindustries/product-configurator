@@ -17,7 +17,7 @@ from app.core.config import settings
 from app.core.exceptions import (
     AuthenticationError,
     AuthorizationError,
-    ConfiguratorError,
+    CustomizerError,
     EntityAlreadyExistsError,
     EntityNotFoundError,
     NotFoundError,
@@ -202,16 +202,16 @@ async def authorization_error_handler(
     )
 
 
-@app.exception_handler(ConfiguratorError)
+@app.exception_handler(CustomizerError)
 async def customizer_error_handler(
-    request: Request, exc: ConfiguratorError
+    request: Request, exc: CustomizerError
 ) -> JSONResponse:
     """
-    Handle generic ConfiguratorError exceptions.
+    Handle generic CustomizerError exceptions.
 
     Args:
         request: The incoming request
-        exc: The ConfiguratorError exception
+        exc: The CustomizerError exception
 
     Returns:
         JSONResponse with 500 status and error details

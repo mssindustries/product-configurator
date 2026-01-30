@@ -3,19 +3,19 @@ Base exception classes for the application.
 """
 
 
-class ConfiguratorError(Exception):
+class CustomizerError(Exception):
     """Base exception for all customizer errors."""
 
     pass
 
 
-class ValidationError(ConfiguratorError):
+class ValidationError(CustomizerError):
     """Raised when data validation fails."""
 
     pass
 
 
-class NotFoundError(ConfiguratorError):
+class NotFoundError(CustomizerError):
     """Raised when a requested resource is not found."""
 
     pass
@@ -41,7 +41,7 @@ class EntityNotFoundError(NotFoundError):
         return f"EntityNotFoundError(entity_name={self.entity_name!r}, entity_id={self.entity_id!r})"
 
 
-class EntityAlreadyExistsError(ConfiguratorError):
+class EntityAlreadyExistsError(CustomizerError):
     """Raised when an entity with duplicate unique field value already exists.
 
     This exception provides structured information about which entity
@@ -65,13 +65,13 @@ class EntityAlreadyExistsError(ConfiguratorError):
         return f"EntityAlreadyExistsError(entity_name={self.entity_name!r}, field_name={self.field_name!r}, field_value={self.field_value!r})"
 
 
-class AuthenticationError(ConfiguratorError):
+class AuthenticationError(CustomizerError):
     """Raised when authentication fails."""
 
     pass
 
 
-class AuthorizationError(ConfiguratorError):
+class AuthorizationError(CustomizerError):
     """Raised when authorization fails."""
 
     pass

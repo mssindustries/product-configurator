@@ -17,12 +17,11 @@ from uuid import UUID
 
 import jsonschema
 from fastapi import APIRouter, HTTPException, Query, status
-from sqlalchemy import select
 
 from app.api.deps import DbSession
 from app.core.exceptions import EntityNotFoundError
-from app.db.models import ProductCustomization, Style
-from app.repositories import ProductCustomizationRepository, ProductRepository
+from app.db.models import ProductCustomization
+from app.repositories import ProductCustomizationRepository, ProductRepository, StyleRepository
 from app.schemas import ListResponse
 from app.schemas.product_customization import (
     ProductCustomizationCreate,
@@ -110,18 +109,11 @@ async def create_product_customization(
     await product_repo.ensure_exists(product_customization_data.product_id)
 
     # Fetch the style to get its customization_schema (scoped to product)
-    style_stmt = select(Style).where(
-        Style.id == product_customization_data.style_id,
-        Style.product_id == product_customization_data.product_id,
+    style_repo = StyleRepository(db)
+    style = await style_repo.ensure_exists_for_product(
+        product_customization_data.product_id,
+        product_customization_data.style_id,
     )
-    style_result = await db.execute(style_stmt)
-    style = style_result.scalar_one_or_none()
-
-    if not style:
-        raise EntityNotFoundError(
-            "Style",
-            f"{product_customization_data.style_id} for product {product_customization_data.product_id}",
-        )
 
     # Validate config_data against style's customization_schema
     try:

@@ -464,7 +464,7 @@ async def delete_style(
 
     Validation:
     - Cannot delete if is_default=true (HTTP 400)
-    - Cannot delete if configurations exist (HTTP 409)
+    - Cannot delete if product customizations exist (HTTP 409)
 
     On success:
     - Deletes style record from database
@@ -493,7 +493,7 @@ async def delete_style(
     if config_count_result.scalar_one() > 0:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="Style has existing configurations. Delete them first.",
+            detail="Style has existing product customizations. Delete them first.",
         )
 
     # Get blob path before deletion
