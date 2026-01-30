@@ -142,9 +142,39 @@ Playwright MCP tools are available for UI testing. Key tools: `browser_navigate`
 4. `superpowers:verification-before-completion` - Confirm tests pass
 5. `/commit` - Commit the fix
 
-## Testing
+## Development Workflow
 
-### Backend Testing
+### Backend Development
+
+**Tools & Commands:**
+- Agent: `fastapi-pro`
+- Test: `cd src/backend && make test`
+- Lint: `cd src/backend && make lint`
+- Format: `cd src/backend && make format`
+- Full check: `cd src/backend && make check`
+
+**Key Patterns:**
+- FastAPI async endpoints
+- SQLAlchemy 2.0 async ORM
+- Pydantic v2 for validation
+- Repository pattern for data access (eliminates "get or 404" duplication)
+- Response schema factory methods (eliminates manual field mapping)
+
+**Repository Pattern:**
+The codebase uses a repository pattern to eliminate duplicated data access logic:
+- Use `EntityRepository.ensure_exists(id)` instead of manual SELECT + None check
+- Raises `EntityNotFoundError` which is caught by global exception handler
+- Example: `product = await ProductRepository(db).ensure_exists(product_id)`
+- Repositories are in `app/repositories/` - check there for available entity repositories
+
+**Response Schema Factory Methods:**
+All response schemas have `from_model()` and `from_models()` class methods for ORM-to-schema conversion:
+- Use `ResponseSchema.from_model(orm_instance)` for single objects
+- Use `ResponseSchema.from_models(orm_sequence)` for collections (accepts `Sequence[T]` from SQLAlchemy)
+- Example: `return ProductResponse.from_model(product)` instead of manual field mapping
+- Benefits: single source of truth, eliminates typos, easier maintenance when schemas change
+
+**Testing:**
 
 ```bash
 cd src/backend
@@ -155,19 +185,62 @@ make format                  # Auto-format code
 make check                   # Run lint + test
 ```
 
-**Test Structure:**
+Test Structure:
 - Tests live in `src/backend/tests/`
 - Test files: `test_*.py`
 - Test functions: `test_*`
 - Use fixtures from `conftest.py` for database and client
 
-**Writing Tests:**
+Writing Tests:
 - Use `client` fixture for API endpoint tests
 - Use `db_session` fixture for direct database tests
 - Each test gets a fresh database (SQLite in-memory)
 - Tests run in parallel - don't share state between tests
 
-### Frontend Testing
+What to Test:
+- API endpoint responses (status codes, response shape)
+- Validation errors (missing fields, invalid data)
+- Business logic in services
+- Edge cases (empty lists, not found, duplicates)
+
+### Frontend Development
+
+**Tools & Commands:**
+- Agent: `typescript-pro`
+- Design: `/frontend-design`
+- Test: `cd src/frontend && npm test`
+- Lint: `cd src/frontend && npm run lint`
+- Dev server: `cd src/frontend && npm run dev`
+
+**Key Patterns:**
+- React Three Fiber for 3D rendering
+- Tailwind CSS v4 for styling
+- React Router for navigation
+
+**UI Components:**
+When building UI:
+1. First explore existing components in `src/frontend/src/components/ui/`
+2. Use design tokens from `index.css` (colors: primary, neutral, success, warning, danger)
+3. If a pattern repeats 2+ times, extract it to a reusable component
+4. Use CVA (class-variance-authority) for component variants
+
+**Data Fetching:**
+Use custom hooks from `src/frontend/src/hooks/` to eliminate repeated fetch-loading-error patterns:
+- `useList()` - For API endpoints returning `{ items: T[], total: number }`
+- `useAsync()` - For general async operations
+
+```tsx
+// Example: Fetching a list
+const { items: clients, isLoading, error, refetch } = useList(getClients);
+
+// Example: Custom async operation
+const { data, isLoading, error, execute } = useAsync(
+  async () => await fetchUser(userId),
+  { immediate: false }
+);
+```
+
+**Testing:**
 
 ```bash
 cd src/frontend
@@ -177,38 +250,84 @@ npm run lint                 # Run ESLint
 npm run build                # Type-check and build
 ```
 
-**Test Structure:**
+Test Structure:
 - Tests live alongside components or in `__tests__/` directories
 - Test files: `*.test.tsx` or `*.test.ts`
 - Use React Testing Library for component tests
 
-**Visual Testing:**
+Visual Testing:
 - Use Playwright browser automation for E2E tests
 - Key tools: `browser_navigate`, `browser_snapshot`, `browser_click`
 
-### What to Test
-
-**Backend:**
-- API endpoint responses (status codes, response shape)
-- Validation errors (missing fields, invalid data)
-- Business logic in services
-- Edge cases (empty lists, not found, duplicates)
-
-**Frontend:**
+What to Test:
 - Component rendering and user interactions
 - Form validation and submission
 - State management behavior
+
+### Multi-Domain Development
+
+When an issue spans multiple domains:
+
+1. **Plan both domains** in a single plan file
+2. **Implement backend first** (API, models, validation)
+3. **Implement frontend second** (components, API calls)
+4. **Verify integration** with end-to-end testing
+
+### Infrastructure Development
+
+**Tools & Commands:**
+- Docker Compose for local dev
+- Azure CLI for cloud resources
+- Bicep for Azure IaC
+
+**Key Files:**
+- `docker-compose.yml` - local services
+- `.github/workflows/` - CI/CD pipelines
+- `infra/` - Bicep modules and parameter files
+- `docs/naming-conventions.md` - Azure resource naming
+
+**Bicep Guidelines:**
+- Always verify latest stable API version for each resource type before writing modules
+- Follow naming conventions in `docs/naming-conventions.md`
+
+**Finding Latest API Versions:**
+```bash
+# Get available API versions for a resource type (newest first)
+az provider show \
+  --namespace <PROVIDER> \
+  --query "resourceTypes[?resourceType=='<TYPE>'].apiVersions | [0]" \
+  --out table
+
+# Examples:
+az provider show --namespace Microsoft.ContainerRegistry --query "resourceTypes[?resourceType=='registries'].apiVersions | [0]" --out table
+az provider show --namespace Microsoft.App --query "resourceTypes[?resourceType=='containerApps'].apiVersions | [0]" --out table
+az provider show --namespace Microsoft.ManagedIdentity --query "resourceTypes[?resourceType=='userAssignedIdentities'].apiVersions | [0]" --out table
+```
+
+**Common Resource Providers:**
+- `Microsoft.ContainerRegistry` - Container registries
+- `Microsoft.App` - Container Apps
+- `Microsoft.Storage` - Storage accounts
+- `Microsoft.DBforPostgreSQL` - PostgreSQL servers
+- `Microsoft.ManagedIdentity` - Managed identities
+- `Microsoft.Web` - Static Web Apps
+
+**Reference:** https://learn.microsoft.com/en-us/azure/templates/
+
+## Testing Philosophy
 
 ### What NOT to Test
 - Third-party library internals
 - Framework internals (routing, lifecycle)
 - Browser/driver behavior
 
-## GitHub Issue Management
+## GitHub Workflow
+
+### Issue Management
 
 This project uses GitHub Projects with issue types and parent-child relationships.
 
-### Issue Types
+**Issue Types:**
 
 | Type | ID | Use For |
 |------|-----|---------|
@@ -218,8 +337,7 @@ This project uses GitHub Projects with issue types and parent-child relationship
 
 > **Note:** User Story type needs to be created in the mssindustries org if needed.
 
-### Project
-
+**Project:**
 - **Project Name**: Product Customizer
 - **Project Number**: 1
 - **Owner**: mssindustries
@@ -265,13 +383,9 @@ After creating an issue, add it to the project:
 gh project item-add 1 --owner mssindustries --url https://github.com/mssindustries/product-customizer/issues/ISSUE_NUMBER
 ```
 
-### Repository ID
+### Issue Workflow
 
-`R_kgDOQtah4Q`
-
-## GitHub Issue Workflow
-
-### Project Statuses
+**Project Statuses:**
 
 | Status | Purpose |
 |--------|---------|
@@ -281,7 +395,7 @@ gh project item-add 1 --owner mssindustries --url https://github.com/mssindustri
 | In Development | Writing code |
 | Done | Complete |
 
-### Working on Issues
+**Working on Issues:**
 
 Use `/work-on-issue <number>` to start work on a GitHub issue. This will:
 1. Fetch the issue details
@@ -387,139 +501,7 @@ Plans are stored in `plans/` with naming: `YYYY-MM-DD-<issue-number>-<slug>.md`
 - End-to-end testing steps
 ```
 
-### Domain-Specific Guidance
-
-When working on an issue, identify the domain and follow the appropriate guidance.
-
-#### Frontend (`src/frontend/`)
-
-**Tools & Commands:**
-- Agent: `typescript-pro`
-- Design: `/frontend-design`
-- Test: `cd src/frontend && npm test`
-- Lint: `cd src/frontend && npm run lint`
-- Dev server: `cd src/frontend && npm run dev`
-
-**Testing Approach:**
-- Component tests with Vitest + React Testing Library
-- Visual testing with Playwright browser automation
-- Test files: `*.test.tsx` or `*.test.ts`
-
-**Key Patterns:**
-- React Three Fiber for 3D rendering
-- Tailwind CSS v4 for styling
-- React Router for navigation
-
-**UI Components:**
-When building UI:
-1. First explore existing components in `src/frontend/src/components/ui/`
-2. Use design tokens from `index.css` (colors: primary, neutral, success, warning, danger)
-3. If a pattern repeats 2+ times, extract it to a reusable component
-4. Use CVA (class-variance-authority) for component variants
-
-**Data Fetching:**
-Use custom hooks from `src/frontend/src/hooks/` to eliminate repeated fetch-loading-error patterns:
-- `useList()` - For API endpoints returning `{ items: T[], total: number }`
-- `useAsync()` - For general async operations
-
-```tsx
-// Example: Fetching a list
-const { items: clients, isLoading, error, refetch } = useList(getClients);
-
-// Example: Custom async operation
-const { data, isLoading, error, execute } = useAsync(
-  async () => await fetchUser(userId),
-  { immediate: false }
-);
-```
-
-#### Backend (`src/backend/`)
-
-**Tools & Commands:**
-- Agent: `fastapi-pro`
-- Test: `cd src/backend && make test`
-- Lint: `cd src/backend && make lint`
-- Format: `cd src/backend && make format`
-- Full check: `cd src/backend && make check`
-
-**Testing Approach:**
-- pytest with async support
-- Use `client` fixture for API tests
-- Use `db_session` fixture for database tests
-- Test files: `test_*.py`
-
-**Key Patterns:**
-- FastAPI async endpoints
-- SQLAlchemy 2.0 async ORM
-- Pydantic v2 for validation
-- Repository pattern for data access (eliminates "get or 404" duplication)
-- Response schema factory methods (eliminates manual field mapping)
-
-**Repository Pattern:**
-The codebase uses a repository pattern to eliminate duplicated data access logic:
-- Use `EntityRepository.ensure_exists(id)` instead of manual SELECT + None check
-- Raises `EntityNotFoundError` which is caught by global exception handler
-- Example: `product = await ProductRepository(db).ensure_exists(product_id)`
-- Repositories are in `app/repositories/` - check there for available entity repositories
-
-**Response Schema Factory Methods:**
-All response schemas have `from_model()` and `from_models()` class methods for ORM-to-schema conversion:
-- Use `ResponseSchema.from_model(orm_instance)` for single objects
-- Use `ResponseSchema.from_models(orm_sequence)` for collections (accepts `Sequence[T]` from SQLAlchemy)
-- Example: `return ProductResponse.from_model(product)` instead of manual field mapping
-- Benefits: single source of truth, eliminates typos, easier maintenance when schemas change
-
-#### Multi-Domain (e.g., frontend + backend)
-
-When an issue spans multiple domains:
-
-1. **Plan both domains** in a single plan file
-2. **Implement backend first** (API, models, validation)
-3. **Implement frontend second** (components, API calls)
-4. **Verify integration** with end-to-end testing
-
-#### Infrastructure
-
-**Tools & Commands:**
-- Docker Compose for local dev
-- Azure CLI for cloud resources
-- Bicep for Azure IaC
-
-**Key Files:**
-- `docker-compose.yml` - local services
-- `.github/workflows/` - CI/CD pipelines
-- `infra/` - Bicep modules and parameter files
-- `docs/naming-conventions.md` - Azure resource naming
-
-**Bicep Guidelines:**
-- Always verify latest stable API version for each resource type before writing modules
-- Follow naming conventions in `docs/naming-conventions.md`
-
-**Finding Latest API Versions:**
-```bash
-# Get available API versions for a resource type (newest first)
-az provider show \
-  --namespace <PROVIDER> \
-  --query "resourceTypes[?resourceType=='<TYPE>'].apiVersions | [0]" \
-  --out table
-
-# Examples:
-az provider show --namespace Microsoft.ContainerRegistry --query "resourceTypes[?resourceType=='registries'].apiVersions | [0]" --out table
-az provider show --namespace Microsoft.App --query "resourceTypes[?resourceType=='containerApps'].apiVersions | [0]" --out table
-az provider show --namespace Microsoft.ManagedIdentity --query "resourceTypes[?resourceType=='userAssignedIdentities'].apiVersions | [0]" --out table
-```
-
-**Common Resource Providers:**
-- `Microsoft.ContainerRegistry` - Container registries
-- `Microsoft.App` - Container Apps
-- `Microsoft.Storage` - Storage accounts
-- `Microsoft.DBforPostgreSQL` - PostgreSQL servers
-- `Microsoft.ManagedIdentity` - Managed identities
-- `Microsoft.Web` - Static Web Apps
-
-**Reference:** https://learn.microsoft.com/en-us/azure/templates/
-
-## Branch Naming Guidelines
+### Branch Naming Guidelines
 
 See the [Branch Naming Guidelines in README.md](README.md#branch-naming-guidelines) for the current branch naming conventions.
 
@@ -528,3 +510,9 @@ See the [Branch Naming Guidelines in README.md](README.md#branch-naming-guidelin
 - `test/description` - experiments and testing
 - `fix/description` - hotfixes
 - `chore/description` - non-feature work
+
+## Reference
+
+### Repository ID
+
+`R_kgDOQtah4Q`
