@@ -19,7 +19,6 @@ import jsonschema
 from fastapi import APIRouter, HTTPException, Query, status
 
 from app.api.deps import DbSession
-from app.core.exceptions import EntityNotFoundError
 from app.db.models import ProductCustomization
 from app.repositories import ProductCustomizationRepository, ProductRepository, StyleRepository
 from app.schemas import ListResponse
