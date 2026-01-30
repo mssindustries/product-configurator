@@ -236,7 +236,7 @@ export function ProductFormModal({
       // Reset justCreated when modal closes
       setJustCreated(false);
     }
-  }, [isOpen, product, refetchClients, refetchStyles, justCreated]);
+  }, [isOpen, product, justCreated]);
 
   /**
    * Handle keyboard events for accessibility.
