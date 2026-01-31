@@ -23,6 +23,10 @@ export interface ClientCreate {
   name: string;
 }
 
+export interface ClientUpdate {
+  name?: string;
+}
+
 export interface ClientListResponse {
   items: Client[];
   total: number;

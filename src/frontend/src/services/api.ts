@@ -5,6 +5,7 @@
 import type {
   Client,
   ClientCreate,
+  ClientUpdate,
   ClientListResponse,
   Product,
   ProductCreate,
@@ -105,6 +106,16 @@ export async function getClients(): Promise<ClientListResponse> {
 export async function createClient(data: ClientCreate): Promise<Client> {
   return fetchApi<Client>('/api/v1/clients', {
     method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateClient(
+  id: string,
+  data: ClientUpdate
+): Promise<Client> {
+  return fetchApi<Client>(`/api/v1/clients/${id}`, {
+    method: 'PATCH',
     body: JSON.stringify(data),
   });
 }
