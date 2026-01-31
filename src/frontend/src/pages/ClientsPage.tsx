@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { getClients, createClient, ApiClientError } from '../services/api';
+import { useState, useEffect } from 'react';
+import { getClients, createClient, updateClient, ApiClientError } from '../services/api';
 import type { Client } from '../types/api';
 import {
   Button,
@@ -18,40 +18,83 @@ import { useList } from '../hooks';
 import { formatDate } from '../lib/format';
 
 /**
- * Add Client Modal
+ * Client Form Modal - handles both create and edit modes.
  */
-function AddClientModal({
+function ClientFormModal({
   isOpen,
   onClose,
-  onSubmit,
-  isSubmitting,
-  error,
+  onSuccess,
+  client,
 }: {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (name: string) => void;
-  isSubmitting: boolean;
-  error: string | null;
+  onSuccess: () => void;
+  client?: Client;
 }) {
+  const isEditMode = !!client;
+  const { addToast } = useToast();
   const [name, setName] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Reset form when modal opens/closes or client changes
+  useEffect(() => {
+    if (isOpen) {
+      setName(client?.name ?? '');
+      setError(null);
+    }
+  }, [isOpen, client]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (name.trim()) {
-      onSubmit(name.trim());
+    const trimmedName = name.trim();
+    if (!trimmedName) return;
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      if (isEditMode && client) {
+        await updateClient(client.id, { name: trimmedName });
+        addToast(`Client "${trimmedName}" updated successfully!`, 'success');
+      } else {
+        await createClient({ name: trimmedName });
+        addToast(`Client "${trimmedName}" created successfully!`, 'success');
+      }
+      onSuccess();
+      onClose();
+    } catch (err) {
+      if (err instanceof ApiClientError) {
+        if (err.status === 409) {
+          setError('A client with this name already exists.');
+        } else {
+          setError(err.detail || err.message);
+        }
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError(isEditMode ? 'Failed to update client' : 'Failed to create client');
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleClose = () => {
-    setName('');
-    onClose();
+    if (!isSubmitting) {
+      setName('');
+      setError(null);
+      onClose();
+    }
   };
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose}>
       <form onSubmit={handleSubmit}>
         <Modal.Header>
-          <h2 className="text-xl font-semibold text-neutral-900">Add New Client</h2>
+          <h2 className="text-xl font-semibold text-neutral-900">
+            {isEditMode ? 'Edit Client' : 'Add New Client'}
+          </h2>
         </Modal.Header>
 
         <Modal.Body className="space-y-4">
@@ -97,7 +140,9 @@ function AddClientModal({
             isLoading={isSubmitting}
             className="flex-1"
           >
-            {isSubmitting ? 'Adding...' : 'Add Client'}
+            {isSubmitting
+              ? isEditMode ? 'Updating...' : 'Adding...'
+              : isEditMode ? 'Update Client' : 'Add Client'}
           </Button>
         </Modal.Footer>
       </form>
