@@ -1,6 +1,5 @@
 """
 FastAPI application entry point.
-Test backend PR workflow quality gates.
 """
 
 from collections.abc import AsyncIterator

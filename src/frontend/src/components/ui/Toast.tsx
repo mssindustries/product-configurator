@@ -104,22 +104,23 @@ function ToastItem({
 
   return (
     <div
-      className={cn(
-        toastVariants({ intent: toast.intent }),
-        'animate-in fade-in slide-in-from-top-2 duration-200'
-      )}
+      className="rounded-lg bg-white animate-in fade-in slide-in-from-top-2 duration-200"
       role="alert"
     >
-      {iconMap[toast.intent]}
-      <p className="text-sm font-medium flex-1">{toast.message}</p>
-      <button
-        type="button"
-        onClick={() => onDismiss(toast.id)}
-        className="p-1 rounded hover:bg-black/5 transition-colors"
-        aria-label="Dismiss"
+      <div
+        className={cn(toastVariants({ intent: toast.intent }))}
       >
-        <Icon name="x" size="sm" />
-      </button>
+        {iconMap[toast.intent]}
+        <p className="text-sm font-medium flex-1">{toast.message}</p>
+        <button
+          type="button"
+          onClick={() => onDismiss(toast.id)}
+          className="p-1 rounded hover:bg-black/5 transition-colors"
+          aria-label="Dismiss"
+        >
+          <Icon name="x" size="sm" />
+        </button>
+      </div>
     </div>
   );
 }
