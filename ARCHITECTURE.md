@@ -180,10 +180,10 @@ src/backend/
 #### ProductCustomizations
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/v1/product_customizations` | List saved product_customizations |
-| GET | `/api/v1/product_customizations/{id}` | Get configuration details |
-| POST | `/api/v1/product_customizations` | Save a configuration |
-| DELETE | `/api/v1/product_customizations/{id}` | Delete configuration |
+| GET | `/api/v1/product-customizations` | List saved product customizations |
+| GET | `/api/v1/product-customizations/{id}` | Get product customization details |
+| POST | `/api/v1/product-customizations` | Save a product customization |
+| DELETE | `/api/v1/product-customizations/{id}` | Delete product customization |
 
 #### Jobs (GLB Generation)
 | Method | Endpoint | Description |
