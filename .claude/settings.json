@@ -11,7 +11,6 @@
   },
   "enabledPlugins": {
     "frontend-design@claude-plugins-official": true,
-    "github@claude-plugins-official": false,
     "python-development@claude-code-workflows": true,
     "backend-development@claude-code-workflows": true,
     "code-review@claude-plugins-official": true,
@@ -19,8 +18,9 @@
     "javascript-typescript@claude-code-workflows": true,
     "commit-commands@claude-plugins-official": true,
     "superpowers@claude-plugins-official": true,
-    "playwright@claude-plugins-official": true,
     "microsoft-docs@microsoft-docs-marketplace": true,
-    "voltagent-infra@voltagent-subagents": true
+    "voltagent-infra@voltagent-subagents": true,
+    "code-simplifier@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true
   }
 }
