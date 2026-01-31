@@ -68,3 +68,19 @@ async def test_create_client_empty_name(client: AsyncClient):
     """Returns 422 for empty name."""
     response = await client.post("/api/v1/clients", json={"name": ""})
     assert response.status_code == 422
+
+
+async def test_update_client_success(client: AsyncClient, sample_client_data: dict):
+    """Updates client name successfully."""
+    # Create a client first
+    create_response = await client.post("/api/v1/clients", json=sample_client_data)
+    assert create_response.status_code == 201
+    client_id = create_response.json()["id"]
+
+    # Update the client
+    update_data = {"name": "Updated Name"}
+    response = await client.patch(f"/api/v1/clients/{client_id}", json=update_data)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["name"] == "Updated Name"
+    assert data["id"] == client_id

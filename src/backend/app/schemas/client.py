@@ -26,6 +26,12 @@ class ClientCreate(ClientBase):
     pass
 
 
+class ClientUpdate(BaseSchema):
+    """Schema for updating an existing client."""
+
+    name: str | None = Field(default=None, min_length=1, max_length=255)
+
+
 class ClientResponse(ClientBase):
     """Schema for client response."""
 
