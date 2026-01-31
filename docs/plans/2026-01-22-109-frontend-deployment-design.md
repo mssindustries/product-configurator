@@ -55,7 +55,7 @@ Design for deploying the React + Vite frontend to Azure Static Web Apps with sup
 
 ---
 
-## Environment Configuration
+## Environment ProductCustomization
 
 ### .env Files
 
@@ -197,7 +197,7 @@ jobs:
           api_location: ""
 ```
 
-**Static Web App Configuration:**
+**Static Web App ProductCustomization:**
 - `app_location: "src/frontend"` - where package.json is
 - `output_location: "dist"` - Vite's default build output
 - `api_location: ""` - no Azure Functions API

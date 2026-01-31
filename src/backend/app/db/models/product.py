@@ -1,5 +1,5 @@
 """
-Product model - Configurable product template.
+Product model - Customizable product template.
 """
 
 from typing import TYPE_CHECKING
@@ -12,16 +12,16 @@ from app.db.models.base import BaseModel
 
 if TYPE_CHECKING:
     from app.db.models.client import Client
-    from app.db.models.configuration import Configuration
+    from app.db.models.product_customization import ProductCustomization
     from app.db.models.style import Style
 
 
 class Product(BaseModel):
     """
-    Configurable product template.
+    Customizable product template.
 
     Products are containers for Styles. Each Style has its own Blender template
-    and customization schema. Configurations are created against specific Styles.
+    and customization schema. ProductCustomizations are created against specific Styles.
 
     Attributes:
         id: UUID primary key
@@ -45,8 +45,8 @@ class Product(BaseModel):
 
     # Relationships
     client: Mapped["Client"] = relationship("Client", back_populates="products")
-    configurations: Mapped[list["Configuration"]] = relationship(
-        "Configuration",
+    product_customizations: Mapped[list["ProductCustomization"]] = relationship(
+        "ProductCustomization",
         back_populates="product",
         cascade="all, delete-orphan",
     )

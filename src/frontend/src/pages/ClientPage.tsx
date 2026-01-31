@@ -2,7 +2,7 @@ import { Card, Icon } from '@/components/ui';
 import { PageLayout } from '@/components/layout';
 
 /**
- * ClientPage - The customer-facing view for product configuration.
+ * ClientPage - The customer-facing view for product customization.
  * This is the starting point for client users to browse and configure products.
  */
 export default function ClientPage() {

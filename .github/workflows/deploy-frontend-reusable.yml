@@ -50,6 +50,7 @@ jobs:
           app_location: "src/frontend/dist"
           skip_app_build: true
           api_location: ""
+          production_branch: "main"
 
       - name: Deployment summary
         if: ${{ !inputs.is-preview }}

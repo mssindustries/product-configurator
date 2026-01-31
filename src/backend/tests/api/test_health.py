@@ -24,5 +24,5 @@ def test_root_endpoint():
     assert "name" in data
     assert "version" in data
     assert "description" in data
-    assert data["name"] == "MSS Industries Product Configurator API"
+    assert data["name"] == "MSS Industries Product Customizer API"
     assert data["version"] == "0.1.0"

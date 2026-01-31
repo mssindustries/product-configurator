@@ -91,8 +91,8 @@ export interface StyleListResponse {
   total: number;
 }
 
-// Configuration types
-export interface Configuration {
+// Product Customization types
+export interface ProductCustomization {
   id: string;
   product_id: string;
   style_id: string; // Reference to Style
@@ -104,7 +104,7 @@ export interface Configuration {
   updated_at: string;
 }
 
-export interface ConfigurationCreate {
+export interface ProductCustomizationCreate {
   product_id: string;
   style_id: string; // Reference to Style (required)
   client_id: string;
@@ -112,15 +112,15 @@ export interface ConfigurationCreate {
   config_data: Record<string, unknown>;
 }
 
-export interface ConfigurationListResponse {
-  items: Configuration[];
+export interface ProductCustomizationListResponse {
+  items: ProductCustomization[];
   total: number;
 }
 
 // Job types
 export interface Job {
   id: string;
-  configuration_id: string;
+  product_customization_id: string;
   status: JobStatus;
   progress: number;
   result_url: string | null;
@@ -135,7 +135,7 @@ export interface Job {
 }
 
 export interface JobCreate {
-  configuration_id: string;
+  product_customization_id: string;
 }
 
 export interface JobStatusResponse {

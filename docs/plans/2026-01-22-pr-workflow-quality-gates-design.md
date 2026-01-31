@@ -398,7 +398,7 @@ jobs:
 
 ### Backend - Docker Image Storage
 
-**ACR Configuration:**
+**ACR ProductCustomization:**
 - Tier: Basic
 - Included storage: 10 GB
 - Additional storage: ~$0.003/GB/day (~$0.09/GB/month)

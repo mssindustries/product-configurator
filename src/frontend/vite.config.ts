@@ -14,4 +14,8 @@ export default defineConfig({
   server: {
     port: 5173,
   },
+  define: {
+    // Force React to run in development mode for DevTools profiler
+    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+  },
 })

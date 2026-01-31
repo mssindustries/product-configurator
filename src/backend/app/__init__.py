@@ -1,1 +1,1 @@
-"""MSS Configurator Backend Application."""
+"""MSS Customizer Backend Application."""

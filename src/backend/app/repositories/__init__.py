@@ -20,16 +20,16 @@ Example usage in a route:
 
 from app.repositories.base import BaseRepository
 from app.repositories.client import ClientRepository
-from app.repositories.configuration import ConfigurationRepository
 from app.repositories.job import JobRepository
 from app.repositories.product import ProductRepository
+from app.repositories.product_customization import ProductCustomizationRepository
 from app.repositories.style import StyleRepository
 
 __all__ = [
     "BaseRepository",
     "ClientRepository",
-    "ConfigurationRepository",
     "JobRepository",
     "ProductRepository",
+    "ProductCustomizationRepository",
     "StyleRepository",
 ]

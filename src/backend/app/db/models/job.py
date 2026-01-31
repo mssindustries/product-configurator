@@ -13,7 +13,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.models.base import Base, UUIDMixin
 
 if TYPE_CHECKING:
-    from app.db.models.configuration import Configuration
+    from app.db.models.product_customization import ProductCustomization
 
 
 class JobStatus(str, enum.Enum):
@@ -33,7 +33,7 @@ class Job(UUIDMixin, Base):
 
     Attributes:
         id: UUID primary key
-        configuration_id: Foreign key to Configuration
+        product_customization_id: Foreign key to ProductCustomization
         status: Job status (PENDING, QUEUED, PROCESSING, COMPLETED, FAILED, CANCELLED)
         progress: Progress percentage (0-100)
         result_url: URL to generated GLB in Blob Storage
@@ -49,9 +49,9 @@ class Job(UUIDMixin, Base):
 
     __tablename__ = "jobs"
 
-    configuration_id: Mapped[str] = mapped_column(
+    product_customization_id: Mapped[str] = mapped_column(
         UUID(as_uuid=False),
-        ForeignKey("configurations.id", ondelete="CASCADE"),
+        ForeignKey("product_customizations.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -78,8 +78,8 @@ class Job(UUIDMixin, Base):
     completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     # Relationships
-    configuration: Mapped["Configuration"] = relationship(
-        "Configuration",
+    product_customization: Mapped["ProductCustomization"] = relationship(
+        "ProductCustomization",
         back_populates="jobs",
     )
 

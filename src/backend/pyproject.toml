@@ -1,7 +1,7 @@
 [project]
-name = "mss-configurator-backend"
+name = "mss-customizer-backend"
 version = "0.1.0"
-description = "MSS Industries Product Configurator - FastAPI Backend"
+description = "MSS Industries Product Customizer - FastAPI Backend"
 requires-python = ">=3.11"
 dependencies = [
     "fastapi[standard]>=0.109.0",

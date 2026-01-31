@@ -18,13 +18,13 @@ class Settings(BaseSettings):
     )
 
     # API Settings
-    api_title: str = "MSS Industries Product Configurator API"
+    api_title: str = "MSS Industries Product Customizer API"
     api_version: str = "0.1.0"
-    api_description: str = "B2B 3D product configurator platform API"
+    api_description: str = "B2B 3D product customizer platform API"
 
     # Database Settings
     database_url: str = Field(
-        default="sqlite+aiosqlite:///./configurator.db",
+        default="sqlite+aiosqlite:///./customizer.db",
         description="Database connection URL. Use PostgreSQL for Docker/production, SQLite for standalone local dev.",
     )
 
